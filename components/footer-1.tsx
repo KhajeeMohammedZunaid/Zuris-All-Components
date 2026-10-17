@@ -76,13 +76,23 @@ export function Footer1() {
         - On the right side of diagonal: scenic landscape painting (f-bg1.png) is revealed.
         - Scales seamlessly on 4K, ultra-wide zoom-outs, laptops, tablets, and phones.
       */}
+      {/* 
+        Unified Scenic Landscape Background Layer (Anchored to the RIGHT & BOTTOM):
+        - Single efficient Image instance (no duplicate DOM nodes or redundant fetches).
+        - Proper top-to-middle mask: 
+          Transparent across the top, smoothly transitioning into full visibility at the middle-to-bottom.
+        - Dual theme-aware overlays:
+          1. Top-to-middle fade (h-[52%]): Pure white in Light mode, pure #09090b in Dark mode.
+             Guarantees the logo and navigation text sit on a 100% clean, neat, and razor-sharp surface.
+          2. Left-side gradient: Softens the left logo area so the landscape naturally anchors on the right.
+      */}
       <div
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
         style={{
           maskImage:
-            "linear-gradient(135deg, transparent 0%, transparent 28%, rgba(0, 0, 0, 0.4) 42%, rgba(0, 0, 0, 0.85) 56%, black 72%)",
+            "linear-gradient(to bottom, transparent 0%, transparent 16%, rgba(0, 0, 0, 0.35) 34%, black 54%)",
           WebkitMaskImage:
-            "linear-gradient(135deg, transparent 0%, transparent 28%, rgba(0, 0, 0, 0.4) 42%, rgba(0, 0, 0, 0.85) 56%, black 72%)",
+            "linear-gradient(to bottom, transparent 0%, transparent 16%, rgba(0, 0, 0, 0.35) 34%, black 54%)",
         }}
         aria-hidden="true"
       >
@@ -92,18 +102,12 @@ export function Footer1() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-right-bottom select-none dark:brightness-[0.72] dark:contrast-[1.12] dark:saturate-[0.92]"
+          className="object-cover object-right-bottom select-none dark:brightness-[0.78] dark:contrast-[1.1] dark:saturate-[0.95]"
         />
 
-        {/* Ambient Dark Mode Overlay for rich twilight feel in dark theme */}
-        <div className="absolute inset-0 hidden dark:block bg-gradient-to-t from-[#09090b]/85 via-[#09090b]/40 to-[#09090b]/30" />
+        {/* Top-to-middle solid fade overlay for BOTH White mode & Dark mode */}
+        <div className="absolute inset-x-0 top-0 h-[52%] bg-gradient-to-b from-white via-white/85 to-transparent dark:from-[#09090b] dark:via-[#09090b]/85 dark:to-transparent" />
       </div>
-
-      {/* Top feather overlay to smoothly blend sky into container background */}
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-28 sm:h-36 2xl:h-44 z-0 bg-gradient-to-b from-white via-white/80 dark:from-[#09090b] dark:via-[#09090b]/80 to-transparent"
-        aria-hidden="true"
-      />
 
       {/* 
         Content Layer: Elevated above the mask (z-10 relative).
@@ -140,7 +144,7 @@ export function Footer1() {
                   {column.links.map((link) => (
                     <li key={link.title}>
                       <a href={link.href} className="block cursor-pointer">
-                        <p className="text-sm 2xl:text-base font-normal leading-normal tracking-normal text-zinc-500 dark:text-zinc-400">
+                        <p className="text-sm 2xl:text-base font-normal leading-normal tracking-normal text-zinc-700 dark:text-zinc-300">
                           {link.title}
                         </p>
                       </a>
