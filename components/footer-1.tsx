@@ -102,7 +102,11 @@ export function Footer1() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-right-bottom select-none dark:brightness-[0.78] dark:contrast-[1.1] dark:saturate-[0.95]"
+          style={{
+            objectFit: "cover",
+            objectPosition: "center bottom",
+          }}
+          className="object-cover object-bottom select-none dark:brightness-[0.78] dark:contrast-[1.1] dark:saturate-[0.95]"
         />
 
         {/* Top-to-middle solid fade overlay for BOTH White mode & Dark mode */}
@@ -119,7 +123,7 @@ export function Footer1() {
         - Typography: <p> text-sm 2xl:text-base, leading-normal, default tracking 0.0%, muted links with NO hover animations.
         - Bottom bar: bold lil (font-medium), NOT muted.
       */}
-      <div className="relative z-10 w-full max-w-[1800px] 2xl:max-w-[2400px] 3xl:max-w-[2800px] mx-auto px-6 sm:px-10 md:px-12 lg:px-16 xl:px-20 2xl:px-28 pt-12 sm:pt-16 lg:pt-20 2xl:pt-28 pb-8 sm:pb-12 2xl:pb-16 flex-1 flex flex-col justify-between">
+      <div className="relative z-10 w-full max-w-[1800px] 2xl:max-w-[2400px] 3xl:max-w-[2800px] mx-auto px-6 sm:px-10 md:px-12 lg:pl-16 lg:pr-10 xl:px-20 2xl:px-28 pt-12 sm:pt-16 lg:pt-20 2xl:pt-28 pb-8 sm:pb-12 2xl:pb-16 flex-1 flex flex-col justify-between">
         {/* Upper Area: Responsive Logo on the Left, Navigation Columns on the Right */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10 sm:gap-12 lg:gap-16 xl:gap-20">
           {/* Responsive Logo on the left */}
@@ -130,8 +134,8 @@ export function Footer1() {
             </a>
           </div>
 
-          {/* Navigation Columns aligned to the RIGHT with fluid responsive gaps and 4K scaling */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 xl:gap-x-16 2xl:gap-x-20 gap-y-8 lg:gap-y-0 shrink-0 lg:ml-auto lg:mr-6 xl:mr-12 2xl:mr-20">
+          {/* Navigation Columns moved slightly right on 1024px laptop with balanced gaps */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-14 xl:gap-x-16 2xl:gap-x-20 gap-y-8 lg:gap-y-0 shrink-0 lg:ml-auto lg:mr-0 xl:mr-4 2xl:mr-8">
             {FOOTER_COLUMNS.map((column) => (
               <div key={column.heading} className="flex flex-col min-w-0">
                 {/* Column Heading: <p> text-sm 2xl:text-base leading-normal tracking-normal */}
@@ -156,9 +160,9 @@ export function Footer1() {
           </div>
         </div>
 
-        {/* Bottom Bar: Copyright (Bold lil, NOT muted) */}
+        {/* Bottom Bar: Copyright (Bold lil, white text over meadow) */}
         <div className="mt-auto pt-12 sm:pt-16 2xl:pt-24 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <p className="text-sm 2xl:text-base font-medium leading-normal tracking-normal text-zinc-900 dark:text-zinc-100">
+          <p className="text-sm 2xl:text-base font-medium leading-normal tracking-normal text-white">
             &copy; 2026 Zuris. All rights reserved.
           </p>
         </div>
