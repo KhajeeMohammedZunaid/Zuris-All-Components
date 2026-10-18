@@ -113,30 +113,33 @@ export function Footer4() {
           {/* Navigation Columns */}
           {/* Mobile View: 2x2 grid filling the void beside Company */}
           <div className="grid grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-6 sm:hidden shrink-0">
-            {PRIMARY_COLUMNS.map((column) => (
-              <div key={column.heading} className="flex flex-col">
-                {/* Column Heading: font-light 300, -5 letter spacing */}
-                <p className="font-sans font-light font-[300] tracking-[-0.05em] text-base text-zinc-900 dark:text-zinc-100 mb-3">
-                  {column.heading}
-                </p>
+            {PRIMARY_COLUMNS.map((column, index) => {
+              const isCol2 = index === 1; // "Platform" column in right cell
+              return (
+                <div key={column.heading} className={`flex flex-col ${isCol2 ? "pl-7 sm:pl-0" : ""}`}>
+                  {/* Column Heading: font-light 300, -5 letter spacing */}
+                  <p className="font-sans font-light font-[300] tracking-[-0.05em] text-base text-zinc-900 dark:text-zinc-100 mb-3">
+                    {column.heading}
+                  </p>
 
-                {/* Sub items / links */}
-                <ul className="flex flex-col space-y-2 list-none m-0 p-0">
-                  {column.links.map((link) => (
-                    <li key={link.title}>
-                      <a href={link.href} className="block cursor-pointer">
-                        <p className="font-sans font-light font-[300] tracking-normal text-xs leading-normal text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors">
-                          {link.title}
-                        </p>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+                  {/* Sub items / links */}
+                  <ul className="flex flex-col space-y-2 list-none m-0 p-0">
+                    {column.links.map((link) => (
+                      <li key={link.title}>
+                        <a href={link.href} className="block cursor-pointer">
+                          <p className="font-sans font-light font-[300] tracking-normal text-xs leading-normal text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 transition-colors">
+                            {link.title}
+                          </p>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
 
             {/* Mobile Only: 4th Cell beside "Company" to completely fill the gap */}
-            <div className="flex flex-col">
+            <div className="flex flex-col pl-7 sm:pl-0">
               <p className="font-sans font-light font-[300] tracking-[-0.05em] text-base text-zinc-900 dark:text-zinc-100 mb-3">
                 Terms & Contact
               </p>
@@ -208,8 +211,8 @@ export function Footer4() {
               </span>
             </div>
 
-            {/* Social links */}
-            <div className="flex items-center">
+            {/* Social links shifted to right along with Platform and Terms & Contact */}
+            <div className="flex items-center pl-7 sm:pl-0">
               <SocialIcons />
             </div>
           </div>
