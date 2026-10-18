@@ -97,12 +97,12 @@ function SocialIcons() {
 
 export function Footer4() {
   return (
-    <footer className="relative w-full min-h-[50vh] sm:min-h-[55vh] flex flex-col justify-between py-6 sm:py-14 md:py-16 lg:py-20 px-3.5 sm:px-8 md:px-10 lg:px-14 xl:px-18 2xl:px-24 bg-white dark:bg-[#09090b] text-zinc-900 dark:text-zinc-50 border-t border-zinc-200/60 dark:border-zinc-800/60 transition-colors duration-300">
-      <div className="relative z-10 w-full mx-auto flex-1 flex flex-col justify-between gap-10 sm:gap-12 md:gap-14 lg:gap-16 2xl:gap-20">
+    <footer className="relative w-full min-h-[45vh] sm:min-h-[50vh] flex flex-col justify-between py-6 sm:py-12 md:py-14 lg:py-16 px-4 sm:px-8 md:px-10 lg:px-14 xl:px-18 2xl:px-24 bg-white dark:bg-[#09090b] text-zinc-900 dark:text-zinc-50 border-t border-zinc-200/60 dark:border-zinc-800/60 transition-colors duration-300">
+      <div className="relative z-10 w-full max-w-[1536px] 2xl:max-w-[1920px] 3xl:max-w-[2400px] mx-auto flex-1 flex flex-col justify-between gap-8 sm:gap-10 md:gap-12 lg:gap-16">
         {/* Top Row: Tagline on Left, Navigation Columns on Right */}
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8 sm:gap-6 md:gap-8 lg:gap-14 xl:gap-16">
           {/* Main Tagline Heading: font-light 300, -5 letter spacing (tracking-[-0.05em]) */}
-          <div className="shrink-0 max-w-sm sm:max-w-[210px] md:max-w-[230px] lg:max-w-sm xl:max-w-md 2xl:max-w-xl">
+          <div className="shrink-0 max-w-sm sm:max-w-xs md:max-w-sm lg:max-w-md xl:max-w-lg 2xl:max-w-xl">
             <p className="font-sans font-light font-[300] tracking-[-0.05em] text-2xl sm:text-2xl md:text-3xl lg:text-4xl 2xl:text-5xl leading-tight text-zinc-900 dark:text-zinc-100">
               Where Design Meets
               <br />
@@ -111,8 +111,8 @@ export function Footer4() {
           </div>
 
           {/* Navigation Columns */}
-          {/* Mobile View: 2x2 grid filling the void beside Company, anchored to left and right */}
-          <div className="grid grid-cols-[1fr_auto] gap-x-6 sm:gap-x-8 gap-y-6 sm:hidden shrink-0">
+          {/* Mobile View: 2x2 grid filling the void beside Company */}
+          <div className="grid grid-cols-2 gap-x-6 sm:gap-x-8 gap-y-6 sm:hidden shrink-0">
             {PRIMARY_COLUMNS.map((column) => (
               <div key={column.heading} className="flex flex-col">
                 {/* Column Heading: font-light 300, -5 letter spacing */}
@@ -198,17 +198,17 @@ export function Footer4() {
           </div>
         </div>
 
-        {/* Mobile-Only Bottom: Logo on Left, Social Icons on Right aligned with right edge */}
+        {/* Mobile-Only Bottom: Logo in Col 1, Social Icons in Col 2 */}
         <div className="flex sm:hidden flex-col gap-6 pt-6">
-          {/* Main big logo on Left, Social icons on Right */}
-          <div className="flex items-center justify-between">
+          {/* Main big logo in Col 1, Social icons in Col 2 */}
+          <div className="grid grid-cols-2 gap-6 items-center">
             <div className="relative select-none">
               <span className="block text-[11vw] font-bold tracking-tight leading-none text-zinc-950 dark:text-zinc-50 font-sans">
                 Zuris<span className="text-[0.4em] font-normal align-top ml-1">®</span>
               </span>
             </div>
 
-            {/* Social links aligned directly with right edge */}
+            {/* Social links */}
             <div className="flex items-center">
               <SocialIcons />
             </div>
@@ -235,7 +235,7 @@ export function Footer4() {
           <div className="flex sm:flex-row sm:items-start sm:justify-between gap-8 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16">
             {/* Big Brand Watermark on Left: Aligned horizontally with Terms of Service text line universally */}
             <div className="relative shrink-0 select-none">
-              <span className="block text-[8.5vw] sm:text-[7vw] md:text-[6.2vw] lg:text-[7.5vw] xl:text-[8vw] 2xl:text-[8.5vw] font-bold tracking-tight leading-none text-zinc-950 dark:text-zinc-50 font-sans -mt-[0.14em]">
+              <span className="block text-[11vw] sm:text-[8vw] md:text-[7.5vw] lg:text-[7.8vw] xl:text-[8vw] 2xl:text-[8.5vw] font-bold tracking-tight leading-none text-zinc-950 dark:text-zinc-50 font-sans -mt-[0.14em]">
                 Zuris<span className="text-[0.4em] font-normal align-top ml-1">®</span>
               </span>
             </div>
