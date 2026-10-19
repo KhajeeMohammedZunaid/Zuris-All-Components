@@ -31,6 +31,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
     items: [
       { name: "Features 1", href: "/features-1", description: "Feature grid showcase" },
       { name: "Sections 1", href: "/sections-1", description: "Interactive product studio showcase" },
+      { name: "Sections 2", href: "/sections-2", description: "Trio card showcase with image-bg-2, floating UI widgets & logo tiles" },
       { name: "FAQs 1", href: "/faqs-1", description: "Accordion FAQ layout" },
     ],
   },
