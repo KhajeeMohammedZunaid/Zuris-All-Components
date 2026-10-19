@@ -27,20 +27,6 @@ const CARD_PADDING = 10; // 10px padding around image edges
 const INNER_RADIUS = 14; // 14px inner image radius
 const OUTER_RADIUS = INNER_RADIUS + CARD_PADDING; // 24px: outer radius = inner radius + padding
 
-// Calibrated card entrance orchestration (no hover animations)
-const cardMotionVariants = {
-  hidden: { opacity: 0, y: 22 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.65,
-      delay: i * 0.12,
-      ease: [0.22, 1, 0.36, 1],
-    },
-  }),
-};
-
 export function Sections2({ className }: Sections2Props) {
   return (
     <section
@@ -55,11 +41,10 @@ export function Sections2({ className }: Sections2Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-5 xl:gap-6 items-stretch">
           {/* Card 1: Project & Task Management */}
           <motion.div
-            custom={0}
-            variants={cardMotionVariants}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.65, delay: 0, ease: [0.22, 1, 0.36, 1] }}
             className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
             style={{
               borderRadius: `${OUTER_RADIUS}px`,
@@ -125,7 +110,7 @@ export function Sections2({ className }: Sections2Props) {
                   <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                     To-do
                   </span>
-                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.2 rounded-md">
+                  <span className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded-md">
                     2
                   </span>
                 </div>
@@ -263,11 +248,10 @@ export function Sections2({ className }: Sections2Props) {
 
           {/* Card 2: Progress & Performance Tracking */}
           <motion.div
-            custom={1}
-            variants={cardMotionVariants}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
             className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
             style={{
               borderRadius: `${OUTER_RADIUS}px`,
@@ -421,11 +405,10 @@ export function Sections2({ className }: Sections2Props) {
 
           {/* Card 3: Connected Apps */}
           <motion.div
-            custom={2}
-            variants={cardMotionVariants}
-            initial="hidden"
-            whileInView="visible"
+            initial={{ opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.15 }}
+            transition={{ duration: 0.65, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
             className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
             style={{
               borderRadius: `${OUTER_RADIUS}px`,
