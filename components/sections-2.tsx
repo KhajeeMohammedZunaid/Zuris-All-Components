@@ -27,6 +27,98 @@ const CARD_PADDING = 10; // 10px padding around image edges
 const INNER_RADIUS = 14; // 14px inner image radius
 const OUTER_RADIUS = INNER_RADIUS + CARD_PADDING; // 24px: outer radius = inner radius + padding
 
+export interface UniversalFeatureCardProps {
+  title: string;
+  description: string;
+  children?: React.ReactNode;
+  bgImage?: string;
+  stageClassName?: string;
+  delay?: number;
+  textDelay?: number;
+  className?: string;
+}
+
+/**
+ * Universal reusable card component for feature showcases.
+ * Handles nested radius calculation, hardware-masked image stage, dark-mode overlay,
+ * entrance motions, and typography layout while allowing any custom interactive widget as children.
+ */
+export function UniversalFeatureCard({
+  title,
+  description,
+  children,
+  bgImage = "/image-bg-2.png",
+  stageClassName = "items-end justify-end p-0",
+  delay = 0,
+  textDelay,
+  className,
+}: UniversalFeatureCardProps) {
+  const resolvedTextDelay = textDelay ?? delay + 0.16;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 22 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.15 }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
+      className={cn(
+        "border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-4 sm:gap-4.5 text-left overflow-hidden w-full",
+        className
+      )}
+      style={{
+        borderRadius: `${OUTER_RADIUS}px`,
+        padding: `${CARD_PADDING}px ${CARD_PADDING}px ${CARD_PADDING - 2}px ${CARD_PADDING}px`,
+      }}
+    >
+      {/* Image Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
+      <div
+        className={cn(
+          "relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex select-none",
+          stageClassName
+        )}
+        style={{
+          borderRadius: `${INNER_RADIUS}px`,
+          WebkitMaskImage: "-webkit-radial-gradient(white, black)",
+          maskImage: "radial-gradient(white, black)",
+          isolation: "isolate",
+        }}
+      >
+        <img
+          src={bgImage}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+          style={{ borderRadius: `${INNER_RADIUS}px` }}
+        />
+        <div
+          className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
+          style={{ borderRadius: `${INNER_RADIUS}px` }}
+        />
+
+        {/* Foreground Interactive Content / Widget */}
+        {children}
+      </div>
+
+      {/* Typography Content: Left-aligned, Medium 500 h4, <p> lead description */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: resolvedTextDelay, ease: [0.22, 1, 0.36, 1] }}
+        className="flex flex-col gap-2.5 md:gap-2 px-1 pb-0.5 pt-0.5 text-left items-start"
+      >
+        <h4 className="font-medium text-xl sm:text-[1.22rem] leading-[1.25] tracking-[-0.025em] text-zinc-950 dark:text-zinc-50 font-sans text-left m-0">
+          {title}
+        </h4>
+        <p className="lead text-left text-sm sm:text-[0.95rem] text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed font-sans m-0">
+          {description}
+        </p>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export { UniversalFeatureCard as Sections2Card };
+
 export function Sections2({ className }: Sections2Props) {
   return (
     <section
@@ -40,37 +132,12 @@ export function Sections2({ className }: Sections2Props) {
         {/* 3-Card Feature Showcase Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-5 xl:gap-6 items-stretch">
           {/* Card 1: Project & Task Management */}
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.65, delay: 0, ease: [0.22, 1, 0.36, 1] }}
-            className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
-            style={{
-              borderRadius: `${OUTER_RADIUS}px`,
-              padding: `${CARD_PADDING}px`,
-            }}
+          <UniversalFeatureCard
+            title="Project & Task Management"
+            description="Plan projects, assign tasks, set deadlines, and track every deliverable from one workspace."
+            delay={0}
+            textDelay={0.22}
           >
-            {/* Image Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
-            <div
-              className="relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex items-end justify-end select-none p-0"
-              style={{
-                borderRadius: `${INNER_RADIUS}px`,
-                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-                maskImage: "radial-gradient(white, black)",
-                isolation: "isolate",
-              }}
-            >
-              <img
-                src="/image-bg-2.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
-              <div
-                className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
 
               {/* Foreground Floating Linear/Notion Task Widget: Micro interactive tap & subtle float */}
               <motion.div
@@ -227,57 +294,15 @@ export function Sections2({ className }: Sections2Props) {
                   </div>
                 </div>
               </motion.div>
-            </div>
+          </UniversalFeatureCard>
 
-            {/* Typography Content: Left-aligned, Medium 500 h4, <p> lead description */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.22, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2 px-1 pb-1 pt-0.5 text-left items-start"
-            >
-              <h4 className="font-medium text-xl sm:text-[1.22rem] leading-[1.25] tracking-[-0.025em] text-zinc-950 dark:text-zinc-50 font-sans text-left m-0">
-                Project & Task Management
-              </h4>
-              <p className="lead text-left text-sm sm:text-[0.95rem] text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed font-sans m-0">
-                Plan projects, assign tasks, set deadlines, and track every deliverable from one workspace.
-              </p>
-            </motion.div>
-          </motion.div>
-
-          {/* Card 2: Progress & Performance Tracking */}
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.65, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
-            style={{
-              borderRadius: `${OUTER_RADIUS}px`,
-              padding: `${CARD_PADDING}px`,
-            }}
+          {/* Card 2: Progress Tracking */}
+          <UniversalFeatureCard
+            title="Progress Tracking"
+            description="Monitor project status, workload, deadlines, and completion rates in dashboards."
+            delay={0.12}
+            textDelay={0.28}
           >
-            {/* Image Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
-            <div
-              className="relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex items-end justify-end select-none p-0"
-              style={{
-                borderRadius: `${INNER_RADIUS}px`,
-                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-                maskImage: "radial-gradient(white, black)",
-                isolation: "isolate",
-              }}
-            >
-              <img
-                src="/image-bg-2.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
-              <div
-                className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
 
               {/* Krezu Chip + Status Table: Same height as Card 1, covers right-bottom edge */}
               <div className="relative z-10 w-[92%] sm:w-[88%] max-w-[340px] sm:max-w-[350px] h-[260px] sm:h-[275px] flex flex-col justify-between items-start translate-x-4 sm:translate-x-6 translate-y-3 sm:translate-y-4">
@@ -384,162 +409,62 @@ export function Sections2({ className }: Sections2Props) {
                   </div>
                 </motion.div>
               </div>
-            </div>
-
-            {/* Typography Content: Left-aligned, Medium 500 h4, <p> lead description */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2 px-1 pb-1 pt-0.5 text-left items-start"
-            >
-              <h4 className="font-medium text-xl sm:text-[1.22rem] leading-[1.25] tracking-[-0.025em] text-zinc-950 dark:text-zinc-50 font-sans text-left m-0">
-                Progress & Performance Tracking
-              </h4>
-              <p className="lead text-left text-sm sm:text-[0.95rem] text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed font-sans m-0">
-                Monitor project status, team workload, deadlines, and completion rates in dashboards.
-              </p>
-            </motion.div>
-          </motion.div>
+          </UniversalFeatureCard>
 
           {/* Card 3: Connected Apps */}
-          <motion.div
-            initial={{ opacity: 0, y: 22 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.15 }}
-            transition={{ duration: 0.65, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
-            className="border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-5 sm:gap-6 text-left overflow-hidden pb-1 w-full"
-            style={{
-              borderRadius: `${OUTER_RADIUS}px`,
-              padding: `${CARD_PADDING}px`,
-            }}
+          <UniversalFeatureCard
+            title="Connected Apps"
+            description="Connect the tools your team uses and keep projects, tasks, and updates synced in one place."
+            stageClassName="items-center justify-center p-3"
+            delay={0.24}
+            textDelay={0.34}
           >
-            {/* Image Stage: Vertically and horizontally centered with hardware-masking */}
-            <div
-              className="relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex items-center justify-center p-3 select-none"
-              style={{
-                borderRadius: `${INNER_RADIUS}px`,
-                WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-                maskImage: "radial-gradient(white, black)",
-                isolation: "isolate",
-              }}
-            >
-              <img
-                src="/image-bg-2.png"
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
-              <div
-                className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
-                style={{ borderRadius: `${INNER_RADIUS}px` }}
-              />
 
-              {/* 2x3 App Tiles: Organic desynchronized zero-gravity liquid glass float with tactile tap */}
+              {/* 2x3 App Tiles: Static tiles without internal animation */}
               <div className="relative z-10 grid grid-cols-3 gap-3.5 sm:gap-4 max-w-[280px] sm:max-w-[305px] mx-auto">
                 {/* Tile 1: OpenAI */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center dark:invert">
                     <OpenAI className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tile 2: Claude AI */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                     <ClaudeAI className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tile 3: Google */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.24, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                     <Google className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tile 4: Shopify */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                     <Shopify className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tile 5: Stripe */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.36, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                     <Stripe className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Tile 6: Datadog */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.88, y: 12 }}
-                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
-                  whileTap={{ scale: 0.93 }}
-                  className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer"
-                >
+                <div className="relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl bg-white/90 dark:bg-[#141416]/90 backdrop-blur-xl border-2 border-white/90 dark:border-white/20 shadow-[0_8px_24px_rgba(0,0,0,0.08),inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center cursor-pointer">
                   <div className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center">
                     <Datadog className="w-full h-full" />
                   </div>
-                </motion.div>
+                </div>
               </div>
-            </div>
-
-            {/* Typography Content: Left-aligned, Medium 500 h4, <p> lead description */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.34, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col gap-2 px-1 pb-1 pt-0.5 text-left items-start"
-            >
-              <h4 className="font-medium text-xl sm:text-[1.22rem] leading-[1.25] tracking-[-0.025em] text-zinc-950 dark:text-zinc-50 font-sans text-left m-0">
-                Connected Apps
-              </h4>
-              <p className="lead text-left text-sm sm:text-[0.95rem] text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed font-sans m-0">
-                Connect the tools your team already uses and keep projects, tasks, and updates synced in one place.
-              </p>
-            </motion.div>
-          </motion.div>
+          </UniversalFeatureCard>
         </div>
       </div>
     </section>
