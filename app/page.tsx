@@ -43,6 +43,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Arc Cards", href: "/arc-cards", description: "Arc card carousel interactive component" },
       { name: "Shader 1", href: "/shader-1", description: "WebGL shader visual canvas" },
       { name: "Typography", href: "/typo", description: "Display and body typography specimens" },
+      { name: "Typography Lab", href: "/typography-lab", description: "Interactive custom typography preset studio & live tag playground" },
     ],
   },
 ];
