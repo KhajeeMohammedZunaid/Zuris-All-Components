@@ -398,7 +398,7 @@ export function Sections2({ className }: Sections2Props) {
                 Progress & Performance Tracking
               </h4>
               <p className="lead text-left text-sm sm:text-[0.95rem] text-zinc-600 dark:text-zinc-400 font-normal leading-relaxed font-sans m-0">
-                Monitor project status, team workload, deadlines, and completion rates with clear dashboards.
+                Monitor project status, team workload, deadlines, and completion rates in dashboards.
               </p>
             </motion.div>
           </motion.div>

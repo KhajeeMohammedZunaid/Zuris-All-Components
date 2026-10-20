@@ -72,7 +72,7 @@ export function Footer5({ className }: Footer5Props) {
   ]
 
   return (
-    <div className={`w-full bg-[#fafafa] dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 font-sans px-4 sm:px-6 lg:px-8 xl:px-0 transition-colors duration-300 ${className || ""}`}>
+    <div className={`w-full overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 font-sans px-4 sm:px-6 lg:px-8 xl:px-0 transition-colors duration-300 ${className || ""}`}>
       <footer
         id="footer"
         className="relative mx-auto flex flex-col max-w-6xl pt-2 pb-8 sm:pb-10"
@@ -81,7 +81,7 @@ export function Footer5({ className }: Footer5Props) {
         <div className="pointer-events-none inset-0">
           {/* Left */}
           <div
-            className="absolute inset-y-0 left-0 my-[-2rem] w-px"
+            className="absolute top-[-2rem] bottom-0 left-0 w-px"
             style={{
               maskImage: "linear-gradient(transparent, white 3rem)",
             }}
@@ -101,7 +101,7 @@ export function Footer5({ className }: Footer5Props) {
 
           {/* Right */}
           <div
-            className="absolute inset-y-0 right-0 my-[-2rem] w-px"
+            className="absolute top-[-2rem] bottom-0 right-0 w-px"
             style={{
               maskImage: "linear-gradient(transparent, white 3rem)",
             }}
@@ -211,7 +211,7 @@ export function Footer5({ className }: Footer5Props) {
                 </ul>
               </div>
             ))}
-          </div>
+            </div>
 
           {/* Mobile-only Socials & Copyright: Neatly pinned below navigation on screens < 768px */}
           <div className="flex md:hidden flex-col items-start pt-6 border-t border-dashed border-zinc-200 dark:border-zinc-800 w-full">
