@@ -24,6 +24,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Footer 2", href: "/footer-2", description: "Full-bleed category row footer with responsive dividers" },
       { name: "Footer 3", href: "/footer-3", description: "Compact centered 1/3-page brand footer" },
       { name: "Footer 4", href: "/footer-4", description: "Half-page high-contrast architectural brand footer" },
+      { name: "Footer 5", href: "/footer-5", description: "Dashed grid brand footer for AI agents, MCP tools & documentation" },
     ],
   },
   {
