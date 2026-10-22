@@ -34,7 +34,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Features 1", href: "/features-1", description: "Feature grid showcase" },
       { name: "Sections 1", href: "/sections-1", description: "Interactive product studio showcase" },
       { name: "Sections 2", href: "/sections-2", description: "Trio card showcase with image-bg-2, floating UI widgets & logo tiles" },
-      { name: "Services 1", href: "/services-1", description: "Architectural services showcase with expanding horizontal image accordion" },
+      { name: "Sections 3", href: "/sections-3", description: "Cloud & SaaS showcase with expanding horizontal accordion" },
       { name: "Testimonials 1", href: "/testimonials", description: "Linear-style dual testimonial cards with hanging quotes & logo watermarks" },
       { name: "FAQs 1", href: "/faqs-1", description: "Accordion FAQ layout" },
     ],

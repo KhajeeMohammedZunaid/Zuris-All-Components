@@ -1,0 +1,251 @@
+"use client";
+
+import * as React from "react";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
+
+export interface CloudServiceItem {
+  num: string;
+  title: string;
+  desc: string;
+  img: string;
+}
+
+export const cloudServicesData: CloudServiceItem[] = [
+  {
+    num: "01",
+    title: "CLOUD COMPUTE",
+    desc: "Elastic serverless compute engines architected for high-concurrency workloads and instantaneous auto-scaling.",
+    img: "/acc-1.png",
+  },
+  {
+    num: "02",
+    title: "EDGE NETWORK",
+    desc: "Global low-latency edge distribution with automated caching, dynamic routing, and DDoS mitigation.",
+    img: "/acc-2.png",
+  },
+  {
+    num: "03",
+    title: "OBJECT STORAGE",
+    desc: "Highly resilient multi-region cloud object storage optimized for real-time asset delivery and petabyte-scale throughput.",
+    img: "/acc-3.png",
+  },
+  {
+    num: "04",
+    title: "DATA & TELEMETRY",
+    desc: "Managed distributed data streaming and query engines delivering sub-second insights across real-time pipelines.",
+    img: "/acc-4.png",
+  },
+  {
+    num: "05",
+    title: "SECURITY & IAM",
+    desc: "Zero-trust identity governance, end-to-end cryptographic key management, and continuous compliance enforcement.",
+    img: "/acc-5.png",
+  },
+];
+
+export interface Sections3AccordionProps {
+  items?: CloudServiceItem[];
+  defaultIndex?: number;
+  className?: string;
+  onItemChange?: (index: number) => void;
+}
+
+export function Sections3Accordion({
+  items = cloudServicesData,
+  defaultIndex = 0,
+  className,
+  onItemChange,
+}: Sections3AccordionProps) {
+  const [activeIndex, setActiveIndex] = React.useState<number>(defaultIndex);
+
+  const handleSelect = (index: number) => {
+    setActiveIndex(index);
+    onItemChange?.(index);
+  };
+
+  return (
+    <div
+      role="tablist"
+      aria-orientation="horizontal"
+      className={cn(
+        "w-full flex flex-col md:flex-row h-auto md:h-[550px] lg:h-[650px] border-y border-[#040404]/10 bg-white",
+        className
+      )}
+    >
+      {items.map((item, index) => {
+        const isActive = activeIndex === index;
+
+        return (
+          <div
+            key={item.num || index}
+            role="tab"
+            tabIndex={0}
+            aria-selected={isActive}
+            aria-label={`${item.num} ${item.title}`}
+            onClick={() => !isActive && handleSelect(index)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                !isActive && handleSelect(index);
+              }
+            }}
+            className={cn(
+              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
+              isActive
+                ? "cursor-default w-full md:flex-grow h-[500px] md:h-full bg-white select-auto"
+                : "cursor-pointer w-full md:w-[80px] lg:w-[100px] xl:w-[120px] h-[70px] sm:h-[80px] md:h-full bg-[#fafafa] hover:bg-[#f4f4f4]"
+            )}
+          >
+            {/* Collapsed State Content (Desktop) - Smooth delayed entrance on close */}
+            <div
+              className={cn(
+                "hidden md:flex h-full absolute inset-y-0 left-0 w-[80px] lg:w-[100px] xl:w-[120px] transition-opacity duration-300",
+                isActive ? "opacity-0 pointer-events-none" : "opacity-100 delay-300"
+              )}
+            >
+              {/* Container for vertical number alignment, centered horizontally */}
+              <div className="w-full flex-col flex items-center pt-10">
+                <span className="text-sm font-bold tracking-[2px] transform rotate-90 text-[#040404]">
+                  {item.num}
+                </span>
+              </div>
+
+              {/* Vertical Title: Smooth CSS writing-mode without text clipping */}
+              <div
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 uppercase font-bold tracking-[1.5px] text-[13px] lg:text-[15px] whitespace-nowrap text-[#040404]"
+                style={{
+                  writingMode: "vertical-rl",
+                  transform: "rotate(180deg)",
+                }}
+              >
+                {item.title}
+              </div>
+            </div>
+
+            {/* Active State Content - Fixed min-width prevents text squishing while closing */}
+            <div
+              className={cn(
+                "absolute inset-y-0 left-0 w-full min-w-full md:min-w-[600px] lg:min-w-[800px] h-full flex flex-col cursor-default transition-opacity duration-500 delay-100",
+                isActive ? "opacity-100" : "opacity-0 pointer-events-none"
+              )}
+            >
+              <div className="flex flex-col h-full p-6 md:p-8 lg:p-12 w-full cursor-default">
+                {/* Desktop Number */}
+                <span className="text-sm md:text-base font-bold tracking-[2px] hidden md:block mb-8 md:mb-12 text-[#040404]">
+                  {item.num}
+                </span>
+
+                {/* Mobile Header: Number and Title */}
+                <div className="md:hidden flex justify-between w-full mb-4 items-center">
+                  <span className="text-sm font-bold tracking-[2px] text-[#040404]">
+                    {item.num}
+                  </span>
+                  <span className="text-sm font-bold tracking-[1.5px] uppercase text-[#040404]">
+                    {item.title}
+                  </span>
+                </div>
+
+                {/* Service Heading: H3, 500 weight, Inter font, -4.5% tracking, normal word spacing */}
+                <div className="mb-6 md:mb-10 w-full md:max-w-xl">
+                  <h3 className="text-[15px] sm:text-[16px] md:text-[20px] lg:text-[24px] text-[#040404] font-['Inter',sans-serif] font-[500] tracking-[-0.045em] [word-spacing:normal] leading-[1.4] md:leading-[1.4]">
+                    {item.desc}
+                  </h3>
+                </div>
+
+                {/* Image: Restored original height and proportions, static without hover scale */}
+                <div className="w-full max-w-[400px] sm:max-w-[500px] md:max-w-[520px] lg:max-w-[640px] h-[260px] sm:h-[320px] md:h-[320px] lg:h-[400px] overflow-hidden relative mt-auto border border-black/5">
+                  <Image
+                    src={item.img}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
+                    priority={index === 0}
+                    unoptimized
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Mobile Collapsed State */}
+            <div
+              className={cn(
+                "md:hidden absolute inset-0 flex items-center justify-between w-full h-full px-6 transition-opacity duration-300",
+                isActive ? "opacity-0 pointer-events-none" : "opacity-100"
+              )}
+            >
+              <span className="text-sm font-bold tracking-[2px] text-[#040404]">
+                {item.num}
+              </span>
+              <span className="text-sm font-bold uppercase tracking-[1.5px] text-[#040404]">
+                {item.title}
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+export interface Sections3Props {
+  eyebrowNumber?: string;
+  eyebrowText?: string;
+  heading?: React.ReactNode;
+  items?: CloudServiceItem[];
+  className?: string;
+}
+
+export function Sections3({
+  eyebrowNumber = "03",
+  eyebrowText = "CLOUD SERVICES",
+  heading = (
+    <>
+      WE OFFER WIDE RANGE
+      <br /> OF CLOUD SERVICES
+    </>
+  ),
+  items = cloudServicesData,
+  className,
+}: Sections3Props) {
+  return (
+    <section
+      className={cn(
+        "bg-white text-[#040404] py-16 md:py-24 flex flex-col justify-center select-none relative z-10 w-full overflow-hidden -mt-px",
+        className
+      )}
+    >
+      {/* Header */}
+      <div className="max-w-7xl mx-auto w-full px-6 md:px-12 mb-12 md:mb-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 w-full items-start">
+          {/* Eyebrow */}
+          <div className="lg:col-span-5 flex items-center gap-3.5 pt-1 md:pt-4">
+            <span className="text-[#040404] text-xs sm:text-sm font-bold tracking-[0.25em] font-sans">
+              {eyebrowNumber}
+            </span>
+            <div className="w-10 md:w-16 h-[1.5px] bg-[#040404]" />
+            <span className="text-[#040404] text-xs sm:text-sm font-bold tracking-[1.5px] uppercase">
+              {eyebrowText}
+            </span>
+          </div>
+
+          {/* Main Heading: H2, 500 weight, Inter, -4.5% tracking, normal word spacing, aligned to the right edge */}
+          <div className="lg:col-span-7 flex flex-col items-start lg:items-end mt-4 lg:mt-0">
+            <h2 className="text-[#040404] text-[24px] sm:text-[28px] md:text-[34px] lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-[500] tracking-[-0.045em] [word-spacing:normal] leading-[1.05] uppercase text-left lg:text-right">
+              {heading}
+            </h2>
+          </div>
+        </div>
+      </div>
+
+      {/* Accordion Container */}
+      <div className="max-w-7xl mx-auto w-full px-6 md:px-12">
+        <Sections3Accordion items={items} />
+      </div>
+    </section>
+  );
+}
+
+export { Sections3 as Section3 };
+export default Sections3;
