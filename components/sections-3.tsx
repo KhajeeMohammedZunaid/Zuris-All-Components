@@ -177,12 +177,12 @@ export function Sections3Accordion({
             >
               <div className="flex flex-col h-full p-6 md:p-8 lg:p-12 w-full cursor-default">
                 {/* Desktop Number */}
-                <span className="text-sm md:text-base font-bold tracking-[2px] hidden md:block mb-8 md:mb-12 text-[#040404]">
+                <span className="text-sm md:text-base font-bold tracking-[2px] hidden md:block relative -top-2 lg:-top-3.5 mb-6 md:mb-9 text-[#040404]">
                   {item.num}
                 </span>
 
                 {/* Mobile Header: Number and Title */}
-                <div className="md:hidden flex justify-between w-full mb-4 items-center">
+                <div className="md:hidden flex justify-between w-full mb-4 items-center relative -top-1">
                   <span className="text-sm font-bold tracking-[2px] text-[#040404]">
                     {item.num}
                   </span>
