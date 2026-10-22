@@ -272,11 +272,56 @@
   }
 }
 
-/* Remove default browser scrollbar arrows / inverted triangles */
+/* =========================================================================
+   Universal Theme-Compatible Slender Scrollbar (Matches ScrollArea)
+   ========================================================================= */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(161, 161, 170, 0.6) transparent;
+}
+
+.dark,
+.dark * {
+  scrollbar-color: rgba(82, 82, 91, 0.6) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(161, 161, 170, 0.6);
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(113, 113, 122, 0.85);
+}
+
+.dark::-webkit-scrollbar-thumb,
+.dark ::-webkit-scrollbar-thumb {
+  background-color: rgba(82, 82, 91, 0.6);
+}
+
+.dark::-webkit-scrollbar-thumb:hover,
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(113, 113, 122, 0.85);
+}
+
 ::-webkit-scrollbar-button {
   display: none !important;
   width: 0 !important;
   height: 0 !important;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

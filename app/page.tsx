@@ -15,6 +15,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
     items: [
       { name: "Hero 1 (Nexura)", href: "/hero-1", description: "Full canvas hero with interactive badge pins & typewriter prompt" },
       { name: "Hero 2 (Zuris CMS)", href: "/hero-2", description: "Zero-roundedness architectural grid hero with Plus Jakarta Sans & CMS SaaS workspace" },
+      { name: "Hero 3", href: "/hero-3", description: "Minimalist fintech hero with Plus Jakarta Sans, marquee brand logos & dual image slots" },
     ],
   },
   {
