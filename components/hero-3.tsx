@@ -39,8 +39,8 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
     {
       name: "Anthropic",
       Component: Anthropic,
-      containerClass: "w-38 sm:w-46 lg:w-52",
-      logoClass: "w-full h-auto max-h-9.5 sm:max-h-11",
+      containerClass: "w-44 sm:w-52 lg:w-60",
+      logoClass: "w-full h-auto max-h-11 sm:max-h-13",
       opacityClass: "opacity-85",
     },
     {
@@ -101,19 +101,19 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
       {/* =========================================================================
           NAVBAR (Refined minimal height, clean logo sizing, zero drop shadows)
           ========================================================================= */}
-      <header className="relative z-30 w-full border-b border-zinc-200/60 dark:border-zinc-800/60 bg-white/70 dark:bg-[#060909]/70 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          {/* Top Left: Zuris Logo with Clean Balanced Size */}
-          <Link href="/" className="flex items-center gap-2 group focus:outline-none">
-            <div className="w-5 h-5 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
+      <header className="relative z-30 w-full bg-white/70 dark:bg-[#060909]/70 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between">
+          {/* Top Left: Zuris Logo with Proportional Analogous Size */}
+          <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
+            <div className="w-7 h-7 flex items-center justify-center">
               <span className="block dark:hidden">
-                <ZurisBlackV1 className="w-5 h-5" />
+                <ZurisBlackV1 className="w-6.5 h-6.5" />
               </span>
               <span className="hidden dark:block">
-                <ZurisWhiteV1 className="w-5 h-5" />
+                <ZurisWhiteV1 className="w-6.5 h-6.5" />
               </span>
             </div>
-            <span className="font-['Plus_Jakarta_Sans',sans-serif] font-semibold text-[17px] tracking-[-0.03em] leading-none text-[#053f31] dark:text-zinc-100">
+            <span className="font-['Plus_Jakarta_Sans',sans-serif] font-bold text-[22px] tracking-[-0.035em] leading-none text-[#053f31] dark:text-zinc-100">
               zuris
             </span>
           </Link>
