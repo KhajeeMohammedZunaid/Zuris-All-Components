@@ -29,12 +29,48 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
   ];
 
   const brandLogos = [
-    { name: "Anthropic", Component: Anthropic },
-    { name: "Grok", Component: Grok },
-    { name: "OpenAI", Component: OpenAI },
-    { name: "Replicate", Component: Replicate },
-    { name: "GitHub", Component: GitHub },
-    { name: "Vercel", Component: Vercel },
+    {
+      name: "OpenAI",
+      Component: OpenAI,
+      containerClass: "w-42 sm:w-50 lg:w-56",
+      logoClass: "w-full h-auto max-h-12 sm:max-h-14",
+      opacityClass: "opacity-90",
+    },
+    {
+      name: "Anthropic",
+      Component: Anthropic,
+      containerClass: "w-38 sm:w-46 lg:w-52",
+      logoClass: "w-full h-auto max-h-9.5 sm:max-h-11",
+      opacityClass: "opacity-85",
+    },
+    {
+      name: "Replicate",
+      Component: Replicate,
+      containerClass: "w-38 sm:w-46 lg:w-52",
+      logoClass: "w-full h-auto max-h-9.5 sm:max-h-11",
+      opacityClass: "opacity-85",
+    },
+    {
+      name: "GitHub",
+      Component: GitHub,
+      containerClass: "w-26 sm:w-30 lg:w-34",
+      logoClass: "w-full h-auto max-h-8 sm:max-h-9",
+      opacityClass: "opacity-85",
+    },
+    {
+      name: "Vercel",
+      Component: Vercel,
+      containerClass: "w-32 sm:w-38 lg:w-42",
+      logoClass: "w-full h-auto max-h-8 sm:max-h-9.5",
+      opacityClass: "opacity-90",
+    },
+    {
+      name: "Grok",
+      Component: Grok,
+      containerClass: "w-28 sm:w-34 lg:w-38",
+      logoClass: "w-full h-auto max-h-8 sm:max-h-9.5",
+      opacityClass: "opacity-85",
+    },
   ];
 
   return (
@@ -228,7 +264,7 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
 
             <Link
               href="#generate-card"
-              className="inline-flex items-center justify-center px-4 py-2.5 rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] hover:text-black dark:text-zinc-300 dark:hover:text-white transition-colors"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] dark:text-zinc-200 bg-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer"
             >
               Generate your card
             </Link>
@@ -241,24 +277,18 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
               ========================================================================= */}
           <div className="w-full mt-10 sm:mt-14 lg:mt-16">
             {/* Mobile & Tablet Infinite Marquee (Hidden on Desktop) */}
-            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-1.5">
+            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-2">
               <div className="flex w-max">
                 {/* Track 1: Animate -100% -> 0% */}
-                <div className="animate-marquee-ltr flex shrink-0 items-center gap-9 sm:gap-12 pr-9 sm:pr-12">
+                <div className="animate-marquee-ltr flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16">
                   {brandLogos.map((logo) => {
                     const LogoComp = logo.Component;
                     return (
                       <div
                         key={`m1-${logo.name}`}
-                        className="shrink-0 flex items-center justify-center h-7 opacity-60 dark:opacity-70 hover:opacity-100 transition-opacity"
+                        className={`shrink-0 flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
                       >
-                        {LogoComp ? (
-                          <LogoComp className="h-5 sm:h-5.5 w-auto object-contain text-zinc-700 dark:text-zinc-300 fill-current" />
-                        ) : (
-                          <span className="font-semibold text-xs tracking-wide text-zinc-600 dark:text-zinc-400">
-                            {logo.name}
-                          </span>
-                        )}
+                        {LogoComp && <LogoComp className={logo.logoClass} />}
                       </div>
                     );
                   })}
@@ -266,7 +296,7 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
 
                 {/* Track 2: Identical duplicate for seamless 100% flicker-free loop */}
                 <div
-                  className="animate-marquee-ltr flex shrink-0 items-center gap-9 sm:gap-12 pr-9 sm:pr-12"
+                  className="animate-marquee-ltr flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16"
                   aria-hidden="true"
                 >
                   {brandLogos.map((logo) => {
@@ -274,15 +304,9 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
                     return (
                       <div
                         key={`m2-${logo.name}`}
-                        className="shrink-0 flex items-center justify-center h-7 opacity-60 dark:opacity-70 hover:opacity-100 transition-opacity"
+                        className={`shrink-0 flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
                       >
-                        {LogoComp ? (
-                          <LogoComp className="h-5 sm:h-5.5 w-auto object-contain text-zinc-700 dark:text-zinc-300 fill-current" />
-                        ) : (
-                          <span className="font-semibold text-xs tracking-wide text-zinc-600 dark:text-zinc-400">
-                            {logo.name}
-                          </span>
-                        )}
+                        {LogoComp && <LogoComp className={logo.logoClass} />}
                       </div>
                     );
                   })}
@@ -291,21 +315,15 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
             </div>
 
             {/* Desktop Static Logos Grid (Hidden on Mobile/Tablet) */}
-            <div className="hidden lg:flex items-center justify-center gap-12 xl:gap-14 max-w-4xl mx-auto py-1">
+            <div className="hidden lg:flex items-center justify-center gap-12 xl:gap-18 max-w-6xl mx-auto py-3">
               {brandLogos.map((logo) => {
                 const LogoComp = logo.Component;
                 return (
                   <div
                     key={`desktop-${logo.name}`}
-                    className="flex items-center justify-center opacity-60 hover:opacity-100 transition-opacity duration-200 cursor-default"
+                    className={`flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
                   >
-                    {LogoComp ? (
-                      <LogoComp className="h-5.5 w-auto object-contain text-zinc-700 dark:text-zinc-300 fill-current" />
-                    ) : (
-                      <span className="font-semibold text-sm tracking-wide text-zinc-600 dark:text-zinc-400">
-                        {logo.name}
-                      </span>
-                    )}
+                    {LogoComp && <LogoComp className={logo.logoClass} />}
                   </div>
                 );
               })}
