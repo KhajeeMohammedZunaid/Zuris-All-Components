@@ -3,6 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { motion } from "motion/react";
 
 export interface CloudServiceItem {
   num: string;
@@ -57,7 +58,23 @@ export function Sections3Accordion({
   className,
   onItemChange,
 }: Sections3AccordionProps) {
-  const [activeIndex, setActiveIndex] = React.useState<number>(defaultIndex);
+  const [activeIndex, setActiveIndex] = React.useState<number>(-1);
+  const [hasOpened, setHasOpened] = React.useState<boolean>(false);
+
+  const triggerInitialOpen = React.useCallback(() => {
+    if (!hasOpened) {
+      setHasOpened(true);
+      setActiveIndex(defaultIndex);
+    }
+  }, [hasOpened, defaultIndex]);
+
+  React.useEffect(() => {
+    // Smooth fallback so panel 0 reliably opens even if viewport callbacks are delayed
+    const timer = setTimeout(() => {
+      triggerInitialOpen();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [triggerInitialOpen]);
 
   const handleSelect = (index: number) => {
     setActiveIndex(index);
@@ -65,9 +82,26 @@ export function Sections3Accordion({
   };
 
   return (
-    <div
+    <motion.div
       role="tablist"
       aria-orientation="horizontal"
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.15 }}
+      onViewportEnter={() => {
+        setTimeout(() => {
+          triggerInitialOpen();
+        }, 260);
+      }}
+      variants={{
+        hidden: {},
+        visible: {
+          transition: {
+            staggerChildren: 0.12,
+            delayChildren: 0.15,
+          },
+        },
+      }}
       className={cn(
         "w-full flex flex-col md:flex-row h-auto md:h-[550px] lg:h-[650px] border-y border-[#040404]/10 bg-white",
         className
@@ -77,7 +111,7 @@ export function Sections3Accordion({
         const isActive = activeIndex === index;
 
         return (
-          <div
+          <motion.div
             key={item.num || index}
             role="tab"
             tabIndex={0}
@@ -90,8 +124,19 @@ export function Sections3Accordion({
                 !isActive && handleSelect(index);
               }
             }}
+            variants={{
+              hidden: { opacity: 0, y: 32 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: {
+                  duration: 1.15,
+                  ease: [0.16, 1, 0.3, 1],
+                },
+              },
+            }}
             className={cn(
-              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-all duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
+              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-[width,height,flex-grow,background-color] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
               isActive
                 ? "cursor-default w-full md:flex-grow h-[500px] md:h-full bg-white select-auto"
                 : "cursor-pointer w-full md:w-[80px] lg:w-[100px] xl:w-[120px] h-[70px] sm:h-[80px] md:h-full bg-[#fafafa] hover:bg-[#f4f4f4]"
@@ -100,8 +145,8 @@ export function Sections3Accordion({
             {/* Collapsed State Content (Desktop) - Smooth delayed entrance on close */}
             <div
               className={cn(
-                "hidden md:flex h-full absolute inset-y-0 left-0 w-[80px] lg:w-[100px] xl:w-[120px] transition-opacity duration-300",
-                isActive ? "opacity-0 pointer-events-none" : "opacity-100 delay-300"
+                "hidden md:flex h-full absolute inset-y-0 left-0 w-[80px] lg:w-[100px] xl:w-[120px] transition-opacity duration-500",
+                isActive ? "opacity-0 pointer-events-none" : "opacity-100 delay-400"
               )}
             >
               {/* Container for vertical number alignment, centered horizontally */}
@@ -126,7 +171,7 @@ export function Sections3Accordion({
             {/* Active State Content - Fixed min-width prevents text squishing while closing */}
             <div
               className={cn(
-                "absolute inset-y-0 left-0 w-full min-w-full md:min-w-[600px] lg:min-w-[800px] h-full flex flex-col cursor-default transition-opacity duration-500 delay-100",
+                "absolute inset-y-0 left-0 w-full min-w-full md:min-w-[600px] lg:min-w-[800px] h-full flex flex-col cursor-default transition-opacity duration-700 delay-200",
                 isActive ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
@@ -171,7 +216,7 @@ export function Sections3Accordion({
             {/* Mobile Collapsed State */}
             <div
               className={cn(
-                "md:hidden absolute inset-0 flex items-center justify-between w-full h-full px-6 transition-opacity duration-300",
+                "md:hidden absolute inset-0 flex items-center justify-between w-full h-full px-6 transition-opacity duration-500",
                 isActive ? "opacity-0 pointer-events-none" : "opacity-100"
               )}
             >
@@ -182,10 +227,10 @@ export function Sections3Accordion({
                 {item.title}
               </span>
             </div>
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
 
@@ -220,21 +265,40 @@ export function Sections3({
       <div className="max-w-7xl mx-auto w-full px-6 md:px-12 mb-12 md:mb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 w-full items-start">
           {/* Eyebrow */}
-          <div className="lg:col-span-5 flex items-center gap-3.5 pt-1 md:pt-4">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.95, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-5 flex items-center gap-3.5 pt-1 md:pt-4"
+          >
             <span className="text-[#040404] text-xs sm:text-sm font-bold tracking-[0.25em] font-sans">
               {eyebrowNumber}
             </span>
-            <div className="w-10 md:w-16 h-[1.5px] bg-[#040404]" />
+            <motion.div
+              initial={{ scaleX: 0 }}
+              whileInView={{ scaleX: 1 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 1.1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              style={{ originX: 0 }}
+              className="w-10 md:w-16 h-[1.5px] bg-[#040404]"
+            />
             <span className="text-[#040404] text-xs sm:text-sm font-bold tracking-[1.5px] uppercase">
               {eyebrowText}
             </span>
-          </div>
+          </motion.div>
 
           {/* Main Heading: H2, 500 weight, Inter, -4.5% tracking, normal word spacing, aligned to the right edge */}
-          <div className="lg:col-span-7 flex flex-col items-start lg:items-end mt-4 lg:mt-0">
-            <h2 className="text-[#040404] text-[24px] sm:text-[28px] md:text-[34px] lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-[500] tracking-[-0.045em] [word-spacing:normal] leading-[1.05] uppercase text-left lg:text-right">
+          <div className="lg:col-span-7 flex flex-col items-start lg:items-end mt-4 lg:mt-0 overflow-hidden">
+            <motion.h2
+              initial={{ opacity: 0, y: 35 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 1.2, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
+              className="text-[#040404] text-[24px] sm:text-[28px] md:text-[34px] lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-[500] tracking-[-0.045em] [word-spacing:normal] leading-[1.05] uppercase text-left lg:text-right"
+            >
               {heading}
-            </h2>
+            </motion.h2>
           </div>
         </div>
       </div>
@@ -249,3 +313,4 @@ export function Sections3({
 
 export { Sections3 as Section3 };
 export default Sections3;
+
