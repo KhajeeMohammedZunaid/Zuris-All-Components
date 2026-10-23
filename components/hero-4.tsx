@@ -5,17 +5,16 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
 import {
-  Anthropic,
-  Replicate,
-  GitHub,
-  Vercel,
+  Mocha,
+  Manus,
+  Firecrawl,
+  Grida,
   Grok,
 } from "@/components/logos/all-logos";
 
 /**
  * High-performance, zero-flicker gradient background converted directly from gradient.html.
- * Uses GPU-accelerated layered radial and linear gradients so on initial page load and refresh,
- * there is zero lag, zero canvas repainting flash, and zero banding.
+ * Uses GPU-accelerated layered radial and linear gradients for instantaneous, smooth rendering.
  */
 export function HeroGradientBackground({ className }: { className?: string }) {
   return (
@@ -75,6 +74,8 @@ export interface Hero4Props {
 
 export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
   const [promptValue, setPromptValue] = React.useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,100 +86,224 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
 
   const logos = [
     {
-      name: "Anthropic",
-      Component: Anthropic,
-      containerClass: "w-32 sm:w-38 md:w-44",
-      logoClass: "w-full h-auto max-h-7 sm:max-h-8 md:max-h-8.5",
+      name: "Mocha",
+      Component: Mocha,
+      logoClass: "h-3.5 xs:h-4 sm:h-[18px] lg:h-5 w-auto",
+    },
+    {
+      name: "Manus",
+      Component: Manus,
+      logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
+    },
+    {
+      name: "Firecrawl",
+      Component: Firecrawl,
+      logoClass: "h-4.5 xs:h-5 sm:h-[22px] lg:h-6 w-auto",
+    },
+    {
+      name: "Grida",
+      Component: Grida,
+      logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
     },
     {
       name: "Grok",
       Component: Grok,
-      containerClass: "w-28 sm:w-32 md:w-38",
-      logoClass: "w-full h-auto max-h-8 sm:max-h-9 md:max-h-9.5",
-    },
-    {
-      name: "Replicate",
-      Component: Replicate,
-      containerClass: "w-28 sm:w-34 md:w-38",
-      logoClass: "w-full h-auto max-h-7 sm:max-h-8 md:max-h-8.5",
-    },
-    {
-      name: "GitHub",
-      Component: GitHub,
-      containerClass: "w-22 sm:w-26 md:w-28",
-      logoClass: "w-full h-auto max-h-6 sm:max-h-7 md:max-h-7.5",
-    },
-    {
-      name: "Vercel",
-      Component: Vercel,
-      containerClass: "w-26 sm:w-30 md:w-34",
-      logoClass: "w-full h-auto max-h-6 sm:max-h-7 md:max-h-7.5",
+      logoClass: "h-5.5 xs:h-6 sm:h-[26px] lg:h-7 w-auto",
     },
   ];
 
   return (
     <section
       className={cn(
-        "relative w-full min-h-screen md:h-screen md:max-h-screen overflow-x-hidden md:overflow-hidden flex flex-col justify-between font-['Inter',sans-serif] bg-white",
+        "relative w-full min-h-screen lg:h-screen lg:max-h-screen overflow-x-hidden lg:overflow-hidden flex flex-col justify-between font-['Inter',sans-serif] bg-white",
         className
       )}
     >
-      {/* Background Gradient converted from gradient.html (Zero-flicker, instant render) */}
+      {/* Seamless Left-to-Right Marquee Keyframes for Mobile & Tablet with 100% mathematically uniform spacing */}
+      <style jsx>{`
+        @keyframes marquee-ltr {
+          0% {
+            transform: translate3d(-50%, 0, 0);
+          }
+          100% {
+            transform: translate3d(0%, 0, 0);
+          }
+        }
+        .animate-marquee-ltr {
+          animation: marquee-ltr 24s linear infinite;
+          will-change: transform;
+        }
+      `}</style>
+
+      {/* Background Gradient converted from gradient.html */}
       <HeroGradientBackground />
 
       {/* Top Navbar */}
-      <header className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pt-4 sm:pt-6 flex items-center justify-between shrink-0">
+      <header className="relative z-50 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 flex items-center justify-between shrink-0">
         {/* Brand: Zuris White Version Logo */}
-        <Link href="/" className="flex items-center gap-2.5 group" aria-label="Zuris Home">
-          <ZurisWhiteV1 className="h-5 sm:h-5.5 w-auto text-white shrink-0" />
-          <span className="text-white text-lg font-semibold tracking-[-0.03em] font-['Inter',sans-serif]">
-            Zuris
-          </span>
-        </Link>
+        <div className="flex items-center justify-start min-w-[100px] sm:min-w-[150px]">
+          <Link href="/" className="flex items-center gap-2 group" aria-label="Zuris Home">
+            <ZurisWhiteV1 className="h-4.5 sm:h-5 w-auto text-white shrink-0" />
+            <span className="text-white text-base font-semibold tracking-[-0.03em] font-['Inter',sans-serif]">
+              Zuris
+            </span>
+          </Link>
+        </div>
 
-        {/* Center Nav Links: Cloud Platform / SaaS Focus */}
-        <nav className="hidden md:flex items-center gap-7 lg:gap-8">
+        {/* Center Nav Links: Centered mathematically on desktop */}
+        <nav className="hidden lg:flex items-center justify-center gap-6 lg:gap-7 absolute left-1/2 -translate-x-1/2">
           <Link
-            href="#compute"
-            className="text-white/80 hover:text-white text-sm font-normal tracking-[-0.02em] transition-colors"
+            href="#products"
+            className="text-white/80 hover:text-white text-[13px] sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
-            Cloud Compute
+            Products
           </Link>
           <Link
-            href="#serverless"
-            className="text-white/80 hover:text-white text-sm font-normal tracking-[-0.02em] transition-colors"
+            href="#apps"
+            className="text-white/80 hover:text-white text-[13px] sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
-            Serverless
+            Apps
           </Link>
           <Link
-            href="#pipelines"
-            className="text-white/80 hover:text-white text-sm font-normal tracking-[-0.02em] transition-colors"
+            href="#resources"
+            className="text-white/80 hover:text-white text-[13px] sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
-            Pipelines
+            Resources
           </Link>
           <Link
             href="#docs"
-            className="text-white/80 hover:text-white text-sm font-normal tracking-[-0.02em] transition-colors"
+            className="text-white/80 hover:text-white text-[13px] sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
             Docs
           </Link>
         </nav>
 
-        {/* Right CTA / Auth */}
-        <div className="flex items-center gap-5 sm:gap-6">
+        {/* Right CTA / Auth (Desktop & Mobile) */}
+        <div className="flex items-center justify-end gap-2 sm:gap-3.5 min-w-[100px] sm:min-w-[150px]">
           <Link
             href="#signin"
-            className="text-white/85 hover:text-white text-sm font-normal tracking-[-0.02em] transition-colors"
+            className="hidden sm:inline-flex text-white/85 hover:text-white text-xs sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
             Sign in
           </Link>
+
           <Link
             href="#get-started"
-            className="text-white hover:text-white/85 text-sm font-normal tracking-[-0.02em] transition-colors inline-flex items-center gap-1 font-medium"
+            className="text-white hover:text-white/90 text-xs sm:text-sm font-medium tracking-[-0.02em] transition-colors inline-flex items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shrink-0"
           >
-            <span>Start free</span>
+            <span>Get started</span>
             <svg
-              className="w-3.5 h-3.5 stroke-current stroke-2 fill-none"
+              className="w-3 h-3 stroke-current stroke-2 fill-none"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </Link>
+
+          {/* Mobile Hamburger / Close Button */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="lg:hidden w-8 h-8 rounded-full flex flex-col items-center justify-center gap-1 text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer shrink-0 ml-0.5"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span
+              className={cn(
+                "w-4 h-[1.5px] bg-white transition-all duration-300 origin-center",
+                mobileMenuOpen && "rotate-45 translate-y-[2.5px]"
+              )}
+            />
+            <span
+              className={cn(
+                "w-4 h-[1.5px] bg-white transition-all duration-300 origin-center",
+                mobileMenuOpen && "-rotate-45 -translate-y-[2.5px]"
+              )}
+            />
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Backdrop Click-to-Close */}
+      {mobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] transition-opacity"
+          onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Mobile Minimal Floating Glass Navigation Menu */}
+      <div
+        className={cn(
+          "lg:hidden fixed top-16 left-4 right-4 sm:left-8 sm:right-8 z-50 max-w-sm sm:max-w-md mx-auto bg-[#030a24]/85 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 sm:p-5 shadow-[0_24px_50px_-10px_rgba(0,0,0,0.8)] flex flex-col gap-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          mobileMenuOpen
+            ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
+            : "opacity-0 -translate-y-2 scale-98 pointer-events-none"
+        )}
+      >
+        {/* Pure Clean Navigation Links: No 'Navigation' header, no descriptions */}
+        <nav className="flex flex-col gap-0.5">
+          {["Products", "Apps", "Resources", "Docs"].map((item) => (
+            <Link
+              key={item}
+              href={`#${item.toLowerCase()}`}
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3.5 py-2 rounded-xl text-white/90 hover:text-white hover:bg-white/10 text-[15px] font-normal tracking-[-0.02em] transition-colors"
+            >
+              {item}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Divider */}
+        <div className="w-full h-px bg-white/10 my-0.5" />
+
+        {/* Bottom Actions matching user screenshot */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2.5">
+            <Link
+              href="#signin"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex-1 text-center py-2.5 rounded-2xl text-white text-sm font-semibold border border-white/20 bg-white/5 hover:bg-white/10 transition-colors"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="#get-started"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex-1 text-center py-2.5 rounded-2xl text-white bg-[#1864f7] hover:bg-[#1056e0] text-sm font-semibold transition-colors shadow-lg shadow-[#1864f7]/30"
+            >
+              Get started
+            </Link>
+          </div>
+
+          {/* SLA / Enterprise status badge matching user screenshot */}
+          <div className="flex items-center gap-2.5 pt-0.5 px-0.5">
+            <div className="w-6 h-6 rounded-full bg-black/80 border border-white/20 flex items-center justify-center shrink-0">
+              <ZurisWhiteV1 className="w-3 h-3 text-white" />
+            </div>
+            <span className="text-[11px] text-white/60 tracking-tight font-normal">
+              #1 Cloud Platform · Enterprise Ready · 99.99% SLA
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Hero Content: Centered in the middle */}
+      <div className="relative z-10 w-full max-w-3xl mx-auto px-5 sm:px-8 my-auto py-5 sm:py-6 lg:py-4 flex flex-col items-center text-center">
+        {/* Top Growth Pill Badge: Single line guaranteed */}
+        <div className="inline-flex items-center justify-center gap-1.5 xs:gap-2 px-3 py-1 rounded-full bg-[#0a183d]/70 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs text-white/90 mb-2.5 sm:mb-3.5 font-normal tracking-[-0.02em] whitespace-nowrap shrink-0 max-w-max select-none mx-auto">
+          <span className="whitespace-nowrap">#1 Cloud Platform</span>
+          <span className="text-white/30 text-[10px]">|</span>
+          <Link
+            href="#explore"
+            className="text-white font-medium hover:text-white/80 transition-colors inline-flex items-center gap-1 shrink-0 whitespace-nowrap"
+          >
+            <span>Explore platform</span>
+            <svg
+              className="w-2.5 h-2.5 stroke-current stroke-2 fill-none"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
@@ -186,51 +311,39 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             </svg>
           </Link>
         </div>
-      </header>
 
-      {/* Main Hero Content */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto px-6 sm:px-8 my-auto py-4 sm:py-6 md:py-8 flex flex-col items-center text-center">
-        {/* Top Growth Pill Badge */}
-        <div className="inline-flex items-center gap-2 sm:gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-[#0a183d]/50 backdrop-blur-md border border-white/15 text-xs sm:text-[13px] text-white/90 mb-3.5 sm:mb-4.5 font-normal tracking-[-0.02em]">
-          <span>#1 Cloud & Workflow Platform for Engineering Teams</span>
-          <span className="text-white/30">|</span>
-          <Link href="#explore" className="text-white font-medium hover:underline">
-            Explore platform
-          </Link>
-        </div>
-
-        {/* Main Headline: h2 tag, 400 weight (font-normal), -4.5% tracking */}
-        <h2 className="text-white text-3xl sm:text-4xl md:text-5xl lg:text-[50px] xl:text-[56px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.08] sm:leading-[1.05] mb-3 sm:mb-4">
-          Connect to any cloud.
+        {/* Main Headline: Centered, reduced, punchy */}
+        <h2 className="text-white text-2xl xs:text-[28px] sm:text-4xl lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.12] sm:leading-[1.08] mb-2 sm:mb-2.5 text-center mx-auto">
+          Connect any cloud.
           <br />
-          Automate every workload.
+          Automate everything.
         </h2>
 
-        {/* Description: p base, 85% mutedness, 400 weight, -4.5% tracking */}
-        <p className="text-white/85 text-sm sm:text-base font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.55] max-w-xl sm:max-w-2xl mb-5 sm:mb-7">
-          Zuris orchestrates your microservices, APIs, and cloud infrastructure into unified automated workflows — scaling your workloads globally without the DevOps overhead.
+        {/* Description: Centered, concise, reduced */}
+        <p className="text-white/85 text-xs sm:text-[13.5px] md:text-[14px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.45] max-w-sm sm:max-w-md mb-4 sm:mb-5 text-center mx-auto">
+          Connect all your tools and automate workflows in real time — zero engineering overhead.
         </p>
 
         {/* Prompt / Automate Input Box */}
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-lg sm:max-w-xl bg-white rounded-2xl sm:rounded-[20px] p-3.5 sm:p-4 flex flex-col justify-between min-h-[85px] sm:min-h-[95px] text-left"
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl"
         >
           <input
             type="text"
             value={promptValue}
             onChange={(e) => setPromptValue(e.target.value)}
-            placeholder="Describe a cloud service or workflow to automate..."
-            className="w-full bg-transparent border-none outline-none text-[#040404] placeholder:text-zinc-400 font-['Inter',sans-serif] font-normal text-sm sm:text-base tracking-[-0.045em]"
+            placeholder="Start right now. What should we automate?"
+            className="w-full bg-transparent border-none outline-none text-[#040404] placeholder:text-zinc-400 font-['Inter',sans-serif] font-normal text-xs sm:text-[13.5px] tracking-[-0.045em]"
           />
-          <div className="flex justify-end mt-2 sm:mt-3">
+          <div className="flex justify-end mt-2">
             <button
               type="submit"
-              className="w-7.5 h-7.5 sm:w-8.5 sm:h-8.5 rounded-full bg-[#1864f7] text-white flex items-center justify-center transition-opacity hover:opacity-90 cursor-pointer shrink-0"
+              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] text-white flex items-center justify-center transition-opacity hover:opacity-90 cursor-pointer shrink-0"
               aria-label="Submit automation prompt"
             >
               <svg
-                className="w-3.5 h-3.5 stroke-current stroke-2 fill-none"
+                className="w-3 h-3 stroke-current stroke-2 fill-none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
@@ -242,29 +355,69 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
         </form>
       </div>
 
-      {/* Bottom Logos Ribbon: OpenAI removed; Anthropic, Grok, Replicate, GitHub, Vercel prominent */}
-      <footer className="relative z-10 w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 pb-5 sm:pb-7 pt-2 shrink-0">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-5 md:gap-8">
+      {/* Bottom Logos Ribbon */}
+      <footer className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pb-5 sm:pb-7 lg:pb-10 pt-2 shrink-0">
+        {/* Desktop Layout: Static evenly distributed row */}
+        <div className="hidden lg:flex items-center justify-between gap-10 lg:gap-14 w-full">
           {/* Left Text */}
-          <div className="text-zinc-600 text-xs sm:text-sm font-['Inter',sans-serif] font-normal leading-[1.35] tracking-[-0.02em] text-center md:text-left shrink-0">
+          <div className="text-zinc-600 text-xs sm:text-sm font-['Inter',sans-serif] font-normal leading-[1.35] tracking-[-0.02em] text-left shrink-0">
             Trusted by fast-growing
             <br />
             cloud teams around the world
           </div>
 
-          {/* Right Logos: Anthropic, Grok, Replicate, GitHub, Vercel */}
-          <div className="flex flex-wrap items-center justify-center md:justify-end gap-5 sm:gap-7 md:gap-9 lg:gap-11 flex-1 text-zinc-800">
-            {logos.map(({ name, Component, containerClass, logoClass }) => (
+          {/* Logos Row */}
+          <div className="flex items-center justify-between gap-8 lg:gap-10 flex-1 text-zinc-800">
+            {logos.map(({ name, Component, logoClass }) => (
               <div
                 key={name}
-                className={cn(
-                  "flex items-center justify-center opacity-85 hover:opacity-100 transition-opacity",
-                  containerClass
-                )}
+                className="flex items-center justify-center shrink-0 opacity-80"
               >
                 <Component className={logoClass} />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Mobile & Tablet Layout: Mathematically consistent Left-to-Right Marquee with blurred ends */}
+        <div className="flex lg:hidden flex-col items-center sm:items-start w-full">
+          <div className="text-zinc-600 text-[11px] sm:text-xs font-['Inter',sans-serif] font-normal leading-[1.3] tracking-[-0.02em] mb-2.5 text-center sm:text-left">
+            Trusted by fast-growing cloud teams around the world
+          </div>
+
+          {/* Marquee Wrapper with soft feathered gradient edges */}
+          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+            {/* Edge Blur Overlays */}
+            <div className="absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
+
+            {/* Continuous 2-track marquee with uniform gap across all logos and wrap-around */}
+            <div className="flex w-max select-none overflow-hidden py-1 animate-marquee-ltr">
+              <div className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14">
+                {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
+                  <div
+                    key={`track1-${name}-${idx}`}
+                    className="flex items-center justify-center shrink-0 opacity-80"
+                  >
+                    <Component className={logoClass} />
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14"
+                aria-hidden="true"
+              >
+                {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
+                  <div
+                    key={`track2-${name}-${idx}`}
+                    className="flex items-center justify-center shrink-0 opacity-80"
+                  >
+                    <Component className={logoClass} />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </footer>
