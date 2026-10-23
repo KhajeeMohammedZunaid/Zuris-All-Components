@@ -1,8 +1,13 @@
 import { ArcCards } from "@/components/arc-cards";
 
+export const metadata = {
+  title: "Arc & Card Slider Carousel - Embla & Torph",
+  description: "Curved arc carousel and single card slider powered by Embla, shadcn Card & Button, and torph text animations.",
+};
+
 export default function ArcCardsShowcasePage() {
   return (
-    <main className="min-h-screen bg-[#fafafa] dark:bg-[#09090b] flex flex-col items-center justify-center transition-colors duration-300">
+    <main className="min-h-screen bg-[#111215]">
       <ArcCards />
     </main>
   );
