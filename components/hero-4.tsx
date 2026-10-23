@@ -178,18 +178,18 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           </Link>
         </nav>
 
-        {/* Right CTA / Auth (Desktop & Mobile) */}
-        <div className="flex items-center justify-end gap-2 sm:gap-3.5 min-w-[100px] sm:min-w-[150px]">
+        {/* Right CTA / Auth (Desktop: Buttons, Mobile/Tablet: Hamburger only) */}
+        <div className="flex items-center justify-end gap-3 min-w-[40px] lg:min-w-[150px]">
           <Link
             href="#signin"
-            className="hidden sm:inline-flex text-white/85 hover:text-white text-xs sm:text-sm font-normal tracking-[-0.02em] transition-colors"
+            className="hidden lg:inline-flex text-white/85 hover:text-white text-xs sm:text-sm font-normal tracking-[-0.02em] transition-colors"
           >
             Sign in
           </Link>
 
           <Link
             href="#get-started"
-            className="text-white hover:text-white/90 text-xs sm:text-sm font-medium tracking-[-0.02em] transition-colors inline-flex items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full shrink-0"
+            className="hidden lg:inline-flex text-white hover:text-white/90 text-xs sm:text-sm font-medium tracking-[-0.02em] transition-colors items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/20 px-3 py-1.5 rounded-full shrink-0"
           >
             <span>Get started</span>
             <svg
@@ -225,10 +225,10 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
         </div>
       </header>
 
-      {/* Mobile Backdrop Click-to-Close */}
+      {/* Mobile Backdrop Click-to-Close (Transparent click catcher) */}
       {mobileMenuOpen && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px] transition-opacity"
+          className="lg:hidden fixed inset-0 z-40 bg-transparent"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"
         />
@@ -237,7 +237,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
       {/* Mobile Minimal Floating Glass Navigation Menu */}
       <div
         className={cn(
-          "lg:hidden fixed top-16 left-4 right-4 sm:left-8 sm:right-8 z-50 max-w-sm sm:max-w-md mx-auto bg-[#030a24]/85 backdrop-blur-2xl border border-white/15 rounded-2xl p-4 sm:p-5 shadow-[0_24px_50px_-10px_rgba(0,0,0,0.8)] flex flex-col gap-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "lg:hidden fixed top-[58px] sm:top-[70px] left-5 right-5 sm:left-8 sm:right-8 z-50 bg-white/[0.08] backdrop-blur-2xl border border-white/20 rounded-2xl p-4 sm:p-5 flex flex-col gap-3.5 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
           mobileMenuOpen
             ? "opacity-100 translate-y-0 scale-100 pointer-events-auto"
             : "opacity-0 -translate-y-2 scale-98 pointer-events-none"
@@ -258,36 +258,24 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
         </nav>
 
         {/* Divider */}
-        <div className="w-full h-px bg-white/10 my-0.5" />
+        <div className="w-full h-px bg-white/15 my-0.5" />
 
-        {/* Bottom Actions matching user screenshot */}
-        <div className="flex flex-col gap-3">
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="#signin"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2.5 rounded-2xl text-white text-sm font-semibold border border-white/20 bg-white/5 hover:bg-white/10 transition-colors"
-            >
-              Sign in
-            </Link>
-            <Link
-              href="#get-started"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex-1 text-center py-2.5 rounded-2xl text-white bg-[#1864f7] hover:bg-[#1056e0] text-sm font-semibold transition-colors shadow-lg shadow-[#1864f7]/30"
-            >
-              Get started
-            </Link>
-          </div>
-
-          {/* SLA / Enterprise status badge matching user screenshot */}
-          <div className="flex items-center gap-2.5 pt-0.5 px-0.5">
-            <div className="w-6 h-6 rounded-full bg-black/80 border border-white/20 flex items-center justify-center shrink-0">
-              <ZurisWhiteV1 className="w-3 h-3 text-white" />
-            </div>
-            <span className="text-[11px] text-white/60 tracking-tight font-normal">
-              #1 Cloud Platform · Enterprise Ready · 99.99% SLA
-            </span>
-          </div>
+        {/* Bottom Actions */}
+        <div className="flex items-center gap-2.5 pt-1">
+          <Link
+            href="#signin"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex-1 text-center py-2.5 rounded-2xl text-white text-sm font-semibold border border-white/20 bg-white/10 hover:bg-white/15 transition-colors"
+          >
+            Sign in
+          </Link>
+          <Link
+            href="#get-started"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex-1 text-center py-2.5 rounded-2xl text-white bg-[#1864f7] hover:bg-[#1056e0] text-sm font-semibold transition-colors"
+          >
+            Get started
+          </Link>
         </div>
       </div>
 
