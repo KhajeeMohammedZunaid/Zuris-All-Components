@@ -3,10 +3,10 @@
 import * as React from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { TextMorph } from "torph/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useTheme } from "next-themes";
 
 export interface DestinationSlide {
   id: number;
@@ -99,11 +99,13 @@ function ChevronRightIcon({ className }: { className?: string }) {
  * =========================================================================
  * VERSION 1: Arc / Curved Carousel (Exact match to User Image 1)
  * =========================================================================
- * - Compact, beautifully scaled cards fanning out in an arc
- * - Both Theme Compatible (seamless Light and Dark modes)
- * - Navigation buttons fixed at immovable coordinates
- * - Text morphs smoothly with torph TextMorph
- * - Shadcn Card & Button components used
+ * - Generously spaced cards fanning out in an arc with natural breathing room
+ * - Standard pointer cursor on cards (NO grabbing hand cursor)
+ * - Navigation buttons locked in fixed positions (never move when text changes)
+ * - Typography: Inter font, h3 title with font-normal (400) and -4.5% tracking,
+ *   p base location tag with matching font-normal and -4.5% tracking
+ * - No text truncation or three dots (...)
+ * - Substantial vertical gap between arc cards and navigation row
  */
 export function ArcCarousel({
   slides = DESTINATIONS,
@@ -119,6 +121,14 @@ export function ArcCarousel({
   });
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   const onSelect = React.useCallback(() => {
     if (!emblaApi) return;
@@ -150,13 +160,13 @@ export function ArcCarousel({
   return (
     <div
       className={cn(
-        "relative w-full max-w-3xl mx-auto flex flex-col items-center justify-center py-4 sm:py-8 px-4 select-none",
+        "relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-0 px-4 select-none font-['Inter',sans-serif]",
         className
       )}
     >
-      {/* Invisible Embla gesture layer capturing swipe / drag */}
+      {/* Underlying gesture track (z-0, default cursor so no grabbing hand takes over card hover) */}
       <div
-        className="w-full overflow-hidden absolute inset-0 z-30 cursor-grab active:cursor-grabbing pointer-events-auto"
+        className="w-full overflow-hidden absolute inset-0 z-0 pointer-events-auto cursor-default"
         ref={emblaRef}
         aria-hidden="true"
       >
@@ -170,14 +180,14 @@ export function ArcCarousel({
         </div>
       </div>
 
-      {/* Arc Fan Stage (Compact, neatly proportioned height) */}
-      <div className="relative w-full h-[220px] xs:h-[240px] sm:h-[270px] md:h-[290px] flex items-center justify-center overflow-visible">
+      {/* Arc Fan Stage: Cards at higher z-index with clean cursor-pointer */}
+      <div className="relative z-10 w-full h-[240px] xs:h-[260px] sm:h-[290px] md:h-[310px] flex items-center justify-center overflow-visible">
         {slides.map((slide, i) => {
           let diff = i - selectedIndex;
           if (diff > total / 2) diff -= total;
           if (diff < -total / 2) diff += total;
 
-          // Compute arc geometry
+          // Compute arc geometry with breathing room
           const isCenter = diff === 0;
           const isLeft1 = diff === -1;
           const isRight1 = diff === 1;
@@ -194,25 +204,25 @@ export function ArcCarousel({
             zIndex = 30;
             opacity = 1;
           } else if (isLeft1) {
-            transform =
-              "translate3d(-85px, 22px, 0px) scale(0.94) rotate(-14deg)";
+            const tx = isMobile ? -100 : -135;
+            transform = `translate3d(${tx}px, 24px, 0px) scale(0.95) rotate(-13deg)`;
             zIndex = 20;
-            opacity = 0.88;
+            opacity = 0.9;
           } else if (isRight1) {
-            transform =
-              "translate3d(85px, 22px, 0px) scale(0.94) rotate(14deg)";
+            const tx = isMobile ? 100 : 135;
+            transform = `translate3d(${tx}px, 24px, 0px) scale(0.95) rotate(13deg)`;
             zIndex = 20;
-            opacity = 0.88;
+            opacity = 0.9;
           } else if (isLeft2) {
-            transform =
-              "translate3d(-160px, 58px, 0px) scale(0.82) rotate(-26deg)";
+            const tx = isMobile ? -190 : -255;
+            transform = `translate3d(${tx}px, 62px, 0px) scale(0.84) rotate(-24deg)`;
             zIndex = 10;
-            opacity = 0.65;
+            opacity = 0.68;
           } else if (isRight2) {
-            transform =
-              "translate3d(160px, 58px, 0px) scale(0.82) rotate(26deg)";
+            const tx = isMobile ? 190 : 255;
+            transform = `translate3d(${tx}px, 62px, 0px) scale(0.84) rotate(24deg)`;
             zIndex = 10;
-            opacity = 0.65;
+            opacity = 0.68;
           }
 
           return (
@@ -225,18 +235,18 @@ export function ArcCarousel({
                 opacity,
               }}
               className={cn(
-                "absolute top-4 sm:top-5 left-1/2 -translate-x-1/2 w-[115px] xs:w-[130px] sm:w-[155px] md:w-[165px] aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom cursor-pointer",
+                "absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[120px] xs:w-[135px] sm:w-[160px] md:w-[172px] aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom cursor-pointer",
                 !isVisible && "pointer-events-none"
               )}
             >
               <Card
                 className={cn(
-                  "w-full h-full p-0 overflow-hidden rounded-[18px] sm:rounded-[22px] border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-zinc-900 shadow-md dark:shadow-2xl relative group transition-shadow",
+                  "w-full h-full p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-zinc-900 shadow-md dark:shadow-2xl relative group transition-shadow cursor-pointer",
                   isCenter &&
-                    "ring-1 ring-zinc-300 dark:ring-white/30 shadow-[0_15px_35px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
+                    "ring-1 ring-zinc-300 dark:ring-white/30 shadow-[0_18px_40px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
                 )}
               >
-                <CardContent className="p-0 w-full h-full relative">
+                <CardContent className="p-0 w-full h-full relative cursor-pointer">
                   <img
                     src={slide.image}
                     alt={slide.title}
@@ -252,9 +262,9 @@ export function ArcCarousel({
         })}
       </div>
 
-      {/* Bottom Information Row with COMPLETELY FIXED Navigation Buttons */}
-      <div className="relative z-40 w-full max-w-[420px] sm:max-w-[480px] mx-auto mt-4 sm:mt-5 px-4 flex items-center justify-between">
-        {/* Left Arrow Button - Fixed position at left edge */}
+      {/* Bottom Information Row with COMPLETELY FIXED Navigation Buttons & Generous Gap */}
+      <div className="relative z-40 w-full max-w-[460px] sm:max-w-[520px] mx-auto mt-8 sm:mt-10 md:mt-12 px-4 flex items-center justify-between">
+        {/* Left Arrow Button - Fixed Position at Left */}
         <Button
           type="button"
           variant="ghost"
@@ -266,27 +276,24 @@ export function ArcCarousel({
           <ChevronLeftIcon className="size-4 sm:size-5" />
         </Button>
 
-        {/* Center Title & Location (Powered by torph TextMorph inside fixed center slot) */}
-        <div className="flex-1 px-3 flex flex-col items-center justify-center text-center overflow-hidden">
+        {/* Center Title & Location (Strict typography: Inter, h3 with 400 weight & -4.5% tracking, p base with 400 weight & -4.5% tracking, NO truncate) */}
+        <div className="flex-1 px-4 flex flex-col items-center justify-center text-center">
           <TextMorph
-            as="h2"
-            className="text-xl sm:text-2xl md:text-[28px] font-bold text-zinc-950 dark:text-white tracking-tight leading-tight select-none truncate max-w-full"
+            as="h3"
+            className="text-2xl sm:text-3xl md:text-[32px] font-normal tracking-[-0.045em] text-zinc-950 dark:text-white leading-tight select-none font-['Inter',sans-serif]"
           >
             {currentSlide.title}
           </TextMorph>
 
-          <div className="flex items-center justify-center gap-1.5 text-zinc-500 dark:text-zinc-400 mt-1 select-none">
+          <p className="flex items-center justify-center gap-1.5 text-zinc-500 dark:text-zinc-400 mt-1.5 select-none font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-sm sm:text-base">
             <MapPinIcon className="size-3.5 sm:size-4 text-zinc-500 dark:text-zinc-400 shrink-0" />
-            <TextMorph
-              as="span"
-              className="text-xs sm:text-sm font-normal text-zinc-500 dark:text-zinc-400 truncate"
-            >
+            <TextMorph as="span">
               {currentSlide.location}
             </TextMorph>
-          </div>
+          </p>
         </div>
 
-        {/* Right Arrow Button - Fixed position at right edge */}
+        {/* Right Arrow Button - Fixed Position at Right */}
         <Button
           type="button"
           variant="ghost"
@@ -300,10 +307,10 @@ export function ArcCarousel({
       </div>
 
       {/* Explore CTA Button */}
-      <div className="relative z-40 mt-4 sm:mt-5">
+      <div className="relative z-40 mt-5 sm:mt-6">
         <Button
           type="button"
-          className="rounded-full px-8 sm:px-9 py-2.5 h-auto bg-zinc-900 hover:bg-zinc-800 text-white shadow-md dark:bg-gradient-to-b dark:from-[#f5f6f8] dark:to-[#d6dae1] dark:hover:from-white dark:hover:to-[#e4e7ec] dark:text-zinc-950 font-semibold text-xs sm:text-sm dark:shadow-[0_4px_24px_rgba(255,255,255,0.18)] active:scale-95 transition-all cursor-pointer border-none"
+          className="rounded-full px-8 sm:px-9 py-2.5 h-auto bg-zinc-900 hover:bg-zinc-800 text-white shadow-md dark:bg-gradient-to-b dark:from-[#f5f6f8] dark:to-[#d6dae1] dark:hover:from-white dark:hover:to-[#e4e7ec] dark:text-zinc-950 font-normal tracking-[-0.045em] text-xs sm:text-sm dark:shadow-[0_4px_24px_rgba(255,255,255,0.18)] active:scale-95 transition-all cursor-pointer border-none font-['Inter',sans-serif]"
         >
           Explore
         </Button>
@@ -318,8 +325,10 @@ export function ArcCarousel({
  * =========================================================================
  * - Single large, full-bleed scenic hero card
  * - Both Theme Compatible
+ * - Clean default cursor (NO grabbing hand cursor)
+ * - Typography: Inter font, h3 with font-normal (400) & -4.5% tracking,
+ *   p with font-normal (400) & -4.5% tracking
  * - Embla carousel seamlessly transitions between destinations
- * - Top-left overlay: Title and location animated with torph TextMorph
  * - Bottom floating pill overlay with fixed chevrons & capsule indicator
  */
 export function SingleCardCarousel({
@@ -373,15 +382,15 @@ export function SingleCardCarousel({
   return (
     <div
       className={cn(
-        "relative w-full max-w-[380px] sm:max-w-[420px] mx-auto select-none",
+        "relative w-full max-w-[380px] sm:max-w-[420px] mx-auto select-none font-['Inter',sans-serif]",
         className
       )}
     >
-      <Card className="w-full aspect-[4/5] sm:h-[510px] p-0 overflow-hidden rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-white/10 bg-zinc-950 shadow-xl dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)] relative group">
-        <CardContent className="p-0 w-full h-full relative">
-          {/* Embla Viewport */}
+      <Card className="w-full aspect-[4/5] sm:h-[490px] md:h-[500px] p-0 overflow-hidden rounded-[28px] sm:rounded-[32px] border border-zinc-200/90 dark:border-white/10 bg-zinc-950 shadow-none relative group cursor-default">
+        <CardContent className="p-0 w-full h-full relative cursor-default">
+          {/* Embla Viewport with clean default cursor */}
           <div
-            className="w-full h-full overflow-hidden cursor-grab active:cursor-grabbing"
+            className="w-full h-full overflow-hidden cursor-default"
             ref={emblaRef}
           >
             <div className="flex h-full w-full">
@@ -401,28 +410,22 @@ export function SingleCardCarousel({
             </div>
           </div>
 
-          {/* Top-Left Header Overlay (Vignette + TextMorph Title/Location) */}
-          <div className="absolute top-0 inset-x-0 pt-6 pb-12 px-6 z-20 bg-gradient-to-b from-black/75 via-black/35 to-transparent pointer-events-none text-left">
+          {/* Top-Left Header Overlay (Vignette + Inter h3 & p tracking -4.5%) */}
+          <div className="absolute top-0 inset-x-0 pt-6 pb-12 px-6 z-20 bg-gradient-to-b from-black/75 via-black/35 to-transparent pointer-events-none text-left font-['Inter',sans-serif]">
             <TextMorph
               as="h3"
-              className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight drop-shadow-md select-none"
+              className="text-xl sm:text-2xl font-normal tracking-[-0.045em] text-white leading-tight drop-shadow-md select-none font-['Inter',sans-serif]"
             >
               {currentSlide.title}
             </TextMorph>
 
-            <div className="flex items-center gap-1.5 text-white/90 text-xs sm:text-sm mt-1 drop-shadow-sm font-medium select-none">
+            <p className="flex items-center gap-1.5 text-white/90 text-sm mt-1 drop-shadow-sm font-normal tracking-[-0.045em] select-none font-['Inter',sans-serif]">
               <MapPinIcon className="size-3.5 text-white/90 shrink-0" />
-              <TextMorph
-                as="span"
-                className="text-xs sm:text-sm text-white/90 font-medium"
-              >
+              <TextMorph as="span">
                 {currentSlide.location}
               </TextMorph>
-            </div>
+            </p>
           </div>
-
-          {/* Bottom Vignette */}
-          <div className="absolute bottom-0 inset-x-0 h-28 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none z-10" />
 
           {/* Bottom Floating Control Bar (Chevron Prev, Dots Capsule, Chevron Next) */}
           <div className="absolute bottom-5 sm:bottom-6 inset-x-0 mx-auto z-30 flex items-center justify-center gap-2.5">
@@ -479,79 +482,56 @@ export function SingleCardCarousel({
 
 /**
  * =========================================================================
- * ALL-IN-ONE SHOWCASE: Switch between Version 1 & Version 2 with Light/Dark compatibility
+ * ALL-IN-ONE SHOWCASE: Fixed switcher position & buttery smooth cross-fade
  * =========================================================================
  */
 export function TravelCarouselShowcase() {
   const [activeTab, setActiveTab] = React.useState<"v1" | "v2">("v1");
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const toggleTheme = () => {
-    setTheme(resolvedTheme === "dark" ? "light" : "dark");
-  };
 
   return (
-    <section className="w-full min-h-screen bg-zinc-50 dark:bg-[#0c0d10] text-zinc-950 dark:text-zinc-50 font-sans flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-200">
-      {/* Top Header & View Switcher */}
-      <div className="w-full max-w-3xl flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 sm:mb-10 border-b border-zinc-200 dark:border-zinc-800 pb-5">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-950 dark:text-white">
-            Travel Carousel Component
-          </h1>
-          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
-            Powered by Embla Carousel, torph TextMorph, and shadcn Card & Button
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* View Switcher Pill */}
-          <div className="flex items-center p-1 rounded-full bg-zinc-200/70 dark:bg-white/[0.06] border border-zinc-300/80 dark:border-white/10 text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setActiveTab("v1")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
-                activeTab === "v1"
-                  ? "bg-white text-zinc-950 font-semibold shadow-sm dark:bg-white dark:text-zinc-950"
-                  : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
-              )}
-            >
-              Arc View (Version 1)
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("v2")}
-              className={cn(
-                "px-3.5 py-1.5 rounded-full transition-all cursor-pointer",
-                activeTab === "v2"
-                  ? "bg-white text-zinc-950 font-semibold shadow-sm dark:bg-white dark:text-zinc-950"
-                  : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
-              )}
-            >
-              Single Card (Version 2)
-            </button>
-          </div>
-
-          {/* Theme Switcher Button */}
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="px-3 py-1.5 text-xs font-medium rounded-full border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors shadow-sm"
-            aria-label="Toggle theme"
+    <section className="w-full min-h-screen bg-zinc-50 dark:bg-[#0c0d10] text-zinc-950 dark:text-zinc-50 font-['Inter',sans-serif] flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-200">
+      {/* Fixed-Height Stage Container (Prevents any jumping/shifting of the switcher below) */}
+      <div className="w-full max-w-4xl h-[510px] sm:h-[530px] flex items-center justify-center relative">
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, scale: 0.985 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.985 }}
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full h-full flex flex-col items-center justify-center"
           >
-            {mounted ? (resolvedTheme === "dark" ? "☀ Light" : "🌙 Dark") : "Theme"}
-          </button>
-        </div>
+            {activeTab === "v1" ? <ArcCarousel /> : <SingleCardCarousel />}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Dynamic Active Carousel View */}
-      <div className="w-full max-w-4xl flex flex-col items-center justify-center">
-        {activeTab === "v1" ? <ArcCarousel /> : <SingleCardCarousel />}
+      {/* Bottom Switcher Pill locked in place (Never moves when switching views) */}
+      <div className="mt-8 sm:mt-10 flex items-center p-1 rounded-full bg-zinc-200/70 dark:bg-white/[0.06] border border-zinc-300/80 dark:border-white/10 text-[11px] sm:text-xs font-medium font-['Inter',sans-serif]">
+        <button
+          type="button"
+          onClick={() => setActiveTab("v1")}
+          className={cn(
+            "px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all cursor-pointer",
+            activeTab === "v1"
+              ? "bg-white text-zinc-950 font-normal shadow-sm dark:bg-white dark:text-zinc-950"
+              : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+          )}
+        >
+          Arc View
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("v2")}
+          className={cn(
+            "px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full transition-all cursor-pointer",
+            activeTab === "v2"
+              ? "bg-white text-zinc-950 font-normal shadow-sm dark:bg-white dark:text-zinc-950"
+              : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+          )}
+        >
+          Single Card
+        </button>
       </div>
     </section>
   );
