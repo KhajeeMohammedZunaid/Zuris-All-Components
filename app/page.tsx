@@ -44,6 +44,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
     category: "Interactive & UI Demos",
     items: [
       { name: "Arc Cards", href: "/arc-cards", description: "Arc card carousel interactive component" },
+      { name: "Arc Embla Carousel", href: "/arc-carousel", description: "Embla & torph TextMorph travel carousel in Arc and Single-Card versions" },
       { name: "Shader 1", href: "/shader-1", description: "WebGL shader visual canvas" },
       { name: "Typography", href: "/typo", description: "Display and body typography specimens" },
       { name: "Typography Lab", href: "/typography-lab", description: "Interactive custom typography preset studio & live tag playground" },
