@@ -121,10 +121,19 @@ export function ArcCarousel({
   });
 
   const [selectedIndex, setSelectedIndex] = React.useState(0);
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [device, setDevice] = React.useState<"mobile" | "tablet" | "desktop">("desktop");
 
   React.useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
+    const check = () => {
+      const w = window.innerWidth;
+      if (w < 640) {
+        setDevice("mobile");
+      } else if (w < 1024) {
+        setDevice("tablet");
+      } else {
+        setDevice("desktop");
+      }
+    };
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
@@ -160,7 +169,7 @@ export function ArcCarousel({
   return (
     <div
       className={cn(
-        "relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-0 px-4 select-none font-['Inter',sans-serif]",
+        "relative w-full max-w-4xl mx-auto flex flex-col items-center justify-center py-0 px-2 sm:px-4 select-none font-['Inter',sans-serif] overflow-x-clip",
         className
       )}
     >
@@ -181,13 +190,13 @@ export function ArcCarousel({
       </div>
 
       {/* Arc Fan Stage: Cards at higher z-index with clean cursor-pointer */}
-      <div className="relative z-10 w-full h-[240px] xs:h-[260px] sm:h-[290px] md:h-[310px] flex items-center justify-center overflow-visible">
+      <div className="relative z-10 w-full h-[230px] xs:h-[250px] sm:h-[290px] md:h-[310px] flex items-center justify-center overflow-visible">
         {slides.map((slide, i) => {
           let diff = i - selectedIndex;
           if (diff > total / 2) diff -= total;
           if (diff < -total / 2) diff += total;
 
-          // Compute arc geometry with breathing room
+          // Compute arc geometry tailored for mobile, tablet, and desktop
           const isCenter = diff === 0;
           const isLeft1 = diff === -1;
           const isRight1 = diff === 1;
@@ -200,29 +209,56 @@ export function ArcCarousel({
           let opacity = 0;
 
           if (isCenter) {
-            transform = "translate3d(0px, 0px, 0px) scale(1.08) rotate(0deg)";
+            const scale = device === "mobile" ? 1.04 : device === "tablet" ? 1.06 : 1.08;
+            transform = `translate3d(0px, 0px, 0px) scale(${scale}) rotate(0deg)`;
             zIndex = 30;
             opacity = 1;
           } else if (isLeft1) {
-            const tx = isMobile ? -100 : -135;
-            transform = `translate3d(${tx}px, 24px, 0px) scale(0.95) rotate(-13deg)`;
+            const tx = device === "mobile" ? -88 : device === "tablet" ? -118 : -135;
+            const ty = device === "mobile" ? 18 : 22;
+            const rot = device === "mobile" ? -10 : -13;
+            const scale = device === "mobile" ? 0.9 : 0.94;
+            transform = `translate3d(${tx}px, ${ty}px, 0px) scale(${scale}) rotate(${rot}deg)`;
             zIndex = 20;
             opacity = 0.9;
           } else if (isRight1) {
-            const tx = isMobile ? 100 : 135;
-            transform = `translate3d(${tx}px, 24px, 0px) scale(0.95) rotate(13deg)`;
+            const tx = device === "mobile" ? 88 : device === "tablet" ? 118 : 135;
+            const ty = device === "mobile" ? 18 : 22;
+            const rot = device === "mobile" ? 10 : 13;
+            const scale = device === "mobile" ? 0.9 : 0.94;
+            transform = `translate3d(${tx}px, ${ty}px, 0px) scale(${scale}) rotate(${rot}deg)`;
             zIndex = 20;
             opacity = 0.9;
           } else if (isLeft2) {
-            const tx = isMobile ? -190 : -255;
-            transform = `translate3d(${tx}px, 62px, 0px) scale(0.84) rotate(-24deg)`;
-            zIndex = 10;
-            opacity = 0.68;
+            if (device === "mobile") {
+              // Tucked away cleanly on mobile so it never overflows screen width
+              transform = `translate3d(-130px, 42px, 0px) scale(0.7) rotate(-18deg)`;
+              zIndex = 10;
+              opacity = 0;
+            } else if (device === "tablet") {
+              transform = `translate3d(-205px, 50px, 0px) scale(0.78) rotate(-22deg)`;
+              zIndex = 10;
+              opacity = 0.65;
+            } else {
+              transform = `translate3d(-250px, 58px, 0px) scale(0.84) rotate(-24deg)`;
+              zIndex = 10;
+              opacity = 0.68;
+            }
           } else if (isRight2) {
-            const tx = isMobile ? 190 : 255;
-            transform = `translate3d(${tx}px, 62px, 0px) scale(0.84) rotate(24deg)`;
-            zIndex = 10;
-            opacity = 0.68;
+            if (device === "mobile") {
+              // Tucked away cleanly on mobile so it never overflows screen width
+              transform = `translate3d(130px, 42px, 0px) scale(0.7) rotate(18deg)`;
+              zIndex = 10;
+              opacity = 0;
+            } else if (device === "tablet") {
+              transform = `translate3d(205px, 50px, 0px) scale(0.78) rotate(22deg)`;
+              zIndex = 10;
+              opacity = 0.65;
+            } else {
+              transform = `translate3d(250px, 58px, 0px) scale(0.84) rotate(24deg)`;
+              zIndex = 10;
+              opacity = 0.68;
+            }
           }
 
           return (
@@ -235,8 +271,8 @@ export function ArcCarousel({
                 opacity,
               }}
               className={cn(
-                "absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[120px] xs:w-[135px] sm:w-[160px] md:w-[172px] aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom cursor-pointer",
-                !isVisible && "pointer-events-none"
+                "absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[112px] xs:w-[128px] sm:w-[155px] md:w-[172px] aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom cursor-pointer",
+                (!isVisible || (device === "mobile" && Math.abs(diff) === 2)) && "pointer-events-none"
               )}
             >
               <Card
@@ -263,24 +299,24 @@ export function ArcCarousel({
       </div>
 
       {/* Bottom Information Row with COMPLETELY FIXED Navigation Buttons & Generous Gap */}
-      <div className="relative z-40 w-full max-w-[460px] sm:max-w-[520px] mx-auto mt-8 sm:mt-10 md:mt-12 px-4 flex items-center justify-between">
+      <div className="relative z-40 w-full max-w-[420px] sm:max-w-[520px] mx-auto mt-7 sm:mt-10 md:mt-12 px-2 sm:px-4 flex items-center justify-between">
         {/* Left Arrow Button - Fixed Position at Left */}
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={scrollPrev}
-          className="size-10 sm:size-11 rounded-full shrink-0 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 shadow-sm dark:bg-white/[0.08] dark:hover:bg-white/[0.18] dark:text-white/90 dark:border-white/10 dark:shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+          className="size-9 sm:size-11 rounded-full shrink-0 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 shadow-sm dark:bg-white/[0.08] dark:hover:bg-white/[0.18] dark:text-white/90 dark:border-white/10 dark:shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer"
           aria-label="Previous slide"
         >
           <ChevronLeftIcon className="size-4 sm:size-5" />
         </Button>
 
         {/* Center Title & Location (Strict typography: Inter, h3 with 400 weight & -4.5% tracking, p base with 400 weight & -4.5% tracking, NO truncate) */}
-        <div className="flex-1 px-4 flex flex-col items-center justify-center text-center">
+        <div className="flex-1 px-2 sm:px-4 flex flex-col items-center justify-center text-center">
           <TextMorph
             as="h3"
-            className="text-2xl sm:text-3xl md:text-[32px] font-normal tracking-[-0.045em] text-zinc-950 dark:text-white leading-tight select-none font-['Inter',sans-serif]"
+            className="text-xl xs:text-2xl sm:text-3xl md:text-[32px] font-normal tracking-[-0.045em] text-zinc-950 dark:text-white leading-tight select-none font-['Inter',sans-serif]"
           >
             {currentSlide.title}
           </TextMorph>
@@ -299,7 +335,7 @@ export function ArcCarousel({
           variant="ghost"
           size="icon"
           onClick={scrollNext}
-          className="size-10 sm:size-11 rounded-full shrink-0 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 shadow-sm dark:bg-white/[0.08] dark:hover:bg-white/[0.18] dark:text-white/90 dark:border-white/10 dark:shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer"
+          className="size-9 sm:size-11 rounded-full shrink-0 bg-zinc-100 hover:bg-zinc-200 text-zinc-900 border border-zinc-200 shadow-sm dark:bg-white/[0.08] dark:hover:bg-white/[0.18] dark:text-white/90 dark:border-white/10 dark:shadow-md backdrop-blur-md transition-all active:scale-95 cursor-pointer"
           aria-label="Next slide"
         >
           <ChevronRightIcon className="size-4 sm:size-5" />
@@ -489,9 +525,9 @@ export function TravelCarouselShowcase() {
   const [activeTab, setActiveTab] = React.useState<"v1" | "v2">("v1");
 
   return (
-    <section className="w-full min-h-screen bg-zinc-50 dark:bg-[#0c0d10] text-zinc-950 dark:text-zinc-50 font-['Inter',sans-serif] flex flex-col items-center justify-center p-4 sm:p-8 transition-colors duration-200">
+    <section className="w-full min-h-screen bg-zinc-50 dark:bg-[#0c0d10] text-zinc-950 dark:text-zinc-50 font-['Inter',sans-serif] flex flex-col items-center justify-center p-3 sm:p-8 transition-colors duration-200 overflow-x-hidden">
       {/* Fixed-Height Stage Container (Prevents any jumping/shifting of the switcher below) */}
-      <div className="w-full max-w-4xl h-[510px] sm:h-[530px] flex items-center justify-center relative">
+      <div className="w-full max-w-4xl h-[490px] xs:h-[510px] sm:h-[530px] flex items-center justify-center relative overflow-x-clip">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeTab}
