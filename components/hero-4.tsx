@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
 import {
   Mocha,
@@ -193,25 +194,29 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             Sign in
           </Link>
 
-          <Link
-            href="#get-started"
-            className="hidden lg:inline-flex text-white hover:text-white/90 text-xs sm:text-sm font-medium tracking-[-0.02em] transition-colors items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/20 px-3 py-1.5 rounded-full shrink-0"
+          {/* Desktop Get started Button */}
+          <Button
+            nativeButton={false}
+            render={<Link href="#get-started" />}
+            className="hidden lg:inline-flex text-white hover:text-white/90 text-xs sm:text-sm font-medium tracking-[-0.02em] transition-colors items-center gap-1 bg-white/10 hover:bg-white/15 border border-white/20 px-3 py-1.5 h-auto rounded-full shrink-0 shadow-none font-sans"
           >
             <span>Get started</span>
             <svg
-              className="w-3 h-3 stroke-current stroke-2 fill-none"
+              className="size-3 stroke-current stroke-2 fill-none"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
-          </Link>
+          </Button>
 
           {/* Mobile Hamburger / Close Button */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden w-8 h-8 rounded-full flex flex-col items-center justify-center gap-1 text-white hover:bg-white/10 transition-colors focus:outline-none cursor-pointer shrink-0 ml-0.5"
+            className="lg:hidden size-8 rounded-full p-0 flex flex-col items-center justify-center gap-1 text-white hover:bg-white/10 hover:text-white transition-colors focus:outline-none cursor-pointer shrink-0 ml-0.5 border-none shadow-none bg-transparent"
             aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
             aria-expanded={mobileMenuOpen}
           >
@@ -227,7 +232,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
                 mobileMenuOpen && "-rotate-45 -translate-y-[2.5px]"
               )}
             />
-          </button>
+          </Button>
         </div>
       </motion.header>
 
@@ -268,20 +273,22 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
 
         {/* Bottom Actions */}
         <div className="flex items-center gap-2.5 pt-1">
-          <Link
-            href="#signin"
+          <Button
+            nativeButton={false}
+            render={<Link href="#signin" />}
             onClick={() => setMobileMenuOpen(false)}
-            className="flex-1 text-center py-2.5 rounded-2xl text-white text-sm font-semibold border border-white/20 bg-white/10 hover:bg-white/15 transition-colors"
+            className="flex-1 text-center py-2.5 h-auto rounded-2xl text-white text-sm font-semibold border border-white/20 bg-white/10 hover:bg-white/15 transition-colors shadow-none font-sans"
           >
             Sign in
-          </Link>
-          <Link
-            href="#get-started"
+          </Button>
+          <Button
+            nativeButton={false}
+            render={<Link href="#get-started" />}
             onClick={() => setMobileMenuOpen(false)}
-            className="flex-1 text-center py-2.5 rounded-2xl text-white bg-[#1864f7] hover:bg-[#1056e0] text-sm font-semibold transition-colors"
+            className="flex-1 text-center py-2.5 h-auto rounded-2xl text-white bg-[#1864f7] hover:bg-[#1056e0] text-sm font-semibold border-none transition-colors shadow-none font-sans"
           >
             Get started
-          </Link>
+          </Button>
         </div>
       </div>
 
@@ -377,22 +384,27 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             className="w-full bg-transparent border-none outline-none text-[#040404] placeholder:text-zinc-400 font-['Inter',sans-serif] font-normal text-xs sm:text-[13.5px] tracking-[-0.045em]"
           />
           <div className="flex justify-end mt-2">
-            <motion.button
+            <Button
               type="submit"
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.94 }}
-              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] text-white flex items-center justify-center cursor-pointer shrink-0 shadow-sm hover:shadow-[0_0_12px_rgba(24,100,247,0.5)] transition-shadow"
+              size="icon"
+              render={
+                <motion.button
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.94 }}
+                />
+              }
+              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] hover:bg-[#1056e0] text-white flex items-center justify-center cursor-pointer shrink-0 shadow-sm hover:shadow-[0_0_12px_rgba(24,100,247,0.5)] transition-shadow border-none p-0"
               aria-label="Submit automation prompt"
             >
               <svg
-                className="w-3 h-3 stroke-current stroke-2 fill-none"
+                className="size-3 stroke-current stroke-2 fill-none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
               >
                 <line x1="12" y1="19" x2="12" y2="5" />
                 <polyline points="5 12 12 5 19 12" />
               </svg>
-            </motion.button>
+            </Button>
           </div>
         </motion.form>
       </div>

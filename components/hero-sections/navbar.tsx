@@ -148,16 +148,17 @@ export function Navbar() {
             Resources
           </a>
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={toggleTheme}
-            className="mobile-nav-link text-left font-sans text-[1.15rem] xs:text-[1.25rem] font-normal text-slate-800 hover:text-black dark:text-zinc-300 dark:hover:text-white no-underline tracking-tight transition-colors py-1 bg-transparent border-none cursor-pointer flex items-center justify-between"
+            className="mobile-nav-link text-left font-sans text-[1.15rem] xs:text-[1.25rem] font-normal text-slate-800 hover:text-black dark:text-zinc-300 dark:hover:text-white no-underline tracking-tight transition-colors py-1 h-auto bg-transparent hover:bg-transparent border-none cursor-pointer flex items-center justify-between shadow-none w-full p-0"
           >
             <span>Theme</span>
             <span className="text-[0.92rem] font-medium text-zinc-950 dark:text-zinc-100 px-3 py-1 rounded-full bg-zinc-200/70 dark:bg-zinc-800 border border-zinc-300/80 dark:border-zinc-700">
               {mounted ? (resolvedTheme === "dark" ? "Dark" : "Light") : "Theme"}
             </span>
-          </button>
+          </Button>
         </nav>
 
         <div className="relative z-10 pt-6 border-t border-solid border-zinc-200 dark:border-zinc-800">
@@ -246,20 +247,23 @@ export function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center justify-end justify-self-end gap-2 sm:gap-3 md:gap-3 lg:gap-5 flex-shrink-0">
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={toggleTheme}
-            className="hidden md:inline-flex items-center justify-center text-[0.82rem] md:text-[0.85rem] lg:text-[0.92rem] 4k:text-[1.12rem] font-normal text-slate-800 hover:text-black dark:text-zinc-300 dark:hover:text-white tracking-tight transition-colors cursor-pointer select-none bg-transparent hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 px-2.5 py-1 md:py-1.5 rounded-full border border-transparent whitespace-nowrap"
+            className="hidden md:inline-flex items-center justify-center text-[0.82rem] md:text-[0.85rem] lg:text-[0.92rem] 4k:text-[1.12rem] font-normal text-slate-800 hover:text-black dark:text-zinc-300 dark:hover:text-white tracking-tight transition-colors cursor-pointer select-none bg-transparent hover:bg-zinc-200/60 dark:hover:bg-zinc-800/70 px-2.5 py-1 md:py-1.5 h-auto rounded-full border border-transparent whitespace-nowrap shadow-none"
             aria-label="Toggle theme"
           >
             {mounted ? (resolvedTheme === "dark" ? "Light" : "Dark") : "Theme"}
-          </button>
+          </Button>
 
-          <button
+          <Button
             id="mobileMenuBtn"
             ref={mobileBtnRef}
+            variant="ghost"
+            size="icon"
             className={cn(
-              "md:hidden relative z-50 p-2 flex flex-col justify-center items-center gap-[5px] text-zinc-900 dark:text-zinc-100 focus:outline-none cursor-pointer select-none",
+              "md:hidden relative z-50 p-2 h-auto w-auto flex flex-col justify-center items-center gap-[5px] text-zinc-900 dark:text-zinc-100 focus:outline-none cursor-pointer select-none border-none shadow-none bg-transparent hover:bg-transparent",
               isMenuOpen && "menu-open"
             )}
             aria-label="Toggle Navigation Menu"
@@ -270,7 +274,7 @@ export function Navbar() {
             <span className="hamburger-bar hamburger-bar-1 block w-5 h-[2px] bg-zinc-950 dark:bg-zinc-100 rounded-full" />
             <span className="hamburger-bar hamburger-bar-2 block w-5 h-[2px] bg-zinc-950 dark:bg-zinc-100 rounded-full" />
             <span className="hamburger-bar hamburger-bar-3 block w-5 h-[2px] bg-zinc-950 dark:bg-zinc-100 rounded-full" />
-          </button>
+          </Button>
 
           <Button
             nativeButton={false}

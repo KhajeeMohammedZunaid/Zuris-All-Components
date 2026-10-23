@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { ZurisBlackV1 } from "@/components/ui/zuris-black-v1";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
 import {
@@ -133,24 +134,27 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
 
           {/* Right Action: Minimal Pill Button (No drop shadow) */}
           <div className="hidden md:flex items-center">
-            <Link
-              href="#get-started"
-              className="inline-flex items-center justify-center px-4 py-2 rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13px] font-medium bg-[#063b2f] hover:bg-[#0a4d3e] text-white transition-colors duration-200 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+            <Button
+              nativeButton={false}
+              render={<Link href="#get-started" />}
+              className="inline-flex items-center justify-center px-4 py-2 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13px] font-medium bg-[#063b2f] hover:bg-[#0a4d3e] text-white transition-colors duration-200 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 shadow-none border-none"
             >
               Get Started
-            </Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-1.5 rounded-md text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            className="md:hidden size-8 rounded-md text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors border-none shadow-none bg-transparent"
             aria-label="Toggle navigation menu"
           >
             {mobileMenuOpen ? (
               <svg
-                className="w-5 h-5"
+                className="size-5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -163,7 +167,7 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
               </svg>
             ) : (
               <svg
-                className="w-5 h-5"
+                className="size-5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -176,7 +180,7 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
                 <line x1="4" x2="20" y1="18" y2="18" />
               </svg>
             )}
-          </button>
+          </Button>
         </div>
 
         {/* Mobile Dropdown Menu */}
@@ -193,13 +197,14 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
               </Link>
             ))}
             <div className="pt-2">
-              <Link
-                href="#get-started"
+              <Button
+                nativeButton={false}
+                render={<Link href="#get-started" />}
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full inline-flex items-center justify-center px-4 py-2 rounded-full font-medium text-[13px] bg-[#063b2f] text-white dark:bg-emerald-500 dark:text-zinc-950"
+                className="w-full inline-flex items-center justify-center px-4 py-2 h-auto rounded-full font-medium text-[13px] bg-[#063b2f] text-white dark:bg-emerald-500 dark:text-zinc-950 shadow-none border-none"
               >
                 Get Started
-              </Link>
+              </Button>
             </div>
           </div>
         )}
@@ -244,13 +249,14 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
 
           {/* CTA Buttons (Minimal sizes, zero drop shadows) */}
           <div className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <Link
-              href="#open-account"
-              className="inline-flex items-center justify-center gap-1.5 px-5 sm:px-6 py-2.5 rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-white bg-[#063b2f] hover:bg-[#0a4d3e] transition-colors duration-200 group dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400"
+            <Button
+              nativeButton={false}
+              render={<Link href="#open-account" />}
+              className="inline-flex items-center justify-center gap-1.5 px-5 sm:px-6 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-white bg-[#063b2f] hover:bg-[#0a4d3e] transition-colors duration-200 group dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 border-none shadow-none"
             >
               <span>Open an Account</span>
               <svg
-                className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
+                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -260,14 +266,15 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
               >
                 <path d="m9 18 6-6-6-6" />
               </svg>
-            </Link>
+            </Button>
 
-            <Link
-              href="#generate-card"
-              className="inline-flex items-center justify-center px-5 py-2.5 rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] dark:text-zinc-200 bg-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer"
+            <Button
+              nativeButton={false}
+              render={<Link href="#generate-card" />}
+              className="inline-flex items-center justify-center px-5 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] dark:text-zinc-200 bg-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer border-none shadow-none"
             >
               Generate your card
-            </Link>
+            </Button>
           </div>
 
           {/* =========================================================================

@@ -103,18 +103,19 @@ export function NavbarHero2({
 
           {/* Right Desktop Actions: Login + Theme Switcher */}
           <div className="hidden md:flex items-stretch">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={onLoginClick}
-              className="flex items-center justify-center px-6 border-l border-zinc-200 dark:border-zinc-800 text-sm font-normal text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 tracking-[-0.03em] cursor-pointer transition-colors rounded-none"
+              className="flex items-center justify-center px-6 h-full border-0 border-l border-zinc-200 dark:border-zinc-800 text-sm font-normal text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 tracking-[-0.03em] cursor-pointer transition-colors rounded-none shadow-none active:translate-y-0"
             >
               Login
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               onClick={toggleTheme}
-              className="rounded-none border-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 font-normal tracking-[-0.03em] text-sm px-6 h-full shadow-none cursor-pointer flex items-center justify-center transition-colors"
+              className="rounded-none border-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 font-normal tracking-[-0.03em] text-sm px-6 h-full shadow-none cursor-pointer flex items-center justify-center transition-colors active:translate-y-0"
               aria-label="Toggle theme"
             >
               {mounted
@@ -122,15 +123,16 @@ export function NavbarHero2({
                   ? "Light Mode"
                   : "Dark Mode"
                 : "Theme"}
-            </button>
+            </Button>
           </div>
 
           {/* Mobile: In-place Morphing Hamburger/Cross Button (smoothly moves to right end on open, returns on close) */}
           <div className="flex md:hidden items-stretch">
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`flex items-center justify-center px-5 border-l border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer rounded-none focus:outline-none h-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              className={`flex items-center justify-center px-5 border-0 border-l border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-pointer rounded-none focus:outline-none h-full shadow-none bg-transparent hover:bg-transparent transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] active:translate-y-0 ${
                 mobileMenuOpen
                   ? "translate-x-3 sm:translate-x-4 md:translate-x-0"
                   : "translate-x-0"
@@ -164,7 +166,7 @@ export function NavbarHero2({
                   }`}
                 />
               </div>
-            </button>
+            </Button>
           </div>
         </div>
       </header>
@@ -229,27 +231,29 @@ export function NavbarHero2({
             Get started
           </Button>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => {
               setMobileMenuOpen(false);
               onLoginClick?.();
             }}
-            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-sm h-11 cursor-pointer flex items-center justify-center transition-colors"
+            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-sm h-11 cursor-pointer flex items-center justify-center transition-colors shadow-none"
           >
             Login
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={toggleTheme}
-            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-xs h-10 cursor-pointer flex items-center justify-between px-4 transition-colors"
+            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-xs h-10 cursor-pointer flex items-center justify-between px-4 transition-colors shadow-none"
           >
             <span>Switch Theme</span>
             <span className="font-normal text-zinc-950 dark:text-zinc-50">
               {mounted ? (resolvedTheme === "dark" ? "Light Mode" : "Dark Mode") : "Theme"}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
     </>
