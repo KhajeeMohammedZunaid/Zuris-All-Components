@@ -2,6 +2,8 @@
 
 import * as React from "react";
 import Link from "next/link";
+
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
 import {
@@ -76,7 +78,6 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
   const [promptValue, setPromptValue] = React.useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (promptValue.trim()) {
@@ -138,8 +139,13 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
       {/* Background Gradient converted from gradient.html */}
       <HeroGradientBackground />
 
-      {/* Top Navbar */}
-      <header className="relative z-50 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 flex items-center justify-between shrink-0">
+      {/* Top Navbar Header (powered by motion/react) */}
+      <motion.header
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="relative z-50 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 flex items-center justify-between shrink-0"
+      >
         {/* Brand: Zuris White Version Logo */}
         <div className="flex items-center justify-start min-w-[100px] sm:min-w-[150px]">
           <Link href="/" className="flex items-center gap-2 group" aria-label="Zuris Home">
@@ -223,7 +229,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             />
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile Backdrop Click-to-Close (Transparent click catcher) */}
       {mobileMenuOpen && (
@@ -281,8 +287,14 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
 
       {/* Main Hero Content: Centered in the middle */}
       <div className="relative z-10 w-full max-w-3xl mx-auto px-5 sm:px-8 my-auto py-5 sm:py-6 lg:py-4 flex flex-col items-center text-center">
-        {/* Top Growth Pill Badge: Single line guaranteed */}
-        <div className="inline-flex items-center justify-center gap-1.5 xs:gap-2 px-3 py-1 rounded-full bg-[#0a183d]/70 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs text-white/90 mb-2.5 sm:mb-3.5 font-normal tracking-[-0.02em] whitespace-nowrap shrink-0 max-w-max select-none mx-auto">
+        {/* Top Growth Pill Badge: Single line guaranteed (powered by motion/react) */}
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={{ scale: 1.02 }}
+          className="inline-flex items-center justify-center gap-1.5 xs:gap-2 px-3 py-1 rounded-full bg-[#0a183d]/70 hover:bg-[#0a183d]/90 backdrop-blur-md border border-white/15 hover:border-white/30 text-[11px] sm:text-xs text-white/90 mb-2.5 sm:mb-3.5 font-normal tracking-[-0.02em] whitespace-nowrap shrink-0 max-w-max select-none mx-auto transition-colors group cursor-pointer"
+        >
           <span className="whitespace-nowrap">#1 Cloud Platform</span>
           <span className="text-white/30 text-[10px]">|</span>
           <Link
@@ -291,31 +303,71 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           >
             <span>Explore platform</span>
             <svg
-              className="w-2.5 h-2.5 stroke-current stroke-2 fill-none"
+              className="w-2.5 h-2.5 stroke-current stroke-2 fill-none transition-transform duration-200 group-hover:translate-x-0.5"
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
               <polyline points="9 18 15 12 9 6" />
             </svg>
           </Link>
-        </div>
+        </motion.div>
 
-        {/* Main Headline: Centered, reduced, punchy */}
-        <h2 className="text-white text-2xl xs:text-[28px] sm:text-4xl lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.12] sm:leading-[1.08] mb-2 sm:mb-2.5 text-center mx-auto">
-          Connect any cloud.
-          <br />
-          Automate everything.
+        {/* Main Headline: Word-by-word staggered reveal (powered by motion/react without clipping descenders) */}
+        <h2 className="text-white text-2xl xs:text-[28px] sm:text-4xl lg:text-[42px] xl:text-[46px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.18] sm:leading-[1.14] mb-2 sm:mb-2.5 text-center mx-auto select-none">
+          <span className="block">
+            {["Connect", "any", "cloud."].map((word, i) => (
+              <motion.span
+                key={i}
+                className="inline-block mr-[0.24em]"
+                initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                transition={{
+                  duration: 0.55,
+                  delay: 0.16 + i * 0.065,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                {word}
+              </motion.span>
+            ))}
+          </span>
+          <span className="block mt-0.5 sm:mt-1">
+            {["Automate", "everything."].map((word, i) => (
+              <motion.span
+                key={i}
+                className="inline-block mr-[0.24em]"
+                initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
+                animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
+                transition={{
+                  duration: 0.55,
+                  delay: 0.36 + i * 0.065,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+              >
+                {word}
+              </motion.span>
+            ))}
+          </span>
         </h2>
 
-        {/* Description: Centered, concise, reduced */}
-        <p className="text-white/85 text-xs sm:text-[13.5px] md:text-[14px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.45] max-w-sm sm:max-w-md mb-4 sm:mb-5 text-center mx-auto">
+        {/* Description: Centered, concise, reduced (powered by motion/react) */}
+        <motion.p
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.55, delay: 0.52, ease: [0.16, 1, 0.3, 1] }}
+          className="text-white/85 text-xs sm:text-[13.5px] md:text-[14px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.45] max-w-sm sm:max-w-md mb-4 sm:mb-5 text-center mx-auto"
+        >
           Connect all your tools and automate workflows in real time — zero engineering overhead.
-        </p>
+        </motion.p>
 
-        {/* Prompt / Automate Input Box */}
-        <form
+        {/* Prompt / Automate Input Box (powered by motion/react) */}
+        <motion.form
           onSubmit={handleSubmit}
-          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl"
+          initial={{ opacity: 0, y: 18, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.55, delay: 0.64, ease: [0.16, 1, 0.3, 1] }}
+          whileHover={{ scale: 1.005 }}
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl transition-shadow duration-300 focus-within:ring-2 focus-within:ring-[#1864f7]/30 focus-within:border-blue-400"
         >
           <input
             type="text"
@@ -325,9 +377,11 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             className="w-full bg-transparent border-none outline-none text-[#040404] placeholder:text-zinc-400 font-['Inter',sans-serif] font-normal text-xs sm:text-[13.5px] tracking-[-0.045em]"
           />
           <div className="flex justify-end mt-2">
-            <button
+            <motion.button
               type="submit"
-              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] text-white flex items-center justify-center transition-opacity hover:opacity-90 cursor-pointer shrink-0"
+              whileHover={{ scale: 1.08 }}
+              whileTap={{ scale: 0.94 }}
+              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] text-white flex items-center justify-center cursor-pointer shrink-0 shadow-sm hover:shadow-[0_0_12px_rgba(24,100,247,0.5)] transition-shadow"
               aria-label="Submit automation prompt"
             >
               <svg
@@ -338,43 +392,67 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
                 <line x1="12" y1="19" x2="12" y2="5" />
                 <polyline points="5 12 12 5 19 12" />
               </svg>
-            </button>
+            </motion.button>
           </div>
-        </form>
+        </motion.form>
       </div>
 
       {/* Bottom Logos Ribbon */}
       <footer className="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pb-5 sm:pb-7 lg:pb-10 pt-2 shrink-0">
         {/* Desktop Layout: Static evenly distributed row */}
         <div className="hidden lg:flex items-center justify-between gap-10 lg:gap-14 w-full">
-          {/* Left Text */}
-          <div className="text-zinc-600 text-xs sm:text-sm font-['Inter',sans-serif] font-normal leading-[1.35] tracking-[-0.02em] text-left shrink-0">
+          {/* Left Text (powered by motion/react) */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.74, ease: [0.16, 1, 0.3, 1] }}
+            className="text-zinc-600 text-xs sm:text-sm font-['Inter',sans-serif] font-normal leading-[1.35] tracking-[-0.02em] text-left shrink-0"
+          >
             Trusted by fast-growing
             <br />
             cloud teams around the world
-          </div>
+          </motion.div>
 
-          {/* Logos Row */}
+          {/* Logos Row (powered by motion/react) */}
           <div className="flex items-center justify-between gap-8 lg:gap-10 flex-1 text-zinc-800">
-            {logos.map(({ name, Component, logoClass }) => (
-              <div
+            {logos.map(({ name, Component, logoClass }, index) => (
+              <motion.div
                 key={name}
-                className="flex items-center justify-center shrink-0 opacity-80"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 0.8, y: 0 }}
+                transition={{
+                  duration: 0.48,
+                  delay: 0.8 + index * 0.065,
+                  ease: [0.16, 1, 0.3, 1],
+                }}
+                whileHover={{ scale: 1.08, opacity: 1 }}
+                className="flex items-center justify-center shrink-0 cursor-pointer"
               >
                 <Component className={logoClass} />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
 
         {/* Mobile & Tablet Layout: Mathematically consistent Left-to-Right Marquee with blurred ends */}
         <div className="flex lg:hidden flex-col items-center sm:items-start w-full">
-          <div className="text-zinc-600 text-[11px] sm:text-xs font-['Inter',sans-serif] font-normal leading-[1.3] tracking-[-0.02em] mb-2.5 text-center sm:text-left">
+          {/* Mobile Footer Text (powered by motion/react) */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.74, ease: [0.16, 1, 0.3, 1] }}
+            className="text-zinc-600 text-[11px] sm:text-xs font-['Inter',sans-serif] font-normal leading-[1.3] tracking-[-0.02em] mb-2.5 text-center sm:text-left"
+          >
             Trusted by fast-growing cloud teams around the world
-          </div>
+          </motion.div>
 
-          {/* Marquee Wrapper with soft feathered gradient edges */}
-          <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]">
+          {/* Marquee Wrapper (powered by motion/react) */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
+            className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+          >
             {/* Edge Blur Overlays */}
             <div className="absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
             <div className="absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
@@ -406,7 +484,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </footer>
     </section>
