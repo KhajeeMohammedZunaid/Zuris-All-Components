@@ -466,16 +466,14 @@ export function SingleCardCarousel({
           {/* Bottom Floating Control Bar (Chevron Prev, Dots Capsule, Chevron Next) */}
           <div className="absolute bottom-5 sm:bottom-6 inset-x-0 mx-auto z-30 flex items-center justify-center gap-2.5">
             {/* Prev Button */}
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon"
               onClick={scrollPrev}
-              className="size-9 rounded-full bg-[#173035]/85 hover:bg-[#20434a] text-white/95 border border-white/10 backdrop-blur-md shadow-lg transition-transform active:scale-95 cursor-pointer shrink-0"
+              className="size-9 rounded-full bg-[#173035]/85 hover:bg-[#20434a]/85 text-white border border-white/10 backdrop-blur-md shadow-lg flex items-center justify-center transition-colors active:scale-95 cursor-pointer shrink-0 outline-none"
               aria-label="Previous destination"
             >
-              <ChevronLeftIcon className="size-4" />
-            </Button>
+              <ChevronLeftIcon className="size-4 text-white" />
+            </button>
 
             {/* Pagination Indicators Capsule */}
             <div className="h-9 px-3 rounded-full bg-[#173035]/85 border border-white/10 backdrop-blur-md shadow-lg flex items-center gap-1.5">
@@ -499,16 +497,14 @@ export function SingleCardCarousel({
             </div>
 
             {/* Next Button */}
-            <Button
+            <button
               type="button"
-              variant="ghost"
-              size="icon"
               onClick={scrollNext}
-              className="size-9 rounded-full bg-[#173035]/85 hover:bg-[#20434a] text-white/95 border border-white/10 backdrop-blur-md shadow-lg transition-transform active:scale-95 cursor-pointer shrink-0"
+              className="size-9 rounded-full bg-[#173035]/85 hover:bg-[#20434a]/85 text-white border border-white/10 backdrop-blur-md shadow-lg flex items-center justify-center transition-colors active:scale-95 cursor-pointer shrink-0 outline-none"
               aria-label="Next destination"
             >
-              <ChevronRightIcon className="size-4" />
-            </Button>
+              <ChevronRightIcon className="size-4 text-white" />
+            </button>
           </div>
         </CardContent>
       </Card>
