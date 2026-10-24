@@ -32,6 +32,7 @@ export interface UniversalFeatureCardProps {
   description: string;
   children?: React.ReactNode;
   bgImage?: string;
+  hasImage?: boolean;
   stageClassName?: string;
   delay?: number;
   textDelay?: number;
@@ -48,6 +49,7 @@ export function UniversalFeatureCard({
   description,
   children,
   bgImage = "/image-bg-2.png",
+  hasImage = true,
   stageClassName = "items-end justify-end p-0",
   delay = 0,
   textDelay,
@@ -70,7 +72,7 @@ export function UniversalFeatureCard({
         padding: `${CARD_PADDING}px ${CARD_PADDING}px ${CARD_PADDING - 2}px ${CARD_PADDING}px`,
       }}
     >
-      {/* Image Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
+      {/* Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
       <div
         className={cn(
           "relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex select-none",
@@ -83,14 +85,32 @@ export function UniversalFeatureCard({
           isolation: "isolate",
         }}
       >
-        <img
-          src={bgImage}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
-          style={{ borderRadius: `${INNER_RADIUS}px` }}
-        />
+        {/* Layer 1: Image Background (smoothly cross-faded) */}
         <div
-          className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
+          className={cn(
+            "absolute inset-0 transition-opacity duration-300 ease-in-out pointer-events-none",
+            hasImage ? "opacity-100" : "opacity-0"
+          )}
+          style={{ borderRadius: `${INNER_RADIUS}px` }}
+        >
+          <img
+            src={bgImage}
+            alt=""
+            className="w-full h-full object-cover object-center select-none pointer-events-none"
+            style={{ borderRadius: `${INNER_RADIUS}px` }}
+          />
+          <div
+            className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
+            style={{ borderRadius: `${INNER_RADIUS}px` }}
+          />
+        </div>
+
+        {/* Layer 2: Without Image Clean Surface (Pure smooth neutral surface, no dots) */}
+        <div
+          className={cn(
+            "absolute inset-0 transition-opacity duration-300 ease-in-out pointer-events-none bg-gradient-to-b from-zinc-100/90 to-zinc-50/80 dark:from-[#17171a] dark:to-[#121215] border border-zinc-200/60 dark:border-white/[0.06]",
+            !hasImage ? "opacity-100" : "opacity-0"
+          )}
           style={{ borderRadius: `${INNER_RADIUS}px` }}
         />
 
@@ -119,7 +139,18 @@ export function UniversalFeatureCard({
 
 export { UniversalFeatureCard as Sections2Card };
 
-export function Sections2({ className }: Sections2Props) {
+export interface Sections2Props {
+  className?: string;
+  defaultVariant?: "with-image" | "without-image";
+}
+
+export function Sections2({
+  className,
+  defaultVariant = "with-image",
+}: Sections2Props) {
+  const [activeVariant, setActiveVariant] = React.useState<"with-image" | "without-image">(defaultVariant);
+  const hasImage = activeVariant === "with-image";
+
   return (
     <section
       className={cn(
@@ -135,6 +166,7 @@ export function Sections2({ className }: Sections2Props) {
           <UniversalFeatureCard
             title="Project & Task Management"
             description="Plan projects, assign tasks, set deadlines, and track every deliverable from one workspace."
+            hasImage={hasImage}
             delay={0}
             textDelay={0.22}
           >
@@ -300,6 +332,7 @@ export function Sections2({ className }: Sections2Props) {
           <UniversalFeatureCard
             title="Progress Tracking"
             description="Monitor project status, workload, deadlines, and completion rates in dashboards."
+            hasImage={hasImage}
             delay={0.12}
             textDelay={0.28}
           >
@@ -415,6 +448,7 @@ export function Sections2({ className }: Sections2Props) {
           <UniversalFeatureCard
             title="Connected Apps"
             description="Connect the tools your team uses and keep projects, tasks, and updates synced in one place."
+            hasImage={hasImage}
             stageClassName="items-center justify-center p-3"
             delay={0.24}
             textDelay={0.34}
@@ -465,6 +499,37 @@ export function Sections2({ className }: Sections2Props) {
                 </div>
               </div>
           </UniversalFeatureCard>
+        </div>
+
+      </div>
+
+      {/* Bottom Switcher Tab: Pinned to bottom of page */}
+      <div className="fixed bottom-5 sm:bottom-6 inset-x-0 mx-auto flex items-center justify-center z-50 pointer-events-none">
+        <div className="pointer-events-auto inline-flex items-center p-1 rounded-full bg-white/90 dark:bg-zinc-900/90 border border-zinc-200/90 dark:border-zinc-800/90 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)] backdrop-blur-xl text-[11px] sm:text-xs font-medium font-sans">
+          <button
+            type="button"
+            onClick={() => setActiveVariant("with-image")}
+            className={cn(
+              "px-3.5 py-1.5 sm:px-4 sm:py-1.5 rounded-full transition-all cursor-pointer select-none",
+              hasImage
+                ? "bg-zinc-950 text-white font-medium shadow-sm dark:bg-white dark:text-zinc-950"
+                : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+            )}
+          >
+            With Image
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveVariant("without-image")}
+            className={cn(
+              "px-3.5 py-1.5 sm:px-4 sm:py-1.5 rounded-full transition-all cursor-pointer select-none",
+              !hasImage
+                ? "bg-zinc-950 text-white font-medium shadow-sm dark:bg-white dark:text-zinc-950"
+                : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+            )}
+          >
+            Without Image
+          </button>
         </div>
       </div>
     </section>

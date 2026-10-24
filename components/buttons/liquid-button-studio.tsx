@@ -132,12 +132,7 @@ export function LiquidButtonStudio() {
             >
               {label || "Button"}
             </LiquidButton>
-
-            {disabled && (
-              <span className="mt-3 text-[11px] text-zinc-400 dark:text-zinc-500 font-medium">
-                (Disabled state)
-              </span>
-            )}
+            
           </div>
         </div>
 
