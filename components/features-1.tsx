@@ -1,12 +1,142 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export interface Features1Props {
   className?: string;
   variant?: "top" | "middle" | "bottom" | "all";
   showVariantNav?: boolean;
+}
+
+interface FeatureShowcaseSectionProps {
+  id: "variant-top" | "variant-middle" | "variant-bottom";
+  alignment: "top" | "middle" | "bottom";
+  headingId: string;
+  figureLabel: string;
+  isLast?: boolean;
+}
+
+function FeatureShowcaseSection({
+  id,
+  alignment,
+  headingId,
+  figureLabel,
+  isLast = false,
+}: FeatureShowcaseSectionProps) {
+  const alignWrapClass =
+    alignment === "top"
+      ? "items-start"
+      : alignment === "middle"
+      ? "items-center"
+      : "items-start lg:items-end";
+
+  const alignArticleClass =
+    alignment === "top"
+      ? "pt-0"
+      : alignment === "middle"
+      ? "justify-center"
+      : "justify-end pb-0";
+
+  return (
+    <section
+      id={id}
+      className={cn(
+        "features-1-variant-section w-full relative py-16 lg:py-24 overflow-x-hidden scroll-mt-6",
+        !isLast && "border-b border-[var(--border-subtle)]/30"
+      )}
+      aria-labelledby={headingId}
+    >
+      <div
+        className={cn(
+          "showcase-main-wrap w-full flex flex-col lg:flex-row justify-between gap-10 lg:gap-14 xl:gap-20",
+          alignWrapClass
+        )}
+      >
+        {/* LEFT COLUMN: Typography (Smooth one-way entrance, no descender clipping) */}
+        <article
+          className={cn(
+            "w-full lg:w-auto max-w-[520px] px-6 sm:px-12 lg:pl-16 xl:pl-24 2xl:pl-32 lg:pr-0 shrink-0 z-10 flex flex-col",
+            alignArticleClass
+          )}
+        >
+          {/* Category Tag: 01 Finance with breathing indicator dot */}
+          <motion.div
+            initial={{ opacity: 0, x: -14 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+            className="inline-flex items-center gap-2 mb-4 sm:mb-5 font-body text-[0.85rem] font-normal text-[var(--text-main)] tracking-[-0.01em]"
+          >
+            <span className="font-mono text-[0.8rem] font-normal text-[var(--text-light)]">01</span>
+            <motion.span
+              animate={{ scale: [1, 1.4, 1] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="w-[3px] h-[3px] rounded-full bg-[var(--text-light)] opacity-50"
+            />
+            <span>Finance</span>
+          </motion.div>
+
+          {/* Headline: font-normal, 2 distinct lines with full descender clearance */}
+          <motion.h2
+            id={headingId}
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.85, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+            className="font-display text-[clamp(2.1rem,3.2vw,2.75rem)] font-normal leading-[1.18] tracking-[-0.03em] text-[var(--text-main)] pb-1"
+          >
+            <span className="block">Ops gets an instant</span>
+            <span className="block">invoice tracker.</span>
+          </motion.h2>
+
+          {/* Description: font-normal, below the headline */}
+          <motion.p
+            initial={{ opacity: 0, y: 14 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.85, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="font-body text-[clamp(1.02rem,1.4vw,1.18rem)] font-normal leading-[1.5] text-[var(--text-muted)] mt-4 sm:mt-5"
+          >
+            Built from billing inboxes.
+          </motion.p>
+        </article>
+
+        {/* RIGHT COLUMN: 980x595 box with smooth entrance only (no hover/mouse events) */}
+        <motion.div
+          initial={{ opacity: 0, x: 28, scale: 0.98 }}
+          whileInView={{ opacity: 1, x: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.95, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full lg:flex-1 relative flex items-start justify-start lg:justify-end overflow-visible px-6 sm:px-12 lg:px-0 pt-0"
+        >
+          <figure
+            className="showcase-figure relative w-full aspect-[980/595] lg:aspect-auto lg:w-[980px] lg:h-[595px] lg:-mr-[98px] shrink-0 m-0 p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] lg:rounded-l-[24px] lg:rounded-r-0 border-0 border-none bg-[var(--bg-surface)] select-none pointer-events-none"
+            role="region"
+            aria-label={figureLabel}
+          >
+            {/* The Image with bottom gradient mask - purely visual, zero mouse interactions */}
+            <div className="relative w-full h-full overflow-hidden image-fade-mask">
+              <img
+                src="/451shots_so.png"
+                alt="Invoice chasing and real-time tracker application"
+                className="w-full h-full object-cover object-left-top block select-none pointer-events-none"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
+
+            {/* Progressive bottom blur diffusion layer */}
+            <div className="image-blur-scrim" aria-hidden="true" />
+
+            {/* Color fade veil matching exact theme background */}
+            <div className="image-gradient-veil" aria-hidden="true" />
+          </figure>
+        </motion.div>
+      </div>
+    </section>
+  );
 }
 
 export function Features1({
@@ -175,239 +305,79 @@ export function Features1({
       `}</style>
 
       <div className="w-full flex flex-col justify-start overflow-x-hidden">
-
-        {/* ========================================================
-             VARIANT 01: TOP ALIGNED
-             Text aligned with the top starting edge of the image
-             ======================================================== */}
+        {/* VARIANT 01: TOP ALIGNED */}
         {showTop && (
-          <section
+          <FeatureShowcaseSection
             id="variant-top"
-            className="features-1-variant-section w-full relative py-16 lg:py-24 overflow-x-hidden border-b border-[var(--border-subtle)]/30 scroll-mt-6"
-            aria-labelledby="heading-v1"
-          >
-            <div className="showcase-main-wrap w-full flex flex-col lg:flex-row items-start justify-between gap-10 lg:gap-14 xl:gap-20">
-              {/* LEFT COLUMN: Typography (Top-aligned with image, font-normal / no bold) */}
-              <article className="w-full lg:w-auto max-w-[520px] px-6 sm:px-12 lg:pl-16 xl:pl-24 2xl:pl-32 lg:pr-0 shrink-0 z-10 pt-0">
-                {/* Category Tag: 01 Finance */}
-                <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 font-body text-[0.85rem] font-normal text-[var(--text-main)] tracking-[-0.01em]">
-                  <span className="font-mono text-[0.8rem] font-normal text-[var(--text-light)]">01</span>
-                  <span className="w-[3px] h-[3px] rounded-full bg-[var(--text-light)] opacity-40" />
-                  <span>Finance</span>
-                </div>
-
-                {/* Headline: font-normal, 2 distinct lines */}
-                <h2
-                  id="heading-v1"
-                  className="font-display text-[clamp(2.1rem,3.2vw,2.75rem)] font-normal leading-[1.12] tracking-[-0.03em] text-[var(--text-main)]"
-                >
-                  <span className="block">Ops gets an instant</span>
-                  <span className="block">invoice tracker.</span>
-                </h2>
-
-                {/* Description: font-normal, below the headline */}
-                <p className="font-body text-[clamp(1.02rem,1.4vw,1.18rem)] font-normal leading-[1.5] text-[var(--text-muted)] mt-4 sm:mt-5">
-                  Built from billing inboxes.
-                </p>
-              </article>
-
-              {/* RIGHT COLUMN: 980x595 box on desktop, full-width with matching padding on mobile, 100% on 4K */}
-              <div className="w-full lg:flex-1 relative flex items-start justify-start lg:justify-end overflow-visible px-6 sm:px-12 lg:px-0 pt-0">
-                <figure
-                  className="showcase-figure relative w-full aspect-[980/595] lg:aspect-auto lg:w-[980px] lg:h-[595px] lg:-mr-[98px] shrink-0 m-0 p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] lg:rounded-l-[24px] lg:rounded-r-0 border-0 border-none bg-[var(--bg-surface)]"
-                  role="region"
-                  aria-label="Invoice tracker application preview - Top Aligned"
-                >
-                  {/* The Image with bottom gradient mask */}
-                  <div className="relative w-full h-full overflow-hidden image-fade-mask">
-                    <img
-                      src="/451shots_so.png"
-                      alt="Invoice chasing and real-time tracker application"
-                      className="w-full h-full object-cover object-left-top block select-none pointer-events-none"
-                      loading="eager"
-                      decoding="async"
-                    />
-                  </div>
-
-                  {/* Progressive bottom blur diffusion layer */}
-                  <div className="image-blur-scrim" aria-hidden="true" />
-
-                  {/* Color fade veil matching exact theme background */}
-                  <div className="image-gradient-veil" aria-hidden="true" />
-                </figure>
-              </div>
-            </div>
-          </section>
+            alignment="top"
+            headingId="heading-v1"
+            figureLabel="Invoice tracker application preview - Top Aligned"
+            isLast={!showMiddle && !showBottom}
+          />
         )}
 
-        {/* ========================================================
-             VARIANT 02: MIDDLE ALIGNED (CENTERED)
-             Text vertically centered relative to the image
-             ======================================================== */}
+        {/* VARIANT 02: MIDDLE ALIGNED (CENTERED) */}
         {showMiddle && (
-          <section
+          <FeatureShowcaseSection
             id="variant-middle"
-            className="features-1-variant-section w-full relative py-16 lg:py-24 overflow-x-hidden border-b border-[var(--border-subtle)]/30 scroll-mt-6"
-            aria-labelledby="heading-v2"
-          >
-            <div className="showcase-main-wrap w-full flex flex-col lg:flex-row items-center justify-between gap-10 lg:gap-14 xl:gap-20">
-              {/* LEFT COLUMN: Typography (Vertically centered relative to image) */}
-              <article className="w-full lg:w-auto max-w-[520px] px-6 sm:px-12 lg:pl-16 xl:pl-24 2xl:pl-32 lg:pr-0 shrink-0 z-10 flex flex-col justify-center">
-                {/* Category Tag: 01 Finance */}
-                <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 font-body text-[0.85rem] font-normal text-[var(--text-main)] tracking-[-0.01em]">
-                  <span className="font-mono text-[0.8rem] font-normal text-[var(--text-light)]">01</span>
-                  <span className="w-[3px] h-[3px] rounded-full bg-[var(--text-light)] opacity-40" />
-                  <span>Finance</span>
-                </div>
-
-                {/* Headline: font-normal, 2 distinct lines */}
-                <h2
-                  id="heading-v2"
-                  className="font-display text-[clamp(2.1rem,3.2vw,2.75rem)] font-normal leading-[1.12] tracking-[-0.03em] text-[var(--text-main)]"
-                >
-                  <span className="block">Ops gets an instant</span>
-                  <span className="block">invoice tracker.</span>
-                </h2>
-
-                {/* Description: font-normal, below the headline */}
-                <p className="font-body text-[clamp(1.02rem,1.4vw,1.18rem)] font-normal leading-[1.5] text-[var(--text-muted)] mt-4 sm:mt-5">
-                  Built from billing inboxes.
-                </p>
-              </article>
-
-              {/* RIGHT COLUMN: 980x595 box on desktop, full-width with matching padding on mobile, 100% on 4K */}
-              <div className="w-full lg:flex-1 relative flex items-start justify-start lg:justify-end overflow-visible px-6 sm:px-12 lg:px-0 pt-0">
-                <figure
-                  className="showcase-figure relative w-full aspect-[980/595] lg:aspect-auto lg:w-[980px] lg:h-[595px] lg:-mr-[98px] shrink-0 m-0 p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] lg:rounded-l-[24px] lg:rounded-r-0 border-0 border-none bg-[var(--bg-surface)]"
-                  role="region"
-                  aria-label="Invoice tracker application preview - Middle Centered"
-                >
-                  {/* The Image with bottom gradient mask */}
-                  <div className="relative w-full h-full overflow-hidden image-fade-mask">
-                    <img
-                      src="/451shots_so.png"
-                      alt="Invoice chasing and real-time tracker application"
-                      className="w-full h-full object-cover object-left-top block select-none pointer-events-none"
-                      loading="eager"
-                      decoding="async"
-                    />
-                  </div>
-
-                  {/* Progressive bottom blur diffusion layer */}
-                  <div className="image-blur-scrim" aria-hidden="true" />
-
-                  {/* Color fade veil matching exact theme background */}
-                  <div className="image-gradient-veil" aria-hidden="true" />
-                </figure>
-              </div>
-            </div>
-          </section>
+            alignment="middle"
+            headingId="heading-v2"
+            figureLabel="Invoice tracker application preview - Middle Centered"
+            isLast={!showBottom}
+          />
         )}
 
-        {/* ========================================================
-             VARIANT 03: BOTTOM ALIGNED
-             Text aligned with the bottom baseline edge of the image
-             ======================================================== */}
+        {/* VARIANT 03: BOTTOM ALIGNED */}
         {showBottom && (
-          <section
+          <FeatureShowcaseSection
             id="variant-bottom"
-            className="features-1-variant-section w-full relative py-16 lg:py-24 overflow-x-hidden scroll-mt-6"
-            aria-labelledby="heading-v3"
-          >
-            <div className="showcase-main-wrap w-full flex flex-col lg:flex-row items-start lg:items-end justify-between gap-10 lg:gap-14 xl:gap-20">
-              {/* LEFT COLUMN: Typography (Bottom-aligned with image) */}
-              <article className="w-full lg:w-auto max-w-[520px] px-6 sm:px-12 lg:pl-16 xl:pl-24 2xl:pl-32 lg:pr-0 shrink-0 z-10 flex flex-col justify-end pb-0">
-                {/* Category Tag: 01 Finance */}
-                <div className="inline-flex items-center gap-2 mb-4 sm:mb-5 font-body text-[0.85rem] font-normal text-[var(--text-main)] tracking-[-0.01em]">
-                  <span className="font-mono text-[0.8rem] font-normal text-[var(--text-light)]">01</span>
-                  <span className="w-[3px] h-[3px] rounded-full bg-[var(--text-light)] opacity-40" />
-                  <span>Finance</span>
-                </div>
-
-                {/* Headline: font-normal, 2 distinct lines */}
-                <h2
-                  id="heading-v3"
-                  className="font-display text-[clamp(2.1rem,3.2vw,2.75rem)] font-normal leading-[1.12] tracking-[-0.03em] text-[var(--text-main)]"
-                >
-                  <span className="block">Ops gets an instant</span>
-                  <span className="block">invoice tracker.</span>
-                </h2>
-
-                {/* Description: font-normal, below the headline */}
-                <p className="font-body text-[clamp(1.02rem,1.4vw,1.18rem)] font-normal leading-[1.5] text-[var(--text-muted)] mt-4 sm:mt-5">
-                  Built from billing inboxes.
-                </p>
-              </article>
-
-              {/* RIGHT COLUMN: 980x595 box on desktop, full-width with matching padding on mobile, 100% on 4K */}
-              <div className="w-full lg:flex-1 relative flex items-start justify-start lg:justify-end overflow-visible px-6 sm:px-12 lg:px-0 pt-0">
-                <figure
-                  className="showcase-figure relative w-full aspect-[980/595] lg:aspect-auto lg:w-[980px] lg:h-[595px] lg:-mr-[98px] shrink-0 m-0 p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] lg:rounded-l-[24px] lg:rounded-r-0 border-0 border-none bg-[var(--bg-surface)]"
-                  role="region"
-                  aria-label="Invoice tracker application preview - Bottom Aligned"
-                >
-                  {/* The Image with bottom gradient mask */}
-                  <div className="relative w-full h-full overflow-hidden image-fade-mask">
-                    <img
-                      src="/451shots_so.png"
-                      alt="Invoice chasing and real-time tracker application"
-                      className="w-full h-full object-cover object-left-top block select-none pointer-events-none"
-                      loading="eager"
-                      decoding="async"
-                    />
-                  </div>
-
-                  {/* Progressive bottom blur diffusion layer */}
-                  <div className="image-blur-scrim" aria-hidden="true" />
-
-                  {/* Color fade veil matching exact theme background */}
-                  <div className="image-gradient-veil" aria-hidden="true" />
-                </figure>
-              </div>
-            </div>
-          </section>
+            alignment="bottom"
+            headingId="heading-v3"
+            figureLabel="Invoice tracker application preview - Bottom Aligned"
+            isLast={true}
+          />
         )}
 
-        {/* FLOATING VARIANT NAVIGATION (when variant === "all" or showVariantNav === true) */}
+        {/* FLOATING VARIANT NAVIGATION (with smooth spring layoutId indicator) */}
         {showVariantNav && variant === "all" && (
-          <nav
+          <motion.nav
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className="fixed bottom-[1.5rem] left-1/2 -translate-x-1/2 bg-[var(--bg)] border border-[var(--border-main)] rounded-full p-[4px] flex items-center gap-[3px] z-50 select-none shadow-sm max-[640px]:scale-[0.88] max-[640px]:bottom-[0.8rem] whitespace-nowrap"
             aria-label="Variant navigation controls"
           >
-            <button
-              className={cn(
-                "bg-transparent border-none font-display text-[0.74rem] font-medium tracking-[0.01em] py-[0.4rem] px-[0.75rem] rounded-full cursor-pointer transition-all duration-200 ease-in-out",
-                activeVariant === "variant-top"
-                  ? "bg-[var(--text-main)] text-[var(--bg)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              )}
-              onClick={() => scrollToVariant("variant-top")}
-            >
-              Top
-            </button>
-            <button
-              className={cn(
-                "bg-transparent border-none font-display text-[0.74rem] font-medium tracking-[0.01em] py-[0.4rem] px-[0.75rem] rounded-full cursor-pointer transition-all duration-200 ease-in-out",
-                activeVariant === "variant-middle"
-                  ? "bg-[var(--text-main)] text-[var(--bg)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              )}
-              onClick={() => scrollToVariant("variant-middle")}
-            >
-              Middle
-            </button>
-            <button
-              className={cn(
-                "bg-transparent border-none font-display text-[0.74rem] font-medium tracking-[0.01em] py-[0.4rem] px-[0.75rem] rounded-full cursor-pointer transition-all duration-200 ease-in-out",
-                activeVariant === "variant-bottom"
-                  ? "bg-[var(--text-main)] text-[var(--bg)]"
-                  : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
-              )}
-              onClick={() => scrollToVariant("variant-bottom")}
-            >
-              Bottom
-            </button>
-          </nav>
+            {(
+              [
+                { id: "variant-top", label: "Top" },
+                { id: "variant-middle", label: "Middle" },
+                { id: "variant-bottom", label: "Bottom" },
+              ] as const
+            ).map((item) => {
+              const isActive = activeVariant === item.id;
+              return (
+                <button
+                  key={item.id}
+                  className={cn(
+                    "relative bg-transparent border-none font-display text-[0.74rem] font-medium tracking-[0.01em] py-[0.4rem] px-[0.75rem] rounded-full cursor-pointer transition-colors duration-200 ease-in-out z-10 active:scale-95",
+                    isActive
+                      ? "text-[var(--bg)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-main)]"
+                  )}
+                  onClick={() => scrollToVariant(item.id)}
+                >
+                  {isActive && (
+                    <motion.span
+                      layoutId="activeVariantPill"
+                      className="absolute inset-0 bg-[var(--text-main)] rounded-full -z-10"
+                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                    />
+                  )}
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </motion.nav>
         )}
       </div>
     </div>
