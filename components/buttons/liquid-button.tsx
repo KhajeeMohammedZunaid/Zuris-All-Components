@@ -7,7 +7,21 @@ import { useReducedMotion } from "motion/react";
 
 import { cn } from "@/lib/utils";
 
-export type ElementName = "lava" | "ocean" | "stone" | "sky" | "obsidian";
+export type ElementName =
+  | "lava"
+  | "ocean"
+  | "stone"
+  | "sky"
+  | "obsidian"
+  | "emerald"
+  | "aurora"
+  | "amber"
+  | "rose"
+  | "cyber"
+  | "neon"
+  | "sunset"
+  | "amethyst"
+  | "solar";
 export type ElementColors = [string, string, string];
 
 type ElementLook = {
@@ -81,6 +95,114 @@ export const elementPalettes: Record<ElementName, ElementLook> = {
     swirl: 0.8,
     distortion: 0.25,
     speed: 0.4,
+    sparkle: 0.18,
+    grain: 0,
+  },
+  emerald: {
+    colors: ["#10b981", "#047857", "#022c22"],
+    text: "#ffffff",
+    ring: "#10b981",
+    shape: 0,
+    scale: 38,
+    swirl: 1.0,
+    distortion: 0.3,
+    speed: 0.5,
+    sparkle: 0.08,
+    grain: 0,
+  },
+  aurora: {
+    colors: ["#c084fc", "#7e22ce", "#2e1065"],
+    text: "#ffffff",
+    ring: "#a855f7",
+    shape: 0,
+    scale: 44,
+    swirl: 1.2,
+    distortion: 0.28,
+    speed: 0.55,
+    sparkle: 0.15,
+    grain: 0,
+  },
+  amber: {
+    colors: ["#f59e0b", "#b45309", "#451a03"],
+    text: "#ffffff",
+    ring: "#f59e0b",
+    shape: 1,
+    scale: 36,
+    swirl: 0.7,
+    distortion: 0.4,
+    speed: 0.35,
+    sparkle: 0.1,
+    grain: 0.05,
+  },
+  rose: {
+    colors: ["#f43f5e", "#be123c", "#4c0519"],
+    text: "#ffffff",
+    ring: "#f43f5e",
+    shape: 0,
+    scale: 40,
+    swirl: 0.95,
+    distortion: 0.32,
+    speed: 0.5,
+    sparkle: 0.12,
+    grain: 0,
+  },
+  cyber: {
+    colors: ["#84cc16", "#4d7c0f", "#1a2e05"],
+    text: "#ffffff",
+    ring: "#84cc16",
+    shape: 0,
+    scale: 46,
+    swirl: 1.15,
+    distortion: 0.35,
+    speed: 0.6,
+    sparkle: 0.1,
+    grain: 0,
+  },
+  neon: {
+    colors: ["#00f0ff", "#0891b2", "#082f49"],
+    text: "#ffffff",
+    ring: "#00f0ff",
+    shape: 0,
+    scale: 44,
+    swirl: 1.2,
+    distortion: 0.3,
+    speed: 0.65,
+    sparkle: 0.16,
+    grain: 0,
+  },
+  sunset: {
+    colors: ["#fb923c", "#db2777", "#4c0519"],
+    text: "#ffffff",
+    ring: "#fb923c",
+    shape: 0,
+    scale: 38,
+    swirl: 0.95,
+    distortion: 0.35,
+    speed: 0.5,
+    sparkle: 0.1,
+    grain: 0,
+  },
+  amethyst: {
+    colors: ["#a78bfa", "#6d28d9", "#1e1b4b"],
+    text: "#ffffff",
+    ring: "#a78bfa",
+    shape: 1,
+    scale: 42,
+    swirl: 0.85,
+    distortion: 0.32,
+    speed: 0.45,
+    sparkle: 0.14,
+    grain: 0.04,
+  },
+  solar: {
+    colors: ["#facc15", "#ea580c", "#431407"],
+    text: "#ffffff",
+    ring: "#facc15",
+    shape: 0,
+    scale: 36,
+    swirl: 1.05,
+    distortion: 0.4,
+    speed: 0.6,
     sparkle: 0.18,
     grain: 0,
   },
@@ -160,6 +282,7 @@ let renderer: Renderer | null | undefined;
 
 function getRenderer() {
   if (renderer !== undefined) return renderer;
+  if (typeof window === "undefined" || typeof document === "undefined") return null;
   const canvas = document.createElement("canvas");
   const gl = canvas.getContext("webgl", {
     antialias: false,
@@ -258,7 +381,7 @@ export function useElementSurface(
 ) {
   const [ready, setReady] = React.useState(false);
   const surfaceRef = React.useRef<Surface | null>(null);
-  const look = elementPalettes[element];
+  const look = elementPalettes[element] ?? elementPalettes.lava;
   const [a, b, c] = colors ?? look.colors;
 
   React.useEffect(() => {
@@ -270,14 +393,14 @@ export function useElementSurface(
     const surface: Surface = {
       canvas,
       ctx,
-      look: elementPalettes.lava,
-      rgb: [],
+      look,
+      rgb: [toRgb(a), toRgb(b), toRgb(c)],
       seed: [Math.random() * 40, Math.random() * 40],
       time: Math.random() * 20,
       speed: 1,
       boost: 1,
       visible: true,
-      still: false,
+      still,
       dirty: true,
       onReady: () => setReady(true),
     };
@@ -332,14 +455,14 @@ const liquidButtonVariants = cva(
     "group/element relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden font-semibold whitespace-nowrap select-none",
     "transition-transform duration-150 ease-out outline-none active:scale-[0.96] active:duration-75",
     "focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-[var(--element-ring)] focus-visible:ring-offset-2",
-    "disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+    "disabled:pointer-events-none disabled:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
   ],
   {
     variants: {
       size: {
-        sm: "h-8 rounded-lg px-3.5 text-xs shadow-sm",
-        default: "h-10 rounded-xl px-5 text-sm shadow-md",
-        lg: "h-12 rounded-xl px-7 text-base shadow-md",
+        sm: "h-8 rounded-lg px-3.5 text-xs",
+        default: "h-10 rounded-xl px-5 text-sm",
+        lg: "h-12 rounded-xl px-7 text-base",
       },
     },
     defaultVariants: { size: "default" },
@@ -348,13 +471,12 @@ const liquidButtonVariants = cva(
 
 export type LiquidButtonSize = NonNullable<VariantProps<typeof liquidButtonVariants>["size"]>;
 
-export interface LiquidButtonProps
-  extends ButtonPrimitive.Props,
-    VariantProps<typeof liquidButtonVariants> {
-  element?: ElementName;
-  colors?: ElementColors;
-  asChild?: boolean;
-}
+export type LiquidButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof liquidButtonVariants> & {
+    element?: ElementName;
+    colors?: ElementColors;
+    asChild?: boolean;
+  };
 
 const LiquidButton = React.forwardRef<HTMLButtonElement, LiquidButtonProps>(
   (
@@ -378,13 +500,15 @@ const LiquidButton = React.forwardRef<HTMLButtonElement, LiquidButtonProps>(
   ) => {
     const still = Boolean(useReducedMotion());
     const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const palette = elementPalettes[element];
+    const palette = elementPalettes[element] ?? elementPalettes.lava;
     const { ready, boost } = useElementSurface(canvasRef, element, colors, still);
 
     // If asChild is passed (from Radix pattern), adapt it to Base UI's render prop
-    const effectiveRender =
-      render ?? (asChild && React.isValidElement(children) ? children : undefined);
-    const content = asChild && React.isValidElement(children) ? null : children;
+    const isChildElement = asChild && React.isValidElement(children);
+    const effectiveRender = render ?? (isChildElement ? children : undefined);
+    const content = isChildElement
+      ? (children as React.ReactElement<{ children?: React.ReactNode }>).props.children
+      : children;
 
     const isNative =
       nativeButton ??
@@ -394,55 +518,66 @@ const LiquidButton = React.forwardRef<HTMLButtonElement, LiquidButtonProps>(
           : (effectiveRender.type as any)?.displayName === "motion.button" ||
             (effectiveRender.type as any)?.name === "button"
             ? true
-            : undefined
+            : false
         : true);
+
+    const baseStyle: React.CSSProperties = {
+      backgroundImage: elementGradient(colors ?? palette.colors),
+      color: palette.text,
+      ["--element-ring" as any]: palette.ring,
+    };
+
+    const resolvedStyle =
+      typeof style === "function"
+        ? (state: ButtonPrimitive.State) => ({ ...baseStyle, ...style(state) })
+        : { ...baseStyle, ...style };
+
+    const resolvedClassName =
+      typeof className === "function"
+        ? (state: ButtonPrimitive.State) => cn(liquidButtonVariants({ size }), className(state))
+        : cn(liquidButtonVariants({ size }), className);
 
     return (
       <ButtonPrimitive
-        ref={ref}
+        ref={ref as any}
         data-element={element}
         render={effectiveRender}
         nativeButton={isNative}
-        className={cn(liquidButtonVariants({ size }), className)}
-        style={
-          {
-            backgroundImage: elementGradient(colors ?? palette.colors),
-            color: palette.text,
-            "--element-ring": palette.ring,
-            ...style,
-          } as React.CSSProperties
-        }
-        onPointerEnter={(event: React.PointerEvent<HTMLButtonElement>) => {
-          onPointerEnter?.(event);
+        className={resolvedClassName}
+        style={resolvedStyle}
+        onPointerEnter={(event) => {
+          onPointerEnter?.(event as any);
           boost(2.6);
         }}
-        onPointerLeave={(event: React.PointerEvent<HTMLButtonElement>) => {
-          onPointerLeave?.(event);
+        onPointerLeave={(event) => {
+          onPointerLeave?.(event as any);
           boost(1);
         }}
-        onFocus={(event: React.FocusEvent<HTMLButtonElement>) => {
-          onFocus?.(event);
+        onFocus={(event) => {
+          onFocus?.(event as any);
           boost(2.6);
         }}
-        onBlur={(event: React.FocusEvent<HTMLButtonElement>) => {
-          onBlur?.(event);
+        onBlur={(event) => {
+          onBlur?.(event as any);
           boost(1);
         }}
         {...props}
       >
         <canvas
           ref={canvasRef}
-          aria-hidden
+          aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 -z-10 size-full transition-opacity duration-500",
+            "pointer-events-none absolute inset-0 z-0 size-full transition-opacity duration-500",
             ready ? "opacity-100" : "opacity-0"
           )}
         />
         <span
-          aria-hidden
-          className="pointer-events-none absolute inset-px -z-10 rounded-[inherit] bg-[linear-gradient(180deg,rgb(255_255_255/0.12),transparent_55%)] opacity-80 transition-opacity duration-300 group-hover/element:opacity-100"
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-px z-[1] rounded-[inherit] bg-[linear-gradient(180deg,rgb(255_255_255/0.12),transparent_55%)] opacity-80 transition-opacity duration-300 group-hover/element:opacity-100"
         />
-        {content}
+        <span className="relative z-10 inline-flex items-center justify-center gap-2">
+          {content}
+        </span>
       </ButtonPrimitive>
     );
   }

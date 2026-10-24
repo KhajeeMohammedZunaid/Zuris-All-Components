@@ -3,7 +3,7 @@ import { LiquidButtonStudio } from "@/components/buttons/liquid-button-studio";
 export const metadata = {
   title: "Liquid Button — Interactive WebGL Shader Button (Base UI)",
   description:
-    "Interactive liquid shader button powered by WebGL, Base UI, and dynamic color elements (Lava, Ocean, Stone, Sky, Obsidian).",
+    "Interactive liquid shader button powered by WebGL, Base UI, and 14 dynamic elemental themes.",
 };
 
 export default function LiquidButtonPage() {
