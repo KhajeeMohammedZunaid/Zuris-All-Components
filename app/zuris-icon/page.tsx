@@ -1,25 +1,28 @@
 "use client";
 
 import * as React from "react";
-import { ZurisAppIcon } from "@/components/zuris-app-icon";
+import { ZurisLiquidGlassAnimation } from "@/components/zuris-liquid-glass-animation";
 import { ZurisSequenceAnimation } from "@/components/zuris-sequence-animation";
+import { ZurisAppIcon } from "@/components/zuris-app-icon";
 import { cn } from "@/lib/utils";
 
-type ActiveTab = "sequence" | "icon";
+type ActiveTab = "liquid-glass" | "shader-sequence" | "app-icon";
 
 export default function ZurisIconPage() {
-  const [activeTab, setActiveTab] = React.useState<ActiveTab>("sequence");
+  const [activeTab, setActiveTab] = React.useState<ActiveTab>("liquid-glass");
   const [replayCount, setReplayCount] = React.useState(0);
 
   return (
     <main className="min-h-screen w-full bg-[#f8f9fb] dark:bg-[#09090b] flex items-center justify-center p-4 transition-colors duration-200 overflow-hidden relative">
       {/* Center Stage: Active Visual Only */}
       <div className="flex items-center justify-center">
-        {activeTab === "sequence" ? (
-          <ZurisSequenceAnimation replayTrigger={replayCount} />
-        ) : (
-          <ZurisAppIcon />
+        {activeTab === "liquid-glass" && (
+          <ZurisLiquidGlassAnimation replayTrigger={replayCount} />
         )}
+        {activeTab === "shader-sequence" && (
+          <ZurisSequenceAnimation replayTrigger={replayCount} />
+        )}
+        {activeTab === "app-icon" && <ZurisAppIcon />}
       </div>
 
       {/* Floating Bottom Tab Switcher */}
@@ -28,31 +31,47 @@ export default function ZurisIconPage() {
           <button
             type="button"
             onClick={() => {
-              setActiveTab("sequence");
+              setActiveTab("liquid-glass");
               setReplayCount((c) => c + 1);
             }}
             className={cn(
               "px-3.5 sm:px-4 py-1.5 rounded-full transition-all cursor-pointer select-none font-medium",
-              activeTab === "sequence"
+              activeTab === "liquid-glass"
                 ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-sm"
                 : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
             )}
           >
-            Sequence Reveal
+            Liquid Glass
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("icon")}
+            onClick={() => {
+              setActiveTab("shader-sequence");
+              setReplayCount((c) => c + 1);
+            }}
             className={cn(
               "px-3.5 sm:px-4 py-1.5 rounded-full transition-all cursor-pointer select-none font-medium",
-              activeTab === "icon"
+              activeTab === "shader-sequence"
+                ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-sm"
+                : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
+            )}
+          >
+            Shader Sequence
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("app-icon")}
+            className={cn(
+              "px-3.5 sm:px-4 py-1.5 rounded-full transition-all cursor-pointer select-none font-medium",
+              activeTab === "app-icon"
                 ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 shadow-sm"
                 : "text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-white"
             )}
           >
             App Icon
           </button>
-          {activeTab === "sequence" && (
+
+          {activeTab !== "app-icon" && (
             <button
               type="button"
               onClick={() => setReplayCount((c) => c + 1)}
