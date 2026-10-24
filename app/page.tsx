@@ -50,6 +50,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Liquid-glass", href: "/liquid-glass", description: "Interactive Apple Liquid-glass Logo redesign" },
       { name: "Liquid Button", href: "/liquid-button", description: "Interactive WebGL liquid shader button with Base UI & live customize studio" },
       { name: "Typography Lab", href: "/typography-lab", description: "Interactive custom typography preset studio & live tag playground" },
+      { name: "Logo Animation", href: "/logo-animation", description: "Micro-interactive Zuris logo entrance and side-sliding text reveal" },
     ],
   },
 ];
