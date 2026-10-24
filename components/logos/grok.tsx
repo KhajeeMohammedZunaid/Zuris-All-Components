@@ -1,7 +1,7 @@
 import type { SVGProps } from "react";
 
 const Grok = (props: SVGProps<SVGSVGElement>) => (
-  <svg {...props} viewBox="0 0 1024 400" fill="none">
+  <svg {...props} viewBox="18 19 987 362" fill="none">
     <path
       d="M878.447 292.85V108.548H907.572V230.18L969.173 159.399H1004.48L949.069 220.058L1005 292.85H970.204L924.902 230.304L907.572 230.18V292.85H878.447Z"
       fill="#0A0A0A"

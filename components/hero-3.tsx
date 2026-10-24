@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "motion/react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZurisBlackV1 } from "@/components/ui/zuris-black-v1";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
@@ -14,13 +16,168 @@ import {
   Vercel,
 } from "@/components/logos/all-logos";
 
+// ---------------------------------------------------------------------------
+// GROWTH & METRIC TELEMETRY CARD (Matches reference image, no live-engine chip)
+// ---------------------------------------------------------------------------
+function Hero3GrowthMetricCard() {
+  // Dot matrix: 3 rows (5 active green, 3 active green, all inactive)
+  const dotMatrix = [
+    [true, true, true, true, true, false, false],
+    [true, true, true, false, false, false, false],
+    [false, false, false, false, false],
+  ];
+
+  // Equalizer waveform bars: 12 bars with 3 center pink peak bars
+  const equalizerBars = [
+    { height: "h-3 sm:h-3.5", active: false },
+    { height: "h-2 sm:h-2.5", active: false },
+    { height: "h-4 sm:h-4.5", active: false },
+    { height: "h-3 sm:h-3.5", active: false },
+    { height: "h-6 sm:h-7", active: true },
+    { height: "h-8 sm:h-9", active: true },
+    { height: "h-8 sm:h-9", active: true },
+    { height: "h-4 sm:h-4.5", active: false },
+    { height: "h-2.5 sm:h-3", active: false },
+    { height: "h-4 sm:h-4.5", active: false },
+    { height: "h-3.5 sm:h-4", active: false },
+    { height: "h-2.5 sm:h-3", active: false },
+  ];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] bg-[#09110f] dark:bg-[#050b0a] rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] p-6 sm:p-7 lg:p-8 flex flex-col justify-between select-none relative overflow-hidden"
+    >
+      {/* Subtle Ambient Emerald & Rose Depth inside the card */}
+      <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 bg-[#49dfa4]/[0.08] rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -left-20 w-56 h-56 bg-[#f9a8d4]/[0.06] rounded-full blur-3xl" />
+
+      {/* TOP SECTION: Dot Matrix (Clean, no chip) */}
+      <div className="flex flex-col gap-2 z-10">
+        {dotMatrix.map((row, rIdx) => (
+          <div key={`row-${rIdx}`} className="flex items-center gap-2 sm:gap-2.5">
+            {row.map((isActive, cIdx) => (
+              <div
+                key={`dot-${rIdx}-${cIdx}`}
+                className={cn(
+                  "w-4.5 h-4.5 sm:w-5.5 sm:h-5.5 rounded-full transition-colors",
+                  isActive
+                    ? "bg-[#49dfa4] shadow-[0_0_8px_rgba(73,223,164,0.35)]"
+                    : "bg-white/[0.08] dark:bg-white/[0.06]"
+                )}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+
+      {/* PRIMARY STAT: 6.4x + Blended ROAS */}
+      <div className="flex items-baseline justify-between pt-3 sm:pt-4 z-10">
+        <span className="font-['Plus_Jakarta_Sans',sans-serif] font-bold text-5xl sm:text-6xl lg:text-[64px] leading-none text-white tracking-[-0.04em]">
+          6.4x
+        </span>
+        <div className="flex flex-col items-end">
+          <span className="font-['Plus_Jakarta_Sans',sans-serif] font-normal text-xs sm:text-[13px] text-zinc-400 tracking-[-0.01em]">
+            Blended ROAS
+          </span>
+          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#49dfa4] mt-0.5">
+            <svg className="w-3 h-3 stroke-[2.5]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m18 15-6-6-6 6" />
+            </svg>
+            +3.2x benchmark
+          </span>
+        </div>
+      </div>
+
+      {/* SUBTLE HORIZONTAL DIVIDER */}
+      <div className="w-full h-px bg-white/[0.08] my-2 sm:my-2.5 z-10" />
+
+      {/* HEADLINE: Built for clarity, control, and compounding growth */}
+      <div className="z-10 flex flex-col gap-2.5">
+        <p className="font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-base sm:text-lg lg:text-[19px] leading-[1.3] text-white tracking-[-0.035em]">
+          Built for clarity, control, and compounding growth
+        </p>
+
+        {/* Mini Performance Matrix */}
+        <div className="grid grid-cols-2 gap-2 pt-0.5">
+          <div className="rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 flex flex-col">
+            <span className="text-[10.5px] text-zinc-400 font-normal">Conversion Rate</span>
+            <span className="text-xs sm:text-sm font-semibold text-white tracking-tight mt-0.5">
+              4.82% <span className="text-[10px] text-emerald-400 font-normal">(+18%)</span>
+            </span>
+          </div>
+          <div className="rounded-xl bg-white/[0.04] border border-white/[0.06] px-3 py-2 flex flex-col">
+            <span className="text-[10.5px] text-zinc-400 font-normal">Net Velocity</span>
+            <span className="text-xs sm:text-sm font-semibold text-white tracking-tight mt-0.5">
+              99.94% <span className="text-[10px] text-emerald-400 font-normal">(Instant)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* SUBMETRIC ROW: CAC in 90 days + -41% */}
+      <div className="flex items-baseline justify-between pt-2 sm:pt-3 z-10">
+        <span className="font-['Plus_Jakarta_Sans',sans-serif] text-xs sm:text-[13px] font-normal text-zinc-400 tracking-[-0.01em]">
+          CAC in 90 days
+        </span>
+        <span className="font-['Plus_Jakarta_Sans',sans-serif] font-bold text-2xl sm:text-3xl text-[#f9a8d4] tracking-[-0.03em]">
+          -41%
+        </span>
+      </div>
+
+      {/* BOTTOM EQUALIZER / WAVEFORM BARS */}
+      <div className="flex flex-col gap-1.5 pt-1 z-10">
+        <div className="flex items-end justify-between sm:justify-center gap-1.5 sm:gap-2">
+          {equalizerBars.map((bar, idx) => (
+            <div
+              key={`bar-${idx}`}
+              className={cn(
+                "w-2.5 sm:w-3.5 rounded-sm sm:rounded-md transition-all",
+                bar.height,
+                bar.active
+                  ? "bg-[#f9a8d4] shadow-[0_0_12px_rgba(249,168,212,0.4)]"
+                  : "bg-white/[0.08] dark:bg-white/[0.06]"
+              )}
+            />
+          ))}
+        </div>
+        <div className="flex justify-between w-full text-[9px] text-zinc-500 font-mono pt-0.5 px-1">
+          <span>DAY 1</span>
+          <span>DAY 45</span>
+          <span>DAY 90</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// MAIN HERO-3 COMPONENT
+// ---------------------------------------------------------------------------
 interface Hero3Props {
+  leftSlot?: React.ReactNode;
+  rightSlot?: React.ReactNode;
   leftImageSlot?: React.ReactNode;
   rightImageSlot?: React.ReactNode;
 }
 
-export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
+export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: Hero3Props) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Smoothly lock body scroll when mobile menu overlay is active
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     { label: "Features", href: "#features" },
@@ -29,57 +186,68 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
     { label: "Resources", href: "#resources" },
   ];
 
+  // Balanced optical sizing: standard base for all logos, with Grok slightly scaled to optically balance its diagonal mark
   const brandLogos = [
     {
       name: "OpenAI",
       Component: OpenAI,
-      containerClass: "w-42 sm:w-50 lg:w-56",
-      logoClass: "w-full h-auto max-h-12 sm:max-h-14",
-      opacityClass: "opacity-90",
+      logoClass: "h-5 sm:h-5.5 lg:h-6",
+      opacityClass: "opacity-85",
     },
     {
       name: "Anthropic",
       Component: Anthropic,
-      containerClass: "w-44 sm:w-52 lg:w-60",
-      logoClass: "w-full h-auto max-h-11 sm:max-h-13",
+      logoClass: "h-4 sm:h-4.5 lg:h-5",
       opacityClass: "opacity-85",
     },
     {
       name: "Replicate",
       Component: Replicate,
-      containerClass: "w-38 sm:w-46 lg:w-52",
-      logoClass: "w-full h-auto max-h-9.5 sm:max-h-11",
+      logoClass: "h-5 sm:h-5.5 lg:h-6",
       opacityClass: "opacity-85",
     },
     {
       name: "GitHub",
       Component: GitHub,
-      containerClass: "w-26 sm:w-30 lg:w-34",
-      logoClass: "w-full h-auto max-h-8 sm:max-h-9",
+      logoClass: "h-4.5 sm:h-5 lg:h-5.5",
       opacityClass: "opacity-85",
     },
     {
       name: "Vercel",
       Component: Vercel,
-      containerClass: "w-32 sm:w-38 lg:w-42",
-      logoClass: "w-full h-auto max-h-8 sm:max-h-9.5",
-      opacityClass: "opacity-90",
+      logoClass: "h-4 sm:h-4.5 lg:h-5",
+      opacityClass: "opacity-85",
     },
     {
       name: "Grok",
       Component: Grok,
-      containerClass: "w-28 sm:w-34 lg:w-38",
-      logoClass: "w-full h-auto max-h-8 sm:max-h-9.5",
+      logoClass: "h-6 sm:h-6.5 lg:h-7",
       opacityClass: "opacity-85",
     },
   ];
 
+  // Reversed slots (Left: Metric Card, Right: Dashboard Image)
+  const resolvedLeft = leftSlot || leftImageSlot || <Hero3GrowthMetricCard />;
+  const resolvedRight = rightSlot || rightImageSlot || (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.98 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] relative overflow-hidden flex items-center justify-center"
+    >
+      <img
+        src="/hero-3-image left.avif"
+        alt="Zuris Platform Dashboard"
+        className="w-full h-full object-cover object-center block"
+      />
+    </motion.div>
+  );
+
   return (
     <div className="relative w-full min-h-screen bg-[#fafbfc] dark:bg-[#060909] text-zinc-900 dark:text-zinc-100 antialiased overflow-hidden transition-colors duration-300">
       {/* 
-        GPU-Accelerated Seamless Infinite Left-to-Right Marquee
-        Using two mathematically identical rows with matching gap and padding.
-        Moves from -100% to 0% continuously with zero jump or flicker.
+        GPU-Accelerated Seamless Infinite Left-to-Right Marquee for Mobile/Tablet
       */}
       <style jsx global>{`
         @keyframes marquee-ltr {
@@ -100,13 +268,13 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
       `}</style>
 
       {/* =========================================================================
-          NAVBAR (Refined minimal height, clean logo sizing, zero drop shadows)
+          NAVBAR: Precision typography, alignment & desktop micro-interactions
           ========================================================================= */}
-      <header className="relative z-30 w-full bg-white/70 dark:bg-[#060909]/70 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full bg-[#fafbfc]/90 dark:bg-[#060909]/90 backdrop-blur-md border-b border-zinc-200/50 dark:border-zinc-800/50 transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between">
-          {/* Top Left: Zuris Logo with Proportional Analogous Size */}
-          <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
-            <div className="w-7 h-7 flex items-center justify-center">
+          {/* Top Left: Zuris Logo & Text (matches hero-3 typography) */}
+          <Link href="/" className="flex items-center gap-2.5 focus:outline-none group">
+            <div className="w-7 h-7 flex items-center justify-center transition-transform duration-200 group-hover:scale-105">
               <span className="block dark:hidden">
                 <ZurisBlackV1 className="w-6.5 h-6.5" />
               </span>
@@ -119,114 +287,147 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
             </span>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-7 lg:gap-8">
+          {/* Desktop Navigation Links: Clean spacing and precise typography */}
+          <nav className="hidden md:flex items-center gap-8 lg:gap-10">
             {navLinks.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
-                className="font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] font-medium text-zinc-600 hover:text-[#053f31] dark:text-zinc-300 dark:hover:text-emerald-400 transition-colors"
+                className="font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] font-medium text-zinc-600 hover:text-[#053f31] dark:text-zinc-400 dark:hover:text-emerald-400 transition-colors duration-200 tracking-[-0.01em]"
               >
                 {item.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right Action: Minimal Pill Button (No drop shadow) */}
+          {/* Desktop Right Action: Get Started Button */}
           <div className="hidden md:flex items-center">
-            <Button
-              nativeButton={false}
-              render={<Link href="#get-started" />}
-              className="inline-flex items-center justify-center px-4 py-2 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13px] font-medium bg-[#063b2f] hover:bg-[#0a4d3e] text-white transition-colors duration-200 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 shadow-none border-none"
+            <motion.div
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              Get Started
-            </Button>
+              <Button
+                nativeButton={false}
+                render={<Link href="#get-started" />}
+                className="inline-flex items-center justify-center px-5 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] font-medium bg-[#063b2f] hover:bg-[#0a4d3e] text-white transition-colors duration-200 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 shadow-none border-none cursor-pointer tracking-[-0.01em]"
+              >
+                Get Started
+              </Button>
+            </motion.div>
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
+          {/* Mobile Morphing Hamburger Button */}
+          <button
             type="button"
-            variant="ghost"
-            size="icon"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden size-8 rounded-md text-zinc-700 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors border-none shadow-none bg-transparent"
-            aria-label="Toggle navigation menu"
+            className="md:hidden size-10 rounded-full flex items-center justify-center text-zinc-800 dark:text-zinc-200 hover:bg-black/[0.05] dark:hover:bg-white/[0.08] transition-colors focus:outline-none cursor-pointer"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? (
-              <svg
-                className="size-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M18 6 6 18" />
-                <path d="m6 6 12 12" />
-              </svg>
-            ) : (
-              <svg
-                className="size-5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="4" x2="20" y1="12" y2="12" />
-                <line x1="4" x2="20" y1="6" y2="6" />
-                <line x1="4" x2="20" y1="18" y2="18" />
-              </svg>
-            )}
-          </Button>
+            <div className="relative w-5 h-4 flex flex-col justify-between items-center pointer-events-none">
+              <span
+                className={cn(
+                  "w-5 h-[1.8px] bg-zinc-900 dark:bg-zinc-100 rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center",
+                  mobileMenuOpen ? "translate-y-[7.1px] rotate-45" : "translate-y-0 rotate-0"
+                )}
+              />
+              <span
+                className={cn(
+                  "w-5 h-[1.8px] bg-zinc-900 dark:bg-zinc-100 rounded-full transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]",
+                  mobileMenuOpen ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100"
+                )}
+              />
+              <span
+                className={cn(
+                  "w-5 h-[1.8px] bg-zinc-900 dark:bg-zinc-100 rounded-full transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] origin-center",
+                  mobileMenuOpen ? "-translate-y-[7.1px] -rotate-45" : "translate-y-0 rotate-0"
+                )}
+              />
+            </div>
+          </button>
         </div>
+      </header>
 
-        {/* Mobile Dropdown Menu */}
+      {/* =========================================================================
+          FULL-SCREEN MOBILE NAVIGATION OVERLAY (Begins directly below navbar, no duplicated logo/text)
+          ========================================================================= */}
+      <AnimatePresence>
         {mobileMenuOpen && (
-          <div className="md:hidden px-4 pt-2 pb-5 border-t border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#060909] space-y-2.5">
-            {navLinks.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-200 hover:text-emerald-600 dark:hover:text-emerald-400"
-              >
-                {item.label}
-              </Link>
-            ))}
-            <div className="pt-2">
+          <motion.div
+            key="mobile-nav-overlay"
+            initial={{ opacity: 0, y: -16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-x-0 top-16 sm:top-18 bottom-0 z-40 md:hidden flex flex-col justify-between bg-[#fafbfc]/98 dark:bg-[#060909]/98 backdrop-blur-2xl px-6 sm:px-8 py-8 sm:py-10 border-b border-zinc-200/60 dark:border-zinc-800/60 select-none overflow-y-auto"
+          >
+            {/* Nav Links with staggered smooth entrance */}
+            <motion.nav
+              initial="hidden"
+              animate="show"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.07, delayChildren: 0.08 },
+                },
+              }}
+              className="flex flex-col gap-6 pt-2"
+            >
+              {navLinks.map((item) => (
+                <motion.div
+                  key={item.label}
+                  variants={{
+                    hidden: { opacity: 0, y: -12 },
+                    show: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] },
+                    },
+                  }}
+                >
+                  <Link
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="font-['Plus_Jakarta_Sans',sans-serif] text-2xl sm:text-3xl font-semibold tracking-[-0.035em] text-zinc-900 dark:text-zinc-100 hover:text-[#053f31] dark:hover:text-emerald-400 transition-colors block py-1"
+                  >
+                    {item.label}
+                  </Link>
+                </motion.div>
+              ))}
+            </motion.nav>
+
+            {/* Bottom Action: Get Started Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="pt-6 border-t border-zinc-200/60 dark:border-zinc-800/60"
+            >
               <Button
                 nativeButton={false}
                 render={<Link href="#get-started" />}
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full inline-flex items-center justify-center px-4 py-2 h-auto rounded-full font-medium text-[13px] bg-[#063b2f] text-white dark:bg-emerald-500 dark:text-zinc-950 shadow-none border-none"
+                className="w-full inline-flex items-center justify-center px-6 py-3.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[15px] font-medium bg-[#063b2f] hover:bg-[#0a4d3e] text-white transition-colors duration-200 dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 shadow-none border-none cursor-pointer tracking-[-0.01em]"
               >
                 Get Started
               </Button>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
-      </header>
+      </AnimatePresence>
 
       {/* =========================================================================
-          HERO CONTENT WRAPPER WITH SUBTLE CONCENTRIC BACKGROUND RINGS
+          HERO CONTENT WRAPPER
           ========================================================================= */}
       <section className="relative z-10 w-full pt-10 sm:pt-14 lg:pt-16 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
-        {/* Concentric Subtle Background Circles radiating outward (Subtle & scaled down) */}
-        <div className="pointer-events-none absolute left-1/2 top-[180px] sm:top-[210px] -translate-x-1/2 -translate-y-1/2 w-full max-w-[960px] h-[600px] flex items-center justify-center overflow-visible select-none -z-10">
-          {/* Inner ring */}
-          <div className="absolute w-[260px] h-[260px] sm:w-[320px] sm:h-[320px] rounded-full border border-emerald-900/[0.04] dark:border-emerald-400/[0.05]" />
-          {/* Middle ring */}
-          <div className="absolute w-[460px] h-[460px] sm:w-[560px] sm:h-[560px] rounded-full border border-emerald-900/[0.035] dark:border-emerald-400/[0.04]" />
-          {/* Outer ring */}
-          <div className="absolute w-[680px] h-[680px] sm:w-[820px] sm:h-[820px] rounded-full border border-emerald-900/[0.025] dark:border-emerald-400/[0.03]" />
-        </div>
+        {/* Soft, borderless ambient atmospheric glow placed far behind text */}
+        <div className="pointer-events-none absolute left-1/2 top-[240px] -translate-x-1/2 -translate-y-1/2 w-[520px] sm:w-[640px] h-[340px] bg-emerald-500/[0.04] dark:bg-emerald-400/[0.03] rounded-full blur-3xl -z-10 select-none" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-          {/* Top Pill Badge (Minimal, no drop shadow) */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#49dfa4] text-[#053f31] font-['Plus_Jakarta_Sans',sans-serif] text-[10.5px] sm:text-[11px] font-bold tracking-[0.05em] uppercase hover:brightness-105 transition-all cursor-default">
+          {/* Top Pill Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#49dfa4] text-[#053f31] font-['Plus_Jakarta_Sans',sans-serif] text-[10.5px] sm:text-[11px] font-bold tracking-[0.05em] uppercase hover:brightness-105 transition-all cursor-default select-none">
             <span>SECURE TRANSFER PLATFORM</span>
             <svg
               className="w-3 h-3 stroke-[2.5]"
@@ -241,69 +442,89 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
             </svg>
           </div>
 
-          {/* Main Heading: Strictly H2, Plus Jakarta Sans, 500 weight, -4.5% tracking, normal word spacing, minimal scale */}
-          <h2 className="mt-6 sm:mt-7 max-w-3xl font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] leading-[1.09] sm:leading-[1.06] tracking-[-0.045em] [word-spacing:normal] text-[#053f31] dark:text-[#6ee7b7] transition-colors">
+          {/* Main Heading */}
+          <motion.h2
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-6 sm:mt-7 max-w-3xl font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] leading-[1.09] sm:leading-[1.06] tracking-[-0.045em] [word-spacing:normal] text-[#053f31] dark:text-[#6ee7b7] transition-colors"
+          >
             Manage money with <br className="hidden sm:inline" />
             confidence everyday
-          </h2>
+          </motion.h2>
 
-          {/* CTA Buttons (Minimal sizes, zero drop shadows) */}
-          <div className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            <Button
-              nativeButton={false}
-              render={<Link href="#open-account" />}
-              className="inline-flex items-center justify-center gap-1.5 px-5 sm:px-6 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-white bg-[#063b2f] hover:bg-[#0a4d3e] transition-colors duration-200 group dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 border-none shadow-none"
+          {/* CTA Action Buttons with micro blur fade & tactile press animation */}
+          <motion.div
+            initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+          >
+            <motion.div
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              <span>Open an Account</span>
-              <svg
-                className="size-3.5 transition-transform duration-200 group-hover:translate-x-0.5"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <Button
+                nativeButton={false}
+                render={<Link href="#open-account" />}
+                className="inline-flex items-center justify-center gap-1.5 px-5 sm:px-6 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-white bg-[#063b2f] hover:bg-[#0a4d3e] transition-colors duration-200 group dark:bg-emerald-500 dark:text-zinc-950 dark:hover:bg-emerald-400 border-none shadow-none cursor-pointer"
               >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </Button>
+                <span>Open an Account</span>
+                <svg
+                  className="size-3.5 transition-transform duration-200 group-hover:translate-x-1"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m9 18 6-6-6-6" />
+                </svg>
+              </Button>
+            </motion.div>
 
-            <Button
-              nativeButton={false}
-              render={<Link href="#generate-card" />}
-              className="inline-flex items-center justify-center px-5 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] dark:text-zinc-200 bg-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer border-none shadow-none"
+            <motion.div
+              whileHover={{ y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              Generate your card
-            </Button>
-          </div>
+              <Button
+                nativeButton={false}
+                render={<Link href="#generate-card" />}
+                className="inline-flex items-center justify-center px-5 sm:px-6 py-2.5 h-auto rounded-full font-['Plus_Jakarta_Sans',sans-serif] text-[13.5px] sm:text-[14px] font-medium text-[#063b2f] dark:text-zinc-200 bg-transparent hover:bg-black/[0.06] dark:hover:bg-white/[0.08] transition-all duration-200 cursor-pointer border-none shadow-none"
+              >
+                Generate your card
+              </Button>
+            </motion.div>
+          </motion.div>
 
           {/* =========================================================================
-              LOGOS BAR:
-              - Mobile & Tablet: Seamless flicker-free left-to-right infinite marquee with blurred edges
-              - Desktop (lg+): Static clean minimal row
+              LOGOS BAR: Consistent responsive spacing & calibrated optical balance
               ========================================================================= */}
-          <div className="w-full mt-10 sm:mt-14 lg:mt-16">
-            {/* Mobile & Tablet Infinite Marquee (Hidden on Desktop) */}
-            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-2">
-              <div className="flex w-max">
-                {/* Track 1: Animate -100% -> 0% */}
-                <div className="animate-marquee-ltr flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16">
+          <div className="w-full mt-8 sm:mt-10 lg:mt-12">
+            {/* Mobile & Tablet Infinite Marquee with consistent gaps */}
+            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-2 sm:py-2.5">
+              <div className="flex w-max items-center">
+                {/* Track 1 */}
+                <div className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13">
                   {brandLogos.map((logo) => {
                     const LogoComp = logo.Component;
                     return (
                       <div
                         key={`m1-${logo.name}`}
-                        className={`shrink-0 flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
+                        className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
                       >
-                        {LogoComp && <LogoComp className={logo.logoClass} />}
+                        <LogoComp className={cn("w-auto shrink-0 select-none", logo.logoClass, logo.opacityClass)} />
                       </div>
                     );
                   })}
                 </div>
 
-                {/* Track 2: Identical duplicate for seamless 100% flicker-free loop */}
+                {/* Track 2 */}
                 <div
-                  className="animate-marquee-ltr flex shrink-0 items-center gap-12 sm:gap-16 pr-12 sm:pr-16"
+                  className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13"
                   aria-hidden="true"
                 >
                   {brandLogos.map((logo) => {
@@ -311,9 +532,9 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
                     return (
                       <div
                         key={`m2-${logo.name}`}
-                        className={`shrink-0 flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
+                        className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
                       >
-                        {LogoComp && <LogoComp className={logo.logoClass} />}
+                        <LogoComp className={cn("w-auto shrink-0 select-none", logo.logoClass, logo.opacityClass)} />
                       </div>
                     );
                   })}
@@ -321,17 +542,27 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
               </div>
             </div>
 
-            {/* Desktop Static Logos Grid (Hidden on Mobile/Tablet) */}
-            <div className="hidden lg:flex items-center justify-center gap-12 xl:gap-18 max-w-6xl mx-auto py-3">
-              {brandLogos.map((logo) => {
+            {/* Desktop Static Logos Grid: strictly uniform gap spacing across all logos */}
+            <div className="hidden lg:flex items-center justify-center gap-11 xl:gap-14 max-w-5xl mx-auto py-2">
+              {brandLogos.map((logo, index) => {
                 const LogoComp = logo.Component;
                 return (
-                  <div
+                  <motion.div
                     key={`desktop-${logo.name}`}
-                    className={`flex items-center justify-center dark:invert dark:brightness-100 ${logo.opacityClass} ${logo.containerClass}`}
+                    initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+                    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
+                    className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
                   >
-                    {LogoComp && <LogoComp className={logo.logoClass} />}
-                  </div>
+                    <LogoComp
+                      className={cn(
+                        "w-auto shrink-0 select-none transition-opacity duration-200 hover:opacity-100",
+                        logo.logoClass,
+                        logo.opacityClass
+                      )}
+                    />
+                  </motion.div>
                 );
               })}
             </div>
@@ -339,77 +570,30 @@ export function Hero3({ leftImageSlot, rightImageSlot }: Hero3Props) {
         </div>
 
         {/* =========================================================================
-            BELOW TWO IMAGES / CARDS CONTAINER:
-            - Kept empty for the user to fill as instructed
-            - Clean minimal borders, zero drop shadows, refined heights & roundedness
+            BELOW TWO CARDS CONTAINER (Reversed Layout: Left Metric Card, Right Dashboard Image)
             ========================================================================= */}
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10 sm:mt-14 lg:mt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-30px" }}
+          transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-12"
+        >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
-            {/* Left Image Card (Narrower ~40% width on desktop) */}
-            <div className="lg:col-span-5 relative w-full rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] overflow-hidden bg-zinc-100/70 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800/70 min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] flex flex-col justify-center items-center transition-all duration-300 group">
-              {leftImageSlot ? (
-                leftImageSlot
-              ) : (
-                /* Empty placeholder frame ready for user image */
-                <div className="w-full h-full min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] flex flex-col items-center justify-center p-6 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-white/70 dark:bg-zinc-800/70 border border-zinc-200/50 dark:border-zinc-700/50 flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-2.5 group-hover:scale-105 transition-transform">
-                    <svg
-                      className="w-5 h-5 stroke-[1.5]"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                    </svg>
-                  </div>
-                  <p className="font-['Plus_Jakarta_Sans',sans-serif] text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
-                    Left Hero Image Slot
-                  </p>
-                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                    (Ready to insert image)
-                  </span>
-                </div>
-              )}
+            {/* Left Card: Growth & Telemetry Metric Card (5 cols on desktop, portrait ratio) */}
+            <div className="lg:col-span-5 relative w-full rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] overflow-hidden border border-zinc-200/70 dark:border-zinc-800/70 min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] flex items-stretch transition-colors">
+              {resolvedLeft}
             </div>
 
-            {/* Right Image Card (Wider ~60% width on desktop) */}
-            <div className="lg:col-span-7 relative w-full rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] overflow-hidden bg-zinc-100/70 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800/70 min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] flex flex-col justify-center items-center transition-all duration-300 group">
-              {rightImageSlot ? (
-                rightImageSlot
-              ) : (
-                /* Empty placeholder frame ready for user image */
-                <div className="w-full h-full min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] flex flex-col items-center justify-center p-6 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-white/70 dark:bg-zinc-800/70 border border-zinc-200/50 dark:border-zinc-700/50 flex items-center justify-center text-zinc-400 dark:text-zinc-500 mb-2.5 group-hover:scale-105 transition-transform">
-                    <svg
-                      className="w-5 h-5 stroke-[1.5]"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
-                      <circle cx="9" cy="9" r="2" />
-                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
-                    </svg>
-                  </div>
-                  <p className="font-['Plus_Jakarta_Sans',sans-serif] text-[13px] font-medium text-zinc-500 dark:text-zinc-400">
-                    Right Hero Image Slot
-                  </p>
-                  <span className="text-[11px] text-zinc-400 dark:text-zinc-500 mt-0.5">
-                    (Ready to insert image)
-                  </span>
-                </div>
-              )}
+            {/* Right Card: Hero Dashboard Image (7 cols on desktop, landscape ratio) */}
+            <div className="lg:col-span-7 relative w-full rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] overflow-hidden bg-zinc-100/70 dark:bg-zinc-900/40 border border-zinc-200/70 dark:border-zinc-800/70 min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] flex items-center justify-center transition-colors">
+              {resolvedRight}
             </div>
           </div>
-        </div>
+        </motion.div>
       </section>
     </div>
   );
 }
+
 export default Hero3;
