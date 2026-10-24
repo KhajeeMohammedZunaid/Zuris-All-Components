@@ -1,6 +1,6 @@
 'use client';
 
-import {
+import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
@@ -13,6 +13,7 @@ import {
   liquidGlassLogoDefaults,
   liquidGlassLogoThemes,
   normalizeLiquidGlassLogo,
+  type LiquidGlassLogoRenderer,
   type LiquidGlassLogoTuning,
 } from './liquid-glass-logo-renderer';
 import './liquid-glass-logo.css';
@@ -23,21 +24,33 @@ export type LiquidGlassLogoHandle = {
   pause: () => void;
   play: () => void;
 };
+
 export type LiquidGlassLogoProps = Partial<LiquidGlassLogoTuning> & {
+  /** Height dimension of the logo container */
   height?: number | string;
-  /** Image URL drawn behind the animation, covering the container. The plate turns see-through. */
+  /** Image URL placed behind the fluid animation; converts the glass plate into a clear lens */
   backgroundImage?: string;
-  /** Horizontal and vertical offsets as percentages of the frame; 0 centers the image. */
+  /** Horizontal offset percentage (-100 to 100) for the background image */
   backgroundX?: number;
+  /** Vertical offset percentage (-100 to 100) for the background image */
   backgroundY?: number;
-  /** Scale of the cover image, from 1 to 3. */
+  /** Scale factor (1 to 3) for the background image */
   backgroundScale?: number;
-  /** Color and opacity (0–1) of the overlay between the image and the logo. */
+  /** Tint overlay color between background image and liquid glass */
   backgroundTint?: string;
+  /** Opacity of the background tint overlay (0 to 1) */
   backgroundTintOpacity?: number;
+  /** Optional soft ambient backlight glow around the fluid plate */
+  glowEffect?: boolean;
+  /** Enables click-to-replay interaction on the canvas */
+  interactive?: boolean;
+  /** Callback fired once the WebGL textures and shaders are fully compiled and ready */
+  onReady?: () => void;
+  /** Additional CSS class names */
   className?: string;
+  /** Inline CSS styles */
   style?: CSSProperties;
-  /** Accessible name; defaults to "Logo" or the visible wordmark text. */
+  /** Accessible label description */
   'aria-label'?: string;
 };
 
@@ -51,83 +64,122 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
       backgroundScale = 1,
       backgroundTint = '#000000',
       backgroundTintOpacity = 0,
+      glowEffect = false,
+      interactive = false,
+      onReady,
       className = '',
       style,
-      'aria-label': label,
+      'aria-label': ariaLabel,
       ...overrides
     },
     ref,
   ) {
-    const canvas = useRef<HTMLCanvasElement>(null);
-    const engine = useRef<ReturnType<typeof createLiquidGlassLogoRenderer>>(null);
-    const [ready, setReady] = useState(false);
-    const [fallback, setFallback] = useState(false);
-    // A theme supplies the colors; any color passed explicitly still wins.
-    const theme = liquidGlassLogoThemes[overrides.theme === 'light' ? 'light' : 'dark'];
-    // Over a background image the plate is see-through: the glass keeps its
-    // optics, but its own color would hide the picture behind it.
-    const tuning = normalizeLiquidGlassLogo({
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const engineRef = useRef<LiquidGlassLogoRenderer | null>(null);
+    const [isReady, setIsReady] = useState(false);
+    const [renderFallback, setRenderFallback] = useState(false);
+
+    // Resolve environmental color theme
+    const themePalette = liquidGlassLogoThemes[overrides.theme === 'light' ? 'light' : 'dark'];
+
+    // Over background images, disable the solid opaque plate so lens optics are clear
+    const activeTuning = normalizeLiquidGlassLogo({
       ...liquidGlassLogoDefaults,
-      ...theme,
+      ...themePalette,
       ...overrides,
       ...(backgroundImage ? { tile: false } : {}),
     });
-    const key = JSON.stringify(tuning);
-    const latest = useRef(tuning);
-    latest.current = tuning;
+
+    const tuningSignature = JSON.stringify(activeTuning);
+    const latestTuningRef = useRef(activeTuning);
+    latestTuningRef.current = activeTuning;
+
     useImperativeHandle(
       ref,
       () => ({
-        replay: () => engine.current?.replay(),
-        seek: (seconds) => engine.current?.seek(seconds),
-        pause: () => engine.current?.pause(),
-        play: () => engine.current?.play(),
+        replay: () => engineRef.current?.replay(),
+        seek: (seconds) => engineRef.current?.seek(seconds),
+        pause: () => engineRef.current?.pause(),
+        play: () => engineRef.current?.play(),
       }),
       [],
     );
+
     useEffect(() => {
-      if (!canvas.current) return;
-      let renderer: ReturnType<typeof createLiquidGlassLogoRenderer> = null;
+      if (!canvasRef.current) return;
+      let rendererInstance: LiquidGlassLogoRenderer | null = null;
+
       try {
-        renderer = createLiquidGlassLogoRenderer(canvas.current, latest.current, () =>
-          setReady(true),
-        );
-      } catch {
-        renderer = null;
+        rendererInstance = createLiquidGlassLogoRenderer(canvasRef.current, latestTuningRef.current, () => {
+          setIsReady(true);
+          onReady?.();
+        });
+      } catch (err) {
+        console.warn('LiquidGlass WebGL2 initialization failed:', err);
+        rendererInstance = null;
       }
-      if (!renderer) setFallback(true);
-      engine.current = renderer;
+
+      if (!rendererInstance) {
+        setRenderFallback(true);
+      }
+
+      engineRef.current = rendererInstance;
+
       return () => {
-        renderer?.dispose();
-        engine.current = null;
+        rendererInstance?.dispose();
+        engineRef.current = null;
       };
     }, []);
-    useEffect(() => engine.current?.update(latest.current), [key]);
-    const markSource = tuning.mark === 'logo' ? tuning.logo : tuning.mark;
+
+    // Push updated tuning props to active WebGL engine
+    useEffect(() => {
+      engineRef.current?.update(latestTuningRef.current);
+    }, [tuningSignature]);
+
+    const activeMarkSrc = activeTuning.mark === 'logo' ? activeTuning.logo : activeTuning.mark;
+    const computedLabel = ariaLabel ?? (activeTuning.ending === 'logo' ? 'Logo' : activeTuning.text);
+
     return (
       <div
-        className={`liquid-glass-logo ${className}`.trim()}
+        className={`liquid-glass-container ${className}`.trim()}
         style={{
           height,
-          background: tuning.background,
+          background: activeTuning.background,
+          cursor: interactive ? 'pointer' : undefined,
           ...style,
         }}
         role="img"
-        aria-label={label ?? (tuning.ending === 'logo' ? 'Logo' : tuning.text)}
-        data-liquid-glass-ready={ready || undefined}
+        aria-label={computedLabel}
+        data-ready={isReady ? 'true' : 'false'}
+        onClick={interactive ? () => engineRef.current?.replay() : undefined}
       >
+        {/* Optional Ambient Glow Behind Glass */}
+        {glowEffect && (
+          <div
+            className="liquid-glass-backdrop-ambient"
+            style={{
+              background: `radial-gradient(circle, ${activeTuning.logoColor} 0%, transparent 70%)`,
+            }}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Custom Background Image & Tint Layer */}
         {backgroundImage && (
           <>
             <div
-              className="liquid-glass-logo-background"
+              className="liquid-glass-layer"
               aria-hidden="true"
               style={{
-                background: `url(${JSON.stringify(backgroundImage)}) center / cover no-repeat`,
+                backgroundImage: `url(${JSON.stringify(backgroundImage)})`,
+                backgroundPosition: 'center',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
                 transform: `translate(${Math.max(-100, Math.min(100, backgroundX))}%, ${Math.max(-100, Math.min(100, backgroundY))}%) scale(${Math.max(1, Math.min(3, backgroundScale))})`,
               }}
             />
             <div
-              className="liquid-glass-logo-background"
+              className="liquid-glass-layer"
               aria-hidden="true"
               style={{
                 backgroundColor: backgroundTint,
@@ -136,27 +188,31 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
             />
           </>
         )}
-        <canvas ref={canvas} aria-hidden="true" />
-        {fallback && (
-          <span
-            className="liquid-glass-logo-fallback"
+
+        {/* WebGL2 Accelerated Simulation Canvas */}
+        <canvas ref={canvasRef} aria-hidden="true" />
+
+        {/* Accessible Fallback Graphic */}
+        {renderFallback && (
+          <div
+            className="liquid-glass-fallback-view"
             aria-hidden="true"
             style={{
-              color: tuning.textColor,
-              fontFamily: tuning.fontFamily,
-              fontWeight: tuning.fontWeight,
-              fontSize: tuning.fontSize,
-              letterSpacing: `${tuning.letterSpacing}em`,
-              gap: `${tuning.markGap}em`,
+              color: activeTuning.textColor,
+              fontFamily: activeTuning.fontFamily,
+              fontWeight: activeTuning.fontWeight,
+              fontSize: activeTuning.fontSize,
+              letterSpacing: `${activeTuning.letterSpacing}em`,
+              gap: `${activeTuning.markGap}em`,
             }}
           >
-            {tuning.ending === 'logo' ? (
+            {activeTuning.ending === 'logo' ? (
               <img
-                src={tuning.logo}
+                src={activeTuning.logo}
                 alt=""
                 style={{
-                  width: tuning.logoSize * tuning.logoScale * tuning.finalLogoScale,
-                  height: tuning.logoSize * tuning.logoScale * tuning.finalLogoScale,
+                  width: activeTuning.logoSize * activeTuning.logoScale * activeTuning.finalLogoScale,
+                  height: activeTuning.logoSize * activeTuning.logoScale * activeTuning.finalLogoScale,
                   maxWidth: '80%',
                   maxHeight: '80%',
                   objectFit: 'contain',
@@ -164,11 +220,11 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
               />
             ) : (
               <>
-                {markSource && <img src={markSource} alt="" />}
-                {tuning.text}
+                {activeMarkSrc && <img src={activeMarkSrc} alt="" />}
+                {activeTuning.text}
               </>
             )}
-          </span>
+          </div>
         )}
       </div>
     );

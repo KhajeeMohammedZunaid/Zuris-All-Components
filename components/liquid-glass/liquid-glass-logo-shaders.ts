@@ -1,3 +1,14 @@
+/**
+ * Liquid Glass Optics & Fluid Dynamics GLSL Shaders
+ * 
+ * Hardware-accelerated WebGL 2.0 shader pipeline modeling:
+ * - Continuous Cauchy-dispersion spectral refraction
+ * - Superelliptic surface signed distance fields (SDF)
+ * - Fluidic wave crest propagation and caustic focusing
+ * - Multi-scale mip-pyramid optical bloom and photorealistic diffusion
+ */
+
+/** Vertex shader transforming a fullscreen clip-space triangle */
 export const liquidGlassLogoVertex = `#version 300 es
 in vec2 aPosition;
 void main() {
@@ -5,586 +16,596 @@ void main() {
 }
 `;
 
-// An optical surface, independent of the artwork beneath it. The first lens morphs
-// from a sphere to a superellipse; the second opens over the measured wordmark.
-// Refraction is integrated over the visible spectrum, rather than RGB offsets.
-// All distances are in CSS pixels, so the optics survive resizing and different DPRs.
+/** Primary fragment shader performing physical optics and fluid raymarching */
 export const liquidGlassLogoRender = `#version 300 es
 precision highp float;
+
+// Input Texture Samplers
 uniform sampler2D uLogo;
 uniform sampler2D uText;
+
+// Viewport & Scale Uniforms
 uniform vec2 uResolution;
 uniform float uDpr;
 uniform float uUnit;
 uniform vec2 uLogoBox;
 uniform vec2 uTextBox;
 uniform float uTextWidth;
+
+// Simulation Clock & Transition States
 uniform float uTime;
 uniform float uSettle;
 uniform float uArtScale;
 uniform float uWordmarkEnabled;
+
+// Environmental & Material Parameters
 uniform vec3 uTile;
 uniform float uTileEnabled;
-// 0 on a dark page, 1 on a pale one.
 uniform float uPageLight;
 uniform float uDepth;
 uniform float uDispersion;
 uniform float uRelief;
 uniform float uCaustics;
 uniform float uHighlights;
-// How much the faint line outside the rim takes the plate color.
 uniform float uEchoTint;
-// 0 draws the full inner wall; 1 keeps it to the upper-left and lower-right arcs.
 uniform float uInnerWallFocus;
 uniform float uDropSize;
 uniform float uDropStrength;
 uniform float uDecay;
-// Second drop: radius, core radius, rim stretch, center factor (negative inverts).
-uniform vec4 uDrop;
-// Second drop: core edge magnification, profile exponent, ripple amplitude, wavelength.
-uniform vec4 uDropLens;
-// Second drop: ripple phase, share of ripples inside the core, dispersion, unused.
-uniform vec4 uDropWave;
+
+// Secondary Fluid Droplet Uniforms
+uniform vec4 uDrop;      // [radius, coreRadius, rimStretch, centerFactor]
+uniform vec4 uDropLens;  // [edgeMagnify, profileExponent, rippleAmplitude, wavelength]
+uniform vec4 uDropWave;  // [phase, coreRippleRatio, dispersionScale, unused]
+
 out vec4 outColor;
-const float PI = 3.14159265359;
-const int BANDS = 32;
 
-float sq(float x) { return x * x; }
-float bell(float x, float width) { return exp(-sq(x / max(width, 0.001))); }
-float ease(float a, float b, float x) { return smoothstep(a, b, x); }
+// Mathematical Constants
+const float PI = 3.14159265358979323846;
+const int NUM_SPECTRAL_BANDS = 32;
 
-// Smooth overlapping spectral sensitivities, normalized in the integration below.
-vec3 spectrum(float s) {
-  float wavelength = 400.0 + 300.0 * s;
+// Utility functions
+float sqr(float v) { return v * v; }
+float gaussianBell(float offset, float width) { return exp(-sqr(offset / max(width, 0.001))); }
+float smoothEase(float edge0, float edge1, float x) { return smoothstep(edge0, edge1, x); }
+
+// Spectral power distribution across the visible spectrum (400nm - 700nm)
+vec3 evaluateSpectrum(float normalizedWavelength) {
+  float lambda = 400.0 + 300.0 * normalizedWavelength;
   vec3 rgb = vec3(0.0);
-  if (wavelength < 440.0) rgb = vec3((440.0 - wavelength) / 120.0, 0.0, 1.0);
-  else if (wavelength < 490.0) rgb = vec3(0.0, (wavelength - 440.0) / 50.0, 1.0);
-  else if (wavelength < 510.0) rgb = vec3(0.0, 1.0, (510.0 - wavelength) / 20.0);
-  else if (wavelength < 580.0) rgb = vec3((wavelength - 510.0) / 70.0, 1.0, 0.0);
-  else if (wavelength < 645.0) rgb = vec3(1.0, (645.0 - wavelength) / 65.0, 0.0);
-  else rgb = vec3(1.0, 0.0, 0.0);
-  return rgb * mix(0.2, 1.0, ease(400.0, 430.0, wavelength)) * mix(1.0, 0.65, ease(650.0, 700.0, wavelength));
-}
-float glassIor(float s, float spread) {
-  float wavelength = 0.4 + 0.3 * s;
-  return 1.38 + (0.04 / (wavelength * wavelength) - 0.12) * spread;
-}
-
-vec4 imageAt(sampler2D image, vec2 p, vec2 box) {
-  vec2 uv = 0.5 + p / box;
-  // Transparent outside the image, including images that touch their texture edges.
-  // Explicit LOD is stable inside the back-face branch; implicit derivatives are
-  // undefined there and can make the same sought frame change after another draw.
-  vec2 footprint = vec2(textureSize(image, 0)) / max(box * uDpr, vec2(1.0));
-  float lod = max(0.0, log2(max(footprint.x, footprint.y)));
-  // The first sphere comes into focus as it flattens into a plate.
-  lod += (1.0 - ease(0.20, 0.36, uTime)) * 2.2;
-  vec4 ink = textureLod(image, uv, lod);
-  return ink * step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+  if (lambda < 440.0) {
+    rgb = vec3((440.0 - lambda) / 120.0, 0.0, 1.0);
+  } else if (lambda < 490.0) {
+    rgb = vec3(0.0, (lambda - 440.0) / 50.0, 1.0);
+  } else if (lambda < 510.0) {
+    rgb = vec3(0.0, 1.0, (510.0 - lambda) / 20.0);
+  } else if (lambda < 580.0) {
+    rgb = vec3((lambda - 510.0) / 70.0, 1.0, 0.0);
+  } else if (lambda < 645.0) {
+    rgb = vec3(1.0, (645.0 - lambda) / 65.0, 0.0);
+  } else {
+    rgb = vec3(1.0, 0.0, 0.0);
+  }
+  float lowSens = smoothEase(400.0, 430.0, lambda);
+  float highSens = smoothEase(650.0, 700.0, lambda);
+  return rgb * mix(0.2, 1.0, lowSens) * mix(1.0, 0.65, highSens);
 }
 
-float superRadius(vec2 p, float n) {
-  vec2 a = max(abs(p), vec2(0.00001));
-  return pow(pow(a.x, n) + pow(a.y, n), 1.0 / n);
-}
-vec2 superNormal(vec2 p, float n) {
-  return normalize(sign(p) * pow(max(abs(p), vec2(0.00001)), vec2(n - 1.0)) + vec2(0.000001));
+// Cauchy dispersion index of refraction for optical glass
+float calculateGlassIOR(float normalizedWavelength, float dispersionSpread) {
+  float lambdaMicrons = 0.4 + 0.3 * normalizedWavelength;
+  return 1.38 + (0.04 / (lambdaMicrons * lambdaMicrons) - 0.12) * dispersionSpread;
 }
 
-float hash1(float n) { return fract(sin(n * 127.1 + 311.7) * 43758.5453); }
+// Sample texture with anti-aliased bounds clipping and level-of-detail stability
+vec4 sampleArtworkLOD(sampler2D imageSampler, vec2 coords, vec2 boundingBox) {
+  vec2 uv = 0.5 + coords / boundingBox;
+  vec2 texSize = vec2(textureSize(imageSampler, 0));
+  vec2 footprint = texSize / max(boundingBox * uDpr, vec2(1.0));
+  float lodLevel = max(0.0, log2(max(footprint.x, footprint.y)));
+  lodLevel += (1.0 - smoothEase(0.20, 0.36, uTime)) * 2.2;
+  vec4 sampleColor = textureLod(imageSampler, uv, lodLevel);
+  float insideMask = step(0.0, uv.x) * step(0.0, uv.y) * step(uv.x, 1.0) * step(uv.y, 1.0);
+  return sampleColor * insideMask;
+}
 
-// Real glass is not a perfect stroke. Along an edge (u = arc length in pixels) its
-// light varies slowly and breaks into short glints where the surface is uneven.
-float contourNoise(float u) {
-  float i = floor(u);
-  float f = fract(u);
+// Superelliptic radius and normal calculation for rounded rectangular glass geometry
+float superellipticRadius(vec2 pt, float exponent) {
+  vec2 absPt = max(abs(pt), vec2(0.00001));
+  return pow(pow(absPt.x, exponent) + pow(absPt.y, exponent), 1.0 / exponent);
+}
+
+vec2 superellipticNormal(vec2 pt, float exponent) {
+  vec2 absPt = max(abs(pt), vec2(0.00001));
+  return normalize(sign(pt) * pow(absPt, vec2(exponent - 1.0)) + vec2(0.000001));
+}
+
+// Pseudo-random noise primitives for micro-surface topography
+float pseudoHash(float n) {
+  return fract(sin(n * 127.1 + 311.7) * 43758.5453);
+}
+
+float edgeContourNoise(float arcPos) {
+  float i = floor(arcPos);
+  float f = fract(arcPos);
   f = f * f * (3.0 - 2.0 * f);
-  return mix(hash1(i), hash1(i + 1.0), f);
+  return mix(pseudoHash(i), pseudoHash(i + 1.0), f);
 }
-float specks(float u, float d, float size, float seed) {
-  float spacing = size * 22.0;
-  float cell = floor(u / spacing);
-  float on = step(0.7, hash1(cell + seed));
-  float center = (cell + 0.2 + 0.6 * hash1(cell + seed + 17.0)) * spacing;
-  float offset = (hash1(cell + seed + 31.0) - 0.5) * size * 0.6;
-  // Glints are dashes along the edge, several times longer than they are wide.
-  float dash = size * (2.5 + 4.0 * hash1(cell + seed + 53.0));
-  return on * bell(u - center, dash) * bell(d - offset, size * 0.35);
+
+// Micro-glint generators for physical glass surface imperfections
+float generateSpecks(float arcPos, float dist, float featureSize, float seed) {
+  float interval = featureSize * 22.0;
+  float cellId = floor(arcPos / interval);
+  float activeMask = step(0.7, pseudoHash(cellId + seed));
+  float centerPos = (cellId + 0.2 + 0.6 * pseudoHash(cellId + seed + 17.0)) * interval;
+  float lateralOffset = (pseudoHash(cellId + seed + 31.0) - 0.5) * featureSize * 0.6;
+  float dashLength = featureSize * (2.5 + 4.0 * pseudoHash(cellId + seed + 53.0));
+  return activeMask * gaussianBell(arcPos - centerPos, dashLength) * gaussianBell(dist - lateralOffset, featureSize * 0.35);
 }
-// The same glints as particles held by the liquid: each one bobs across the edge
-// on its own period and barely sways along it, so nothing slides sideways.
-// Neighboring cells are included so a moving glint is not clipped at its cell.
-float driftingSpecks(float u, float d, float size, float seed, float t) {
-  float spacing = size * 22.0;
-  float cell = floor(u / spacing);
-  float glints = 0.0;
-  for (int j = -1; j <= 1; j++) {
-    float id = cell + float(j);
-    float on = step(0.7, hash1(id + seed));
-    float rate = 2.5 + 3.0 * hash1(id + seed + 71.0);
-    float phase = 6.2832 * hash1(id + seed + 89.0);
-    float center = (id + 0.2 + 0.6 * hash1(id + seed + 17.0)) * spacing + sin(t * rate * 0.5 + phase) * spacing * 0.05;
-    float offset = (hash1(id + seed + 31.0) - 0.5) * size * 0.6 + sin(t * rate + phase) * size * 1.6;
-    float dash = size * (2.5 + 4.0 * hash1(id + seed + 53.0));
-    glints += on * bell(u - center, dash) * bell(d - offset, size * 0.35);
+
+float generateDriftingSpecks(float arcPos, float dist, float featureSize, float seed, float time) {
+  float interval = featureSize * 22.0;
+  float cellId = floor(arcPos / interval);
+  float cumulativeGlints = 0.0;
+  for (int offset = -1; offset <= 1; offset++) {
+    float id = cellId + float(offset);
+    float activeMask = step(0.7, pseudoHash(id + seed));
+    float oscillationRate = 2.5 + 3.0 * pseudoHash(id + seed + 71.0);
+    float oscillationPhase = 6.2831853 * pseudoHash(id + seed + 89.0);
+    float centerPos = (id + 0.2 + 0.6 * pseudoHash(id + seed + 17.0)) * interval + sin(time * oscillationRate * 0.5 + oscillationPhase) * interval * 0.05;
+    float lateralOffset = (pseudoHash(id + seed + 31.0) - 0.5) * featureSize * 0.6 + sin(time * oscillationRate + oscillationPhase) * featureSize * 1.6;
+    float dashLength = featureSize * (2.5 + 4.0 * pseudoHash(id + seed + 53.0));
+    cumulativeGlints += activeMask * gaussianBell(arcPos - centerPos, dashLength) * gaussianBell(dist - lateralOffset, featureSize * 0.35);
   }
-  return min(glints, 1.0);
+  return min(cumulativeGlints, 1.0);
 }
 
-// Material-space relief: neighboring glass walls share the slow undulation but
-// have different fine thickness variations. It stays attached as the lens grows.
-float edgeWarp(float arc, float seed) {
-  float broad = contourNoise(arc / (uUnit * 0.037) + seed) - 0.5;
-  float fine = contourNoise(arc / (uUnit * 0.008) + seed + 29.0) - 0.5;
-  return uUnit * (broad * 0.0017 + fine * 0.0008);
+float calculateEdgeWarp(float arcLength, float seed) {
+  float lowFreq = edgeContourNoise(arcLength / (uUnit * 0.037) + seed) - 0.5;
+  float highFreq = edgeContourNoise(arcLength / (uUnit * 0.008) + seed + 29.0) - 0.5;
+  return uUnit * (lowFreq * 0.0017 + highFreq * 0.0008);
 }
 
-// Small flattened air pockets in the glass channel. x is the dark cavity;
-// y is its light-catching lip. Three cells avoid popping at cell boundaries.
-vec2 glassPores(float arc, float d, float seed) {
-  if (abs(d) > uUnit * 0.011) return vec2(0.0);
-  float pitch = uUnit * 0.022;
-  float cell = floor(arc / pitch);
-  vec2 pores = vec2(0.0);
-  for (int j = -1; j <= 1; j++) {
-    float id = cell + float(j) + seed;
-    float visible = step(0.63, hash1(id));
-    float center = (cell + float(j) + 0.15 + 0.7 * hash1(id + 17.0)) * pitch;
-    float across = (hash1(id + 31.0) - 0.5) * uUnit * 0.009;
-    float span = uUnit * (0.0022 + 0.0035 * hash1(id + 53.0));
-    float height = max(0.35 / uDpr, uUnit * (0.0007 + 0.0012 * hash1(id + 71.0)));
-    vec2 q = vec2((arc - center) / span, (d - across) / height);
-    // A slight skew keeps the cavities from forming identical ellipses.
-    q.x += q.y * (hash1(id + 89.0) - 0.5) * 0.55;
-    float radius = length(q);
-    float aa = max(0.18, 0.4 / (uDpr * height));
-    float cavity = bell(radius, 0.65);
-    float lip = bell(radius - 1.0, aa);
-    float glint = 0.25 + 0.75 * max(dot(q / max(radius, 0.001), normalize(vec2(-0.4, 0.8))), 0.0);
-    pores += vec2(cavity, lip * glint) * visible;
+vec2 computeGlassMicroPores(float arcLength, float dist, float seed) {
+  if (abs(dist) > uUnit * 0.011) return vec2(0.0);
+  float spacing = uUnit * 0.022;
+  float cellId = floor(arcLength / spacing);
+  vec2 poreResponse = vec2(0.0);
+  for (int offset = -1; offset <= 1; offset++) {
+    float id = cellId + float(offset) + seed;
+    float isVisible = step(0.63, pseudoHash(id));
+    float centerPos = (cellId + float(offset) + 0.15 + 0.7 * pseudoHash(id + 17.0)) * spacing;
+    float crossDist = (pseudoHash(id + 31.0) - 0.5) * uUnit * 0.009;
+    float poreSpan = uUnit * (0.0022 + 0.0035 * pseudoHash(id + 53.0));
+    float poreDepth = max(0.35 / uDpr, uUnit * (0.0007 + 0.0012 * pseudoHash(id + 71.0)));
+    vec2 normalizedCoord = vec2((arcLength - centerPos) / poreSpan, (dist - crossDist) / poreDepth);
+    normalizedCoord.x += normalizedCoord.y * (pseudoHash(id + 89.0) - 0.5) * 0.55;
+    float radius = length(normalizedCoord);
+    float aaThreshold = max(0.18, 0.4 / (uDpr * poreDepth));
+    float cavityDepth = gaussianBell(radius, 0.65);
+    float lipHighlight = gaussianBell(radius - 1.0, aaThreshold);
+    float directionalGlint = 0.25 + 0.75 * max(dot(normalizedCoord / max(radius, 0.001), normalize(vec2(-0.4, 0.8))), 0.0);
+    poreResponse += vec2(cavityDepth, lipHighlight * directionalGlint) * isVisible;
   }
-  return min(pores, vec2(1.0));
+  return min(poreResponse, vec2(1.0));
 }
 
-// Light reflected off the ripples outside the glass is invisible on a pale page.
-// There the same ripples bend the page away and read as cool shadows, as in the
-// light reference. Coverage is unchanged, so a dark page renders as before.
-vec3 exteriorColor(vec3 light, float coverage) {
-  // The shadow leans toward the plate's own tone, a little deeper, so it belongs
-  // to the glass instead of reading as a gray smudge on the page.
-  vec3 shade = mix(vec3(0.40, 0.46, 0.56), uTile * 0.86, uEchoTint);
-  return mix(light, shade * coverage, uPageLight);
+vec3 calculateExteriorReflection(vec3 specularLight, float surfaceCoverage) {
+  vec3 plateShadow = mix(vec3(0.40, 0.46, 0.56), uTile * 0.86, uEchoTint);
+  return mix(specularLight, plateShadow * surfaceCoverage, uPageLight);
 }
 
-// Per-channel coverage of the last refracted image. Each wavelength band lands
-// on the artwork at its own offset, so a dark logo over a light plate blocks red,
-// green and blue at slightly different places and its edges split into color.
-vec3 refractedCoverage;
+// Global accumulator for per-channel chromatic refraction coverage
+vec3 gRefractedSpectralCoverage;
 
-// A refracted image behind a glass lens, with a little light focused onto its ink.
-vec4 refractedLogo(vec2 p, vec2 normalXY, float lensScale, float glass, float chromaticScale, float surfaceDistance) {
-  vec3 normal = normalize(vec3(normalXY, 1.0));
-  vec3 color = vec3(0.0);
-  vec3 weights = vec3(0.0);
-  float alpha = 0.0;
-  float minCoverage = 1.0;
-  float maxCoverage = 0.0;
-  refractedCoverage = vec3(0.0);
-  float spread = uDispersion * chromaticScale * mix(0.85, mix(2.2, 1.5, ease(0.28, 0.9, uTime)), ease(0.25, 0.33, uTime));
-  vec3 neutralRay = refract(vec3(0.0, 0.0, -1.0), normal, 1.0 / glassIor(0.5, spread));
-  vec2 neutralOffset = neutralRay.xy / max(-neutralRay.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
-  for (int i = 0; i < BANDS; i++) {
-    float s = float(i) / float(BANDS - 1);
-    // Shorter wavelengths bend more. Dispersion is intentionally visible at the bevel.
-    // The young sphere splits light only at its rim; the settled bevel splits it strongly.
-    float ior = glassIor(s, spread);
-    vec3 ray = refract(vec3(0.0, 0.0, -1.0), normal, 1.0 / ior);
-    vec2 offset = ray.xy / max(-ray.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
-    // Measured artwork scale over time; see artworkScale in the renderer.
-    float artworkScale = uArtScale;
-    float magnification = 1.0;
-    // The opening focus folds the edge of the image into a partial crescent.
-    // It opens into barrel distortion before the sphere flattens into the plate.
-    float sphereRadius = uUnit * lensScale * 0.5;
-    float sphereFocus = 1.0 - ease(0.225, 0.335, uTime);
-    float bubbleQ = min(length(p) / max(sphereRadius, 1.0), 1.0);
-    float openingFocus = 1.0 - ease(0.19, 0.265, uTime);
-    float focusProfile = mix(0.7 + 0.6 * sq(bubbleQ), 1.0 - 0.9 * sq(bubbleQ), openingFocus);
-    vec2 bubbleSample = p * focusProfile + offset * mix(0.35, 0.12, openingFocus);
-    bubbleSample += vec2(0.025, 0.10) * uUnit * openingFocus;
-    bubbleSample += (offset - neutralOffset) * openingFocus * 1.6;
-    vec2 sourcePoint = mix(p + offset, bubbleSample, sphereFocus);
-    vec4 ink = imageAt(uLogo, sourcePoint, uLogoBox * artworkScale * magnification);
-    // Focus is inside the young dome, leaving clear glass between the enlarged
-    // fragment and the rim. The aperture opens as the rest of the logo appears.
-    ink *= mix(1.0, 1.0 - ease(0.72, 0.86, bubbleQ), openingFocus);
-    // The rim is an optical aperture too. Giving each wavelength its own boundary
-    // creates a red/yellow outer edge and cyan/blue inner edge without tinting the ink.
-    float edgeShift = (s - 0.5) * uUnit * lensScale * 0.018 * uDispersion * chromaticScale;
-    ink *= 1.0 - smoothstep(-0.8 / uDpr, 0.8 / uDpr, surfaceDistance - edgeShift);
-    minCoverage = min(minCoverage, ink.a);
-    maxCoverage = max(maxCoverage, ink.a);
-    vec3 w = spectrum(s);
-    color += ink.rgb * w;
-    alpha += ink.a * (w.r + w.g + w.b);
-    refractedCoverage += ink.a * w;
-    weights += w;
+// Primary chromatic refraction pass simulating dispersive glass optics
+vec4 computeRefractedArtwork(vec2 pos, vec2 surfaceNormXY, float scaleFactor, float glassVisibility, float chromaticFactor, float distToSurface) {
+  vec3 surfaceNormal = normalize(vec3(surfaceNormXY, 1.0));
+  vec3 accumulatedColor = vec3(0.0);
+  vec3 accumulatedWeights = vec3(0.0);
+  float accumulatedAlpha = 0.0;
+  float minSpectralAlpha = 1.0;
+  float maxSpectralAlpha = 0.0;
+  gRefractedSpectralCoverage = vec3(0.0);
+
+  float dispersionStrength = uDispersion * chromaticFactor * mix(0.85, mix(2.2, 1.5, smoothEase(0.28, 0.9, uTime)), smoothEase(0.25, 0.33, uTime));
+  vec3 centralRay = refract(vec3(0.0, 0.0, -1.0), surfaceNormal, 1.0 / calculateGlassIOR(0.5, dispersionStrength));
+  vec2 centralOffset = centralRay.xy / max(-centralRay.z, 0.25) * uUnit * uDepth * 0.80 * scaleFactor;
+
+  for (int band = 0; band < NUM_SPECTRAL_BANDS; band++) {
+    float spectralT = float(band) / float(NUM_SPECTRAL_BANDS - 1);
+    float ior = calculateGlassIOR(spectralT, dispersionStrength);
+    vec3 refractedRay = refract(vec3(0.0, 0.0, -1.0), surfaceNormal, 1.0 / ior);
+    vec2 lateralOffset = refractedRay.xy / max(-refractedRay.z, 0.25) * uUnit * uDepth * 0.80 * scaleFactor;
+
+    float currentArtScale = uArtScale;
+    float magnificationFactor = 1.0;
+
+    float baseSphereRadius = uUnit * scaleFactor * 0.5;
+    float sphereFocusProg = 1.0 - smoothEase(0.225, 0.335, uTime);
+    float normalizedRadius = min(length(pos) / max(baseSphereRadius, 1.0), 1.0);
+    float openingProgress = 1.0 - smoothEase(0.19, 0.265, uTime);
+    float radialProfile = mix(0.7 + 0.6 * sqr(normalizedRadius), 1.0 - 0.9 * sqr(normalizedRadius), openingProgress);
+
+    vec2 bubblePoint = pos * radialProfile + lateralOffset * mix(0.35, 0.12, openingProgress);
+    bubblePoint += vec2(0.025, 0.10) * uUnit * openingProgress;
+    bubblePoint += (lateralOffset - centralOffset) * openingProgress * 1.6;
+
+    vec2 finalSampleCoord = mix(pos + lateralOffset, bubblePoint, sphereFocusProg);
+    vec4 inkColor = sampleArtworkLOD(uLogo, finalSampleCoord, uLogoBox * currentArtScale * magnificationFactor);
+
+    inkColor *= mix(1.0, 1.0 - smoothEase(0.72, 0.86, normalizedRadius), openingProgress);
+
+    float chromaticBoundaryShift = (spectralT - 0.5) * uUnit * scaleFactor * 0.018 * uDispersion * chromaticFactor;
+    inkColor *= 1.0 - smoothstep(-0.8 / uDpr, 0.8 / uDpr, distToSurface - chromaticBoundaryShift);
+
+    minSpectralAlpha = min(minSpectralAlpha, inkColor.a);
+    maxSpectralAlpha = max(maxSpectralAlpha, inkColor.a);
+
+    vec3 bandWeight = evaluateSpectrum(spectralT);
+    accumulatedColor += inkColor.rgb * bandWeight;
+    accumulatedAlpha += inkColor.a * (bandWeight.r + bandWeight.g + bandWeight.b);
+    gRefractedSpectralCoverage += inkColor.a * bandWeight;
+    accumulatedWeights += bandWeight;
   }
-  color /= weights;
-  refractedCoverage /= weights;
-  // A coated glass shoulder has a cooler spectral response at a split image edge.
-  // Coverage variance keeps solid areas and original-color artwork free of a tint.
-  float coating = ease(-uUnit * lensScale * 0.022, 0.0, surfaceDistance);
-  color.g *= 1.0 - 0.65 * coating * (maxCoverage - minCoverage);
-  // The young curved face catches a violet interference fringe at internal ink
-  // edges. Its outer lip stays cyan; opaque artwork keeps its original color.
-  float youngFilm = (maxCoverage - minCoverage) * (1.0 - ease(0.19, 0.30, uTime));
-  youngFilm *= 1.0 - ease(-uUnit * lensScale * 0.08, -uUnit * lensScale * 0.025, surfaceDistance);
-  color.r += color.b * youngFilm * 0.80;
-  color.b += color.r * youngFilm * 0.60;
-  color.g *= 1.0 - youngFilm * 0.55;
-  alpha /= weights.r + weights.g + weights.b;
-  // This lift belongs to the image's edges, not a painted rainbow on the lens.
-  float diffuse = max(dot(normal, normalize(vec3(-0.4, 0.6, 1.0))), 0.0);
-  vec3 earlyWhite = mix(vec3(0.90, 0.93, 0.95), vec3(0.84, 0.86, 0.89), ease(0.21, 0.40, uTime));
-  vec3 whiteBalance = mix(earlyWhite, vec3(0.87, 0.88, 0.885), ease(0.75, 1.22, uTime));
-  color *= whiteBalance * ((0.90 + 0.10 * diffuse + glass * uCaustics * 0.04) * ((0.975 + 0.025 * sin(p.y / uUnit * PI)) * (1.0 + 0.09 * ease(0.75, 1.22, uTime) + 0.03 * (1.0 - ease(0.2, 0.5, uTime)))));
-  return vec4(color, alpha);
+
+  accumulatedColor /= accumulatedWeights;
+  gRefractedSpectralCoverage /= accumulatedWeights;
+
+  float edgeCoating = smoothEase(-uUnit * scaleFactor * 0.022, 0.0, distToSurface);
+  accumulatedColor.g *= 1.0 - 0.65 * edgeCoating * (maxSpectralAlpha - minSpectralAlpha);
+
+  float thinFilmEffect = (maxSpectralAlpha - minSpectralAlpha) * (1.0 - smoothEase(0.19, 0.30, uTime));
+  thinFilmEffect *= 1.0 - smoothEase(-uUnit * scaleFactor * 0.08, -uUnit * scaleFactor * 0.025, distToSurface);
+  accumulatedColor.r += accumulatedColor.b * thinFilmEffect * 0.80;
+  accumulatedColor.b += accumulatedColor.r * thinFilmEffect * 0.60;
+  accumulatedColor.g *= 1.0 - thinFilmEffect * 0.55;
+  accumulatedAlpha /= (accumulatedWeights.r + accumulatedWeights.g + accumulatedWeights.b);
+
+  float diffuseLight = max(dot(surfaceNormal, normalize(vec3(-0.4, 0.6, 1.0))), 0.0);
+  vec3 tintProfile = mix(vec3(0.90, 0.93, 0.95), vec3(0.84, 0.86, 0.89), smoothEase(0.21, 0.40, uTime));
+  vec3 balanceVector = mix(tintProfile, vec3(0.87, 0.88, 0.885), smoothEase(0.75, 1.22, uTime));
+
+  accumulatedColor *= balanceVector * ((0.90 + 0.10 * diffuseLight + glassVisibility * uCaustics * 0.04) *
+    ((0.975 + 0.025 * sin(pos.y / uUnit * PI)) * (1.0 + 0.09 * smoothEase(0.75, 1.22, uTime) + 0.03 * (1.0 - smoothEase(0.2, 0.5, uTime)))));
+
+  return vec4(accumulatedColor, accumulatedAlpha);
 }
 
-vec4 iconLens(vec2 p) {
+// Icon plate liquid glass simulation stage
+vec4 evaluateIconPlate(vec2 pos) {
   float t = uTime;
-  float settle = ease(0.0, 1.0, uSettle);
-  float enter = ease(0.025, 0.16, t);
-  vec4 source = imageAt(uLogo, p, uLogoBox * uArtScale);
-  if (t > 1.58) return source * settle;
-  if (enter < 0.001) return vec4(0.0);
-  float shape = 2.0 + 3.0 * ease(0.29, 0.36, t);
-  // The sphere appears quickly, then the glass continues expanding after the
-  // corners have squared off. Completing both motions at once feels abrupt.
-  float expand = enter * (0.64 + 0.41 * (1.0 - exp(-max(t - 0.16, 0.0) * 5.8)));
-  float collapse = 1.0 - ease(1.33, 1.52, t);
-  float lensScale = max(0.001, mix(expand * mix(0.48, 1.0, collapse), 1.0, settle));
-  float halfSize = uUnit * 0.5 * lensScale;
-  float radius = superRadius(p / halfSize, shape);
-  float sd = (radius - 1.0) * halfSize;
-  float aa = max(fwidth(sd), 0.65);
-  float mask = (1.0 - smoothstep(-aa, aa, sd));
-  float glass = (1.0 - ease(1.05, 1.4, t)) * collapse * (1.0 - settle);
-  float shown = ease(0.12, 0.165, t) * (1.0 - ease(1.39, 1.53, t));
-  // Nothing is drawn beyond the thin echo just outside the rim.
-  if (sd > uUnit * 0.10) return vec4(0.0);
-  vec2 outward = superNormal(p / halfSize, shape);
-  // A flat center rolls into a thick, curved shoulder. The normal continuously bends
-  // source rays into the plate and folds them at its rim, whatever the source image.
-  vec2 radial = normalize(p + vec2(0.001));
-  float diagonal = max(0.0, 2.0 * radial.x * radial.y);
-  float shoulderStart = 0.6 + 0.18 * ease(0.66, 1.15, t) * (1.0 - diagonal) + 0.16 * ease(1.0, 1.22, t) * diagonal;
-  float shoulder = ease(shoulderStart, 1.0, radius);
-  float slope = (0.04 * radius + (0.85 + 0.2 * (1.0 - ease(0.28, 0.75, t))) * shoulder * shoulder) * glass * uDropStrength;
-  // The early sphere is rounder and more strongly magnifying than the settled tile.
-  slope += (1.0 - ease(0.18, 0.42, t)) * radius * 0.32 * uDropStrength;
-  vec2 opticalDirection = normalize(mix(outward, normalize(p + vec2(0.001)), 0.95));
-  // A mild astigmatic shoulder carries the image into opposite corners.
-  float astigmatism = 0.8 + 0.4 * radial.x * radial.y;
-  vec2 n = opticalDirection * slope * astigmatism * (1.0 - settle);
-  vec4 ink = refractedLogo(p, n, lensScale, glass, 1.0, sd);
-  float illumination = 0.5 + 0.5 * dot(outward, normalize(vec2(-0.5, 0.9)));
-  vec3 inkCoverage = refractedCoverage;
-  // A dark plate deepens toward its rim; a pale frosted plate stays nearly even.
-  float plateLight = ease(0.3, 0.8, dot(uTile, vec3(0.299, 0.587, 0.114)));
-  vec3 body = uTile * (mix(0.55, 0.96, plateLight) + mix(0.45, 0.04, plateLight) * (1.0 - min(radius, 1.0)));
-  body += vec3(0.004, 0.007, 0.01) * bell(radius - 0.75, 0.5);
-  vec3 color = ink.rgb + body * (1.0 - inkCoverage) * glass * uTileEnabled;
-  // On a pale page the plate's coverage follows the glass exactly, so its color
-  // keeps the same hue while it melts into the page instead of dipping and
-  // flaring. A dark page keeps its original fade.
-  float plateFade = mix((1.0 - ease(1.08, 1.36, t)) * (1.0 - settle), glass, uPageLight);
-  float alpha = max(ink.a, plateFade * uTileEnabled);
-  // A broad studio light is reflected by the curved front face of the sphere.
-  // It fades as the face flattens, revealing the dark glass beneath the artwork.
-  vec2 spherePoint = p / halfSize;
-  vec3 sphereNormal = normalize(vec3(spherePoint, sqrt(max(0.001, 1.0 - dot(spherePoint, spherePoint)))));
-  vec3 sphereRay = reflect(vec3(0.0, 0.0, -1.0), sphereNormal);
-  float lightTravel = mix(-0.12, 0.20, ease(0.13, 0.30, t));
-  float softbox = bell(sphereRay.x - lightTravel, 1.05) * bell(sphereRay.y - 0.56, 0.52);
-  float sphericalLight = softbox * (1.0 - ease(0.245, 0.36, t)) * glass * uHighlights * 0.70;
-  color += vec3(0.50, 0.61, 0.72) * sphericalLight * (1.0 - ink.a * 0.85);
-  alpha = max(alpha, sphericalLight);
+  float settleProg = smoothEase(0.0, 1.0, uSettle);
+  float enterProg = smoothEase(0.025, 0.16, t);
+  vec4 restingArtwork = sampleArtworkLOD(uLogo, pos, uLogoBox * uArtScale);
 
-  // Thin nested surface reflections, with asymmetric key light and a dim cool fill.
-  // Material coordinates stay fixed during expansion and deterministic seeking.
-  float arc = atan(p.y, p.x) * uUnit * 0.5;
+  if (t > 1.58) return restingArtwork * settleProg;
+  if (enterProg < 0.001) return vec4(0.0);
+
+  float cornerShape = 2.0 + 3.0 * smoothEase(0.29, 0.36, t);
+  float expansionFactor = enterProg * (0.64 + 0.41 * (1.0 - exp(-max(t - 0.16, 0.0) * 5.8)));
+  float collapseFactor = 1.0 - smoothEase(1.33, 1.52, t);
+  float activeScale = max(0.001, mix(expansionFactor * mix(0.48, 1.0, collapseFactor), 1.0, settleProg));
+
+  float halfBoundary = uUnit * 0.5 * activeScale;
+  float superNormRadius = superellipticRadius(pos / halfBoundary, cornerShape);
+  float signedDist = (superNormRadius - 1.0) * halfBoundary;
+  float aaWidth = max(fwidth(signedDist), 0.65);
+  float plateMask = 1.0 - smoothstep(-aaWidth, aaWidth, signedDist);
+  float glassPresence = (1.0 - smoothEase(1.05, 1.4, t)) * collapseFactor * (1.0 - settleProg);
+  float visibilityFade = smoothEase(0.12, 0.165, t) * (1.0 - smoothEase(1.39, 1.53, t));
+
+  if (signedDist > uUnit * 0.10) return vec4(0.0);
+
+  vec2 normalOutward = superellipticNormal(pos / halfBoundary, cornerShape);
+  vec2 radialDir = normalize(pos + vec2(0.001));
+  float diagonalBias = max(0.0, 2.0 * radialDir.x * radialDir.y);
+  float shoulderStart = 0.6 + 0.18 * smoothEase(0.66, 1.15, t) * (1.0 - diagonalBias) + 0.16 * smoothEase(1.0, 1.22, t) * diagonalBias;
+  float shoulderCurve = smoothEase(shoulderStart, 1.0, superNormRadius);
+
+  float surfaceSlope = (0.04 * superNormRadius + (0.85 + 0.2 * (1.0 - smoothEase(0.28, 0.75, t))) * shoulderCurve * shoulderCurve) * glassPresence * uDropStrength;
+  surfaceSlope += (1.0 - smoothEase(0.18, 0.42, t)) * superNormRadius * 0.32 * uDropStrength;
+
+  vec2 opticalDirection = normalize(mix(normalOutward, normalize(pos + vec2(0.001)), 0.95));
+  float astigmaticWarp = 0.8 + 0.4 * radialDir.x * radialDir.y;
+  vec2 refractionNorm = opticalDirection * surfaceSlope * astigmaticWarp * (1.0 - settleProg);
+
+  vec4 refractedColor = computeRefractedArtwork(pos, refractionNorm, activeScale, glassPresence, 1.0, signedDist);
+  float directIllumination = 0.5 + 0.5 * dot(normalOutward, normalize(vec2(-0.5, 0.9)));
+  vec3 channelCoverage = gRefractedSpectralCoverage;
+
+  float plateLuminance = smoothEase(0.3, 0.8, dot(uTile, vec3(0.299, 0.587, 0.114)));
+  vec3 plateBaseColor = uTile * (mix(0.55, 0.96, plateLuminance) + mix(0.45, 0.04, plateLuminance) * (1.0 - min(superNormRadius, 1.0)));
+  plateBaseColor += vec3(0.004, 0.007, 0.01) * gaussianBell(superNormRadius - 0.75, 0.5);
+
+  vec3 compositeRGB = refractedColor.rgb + plateBaseColor * (1.0 - channelCoverage) * glassPresence * uTileEnabled;
+  float plateAlphaDecay = mix((1.0 - smoothEase(1.08, 1.36, t)) * (1.0 - settleProg), glassPresence, uPageLight);
+  float compositeAlpha = max(refractedColor.a, plateAlphaDecay * uTileEnabled);
+
+  // Front spherical highlight reflection
+  vec2 sphereCoord = pos / halfBoundary;
+  vec3 sphereNormalVec = normalize(vec3(sphereCoord, sqrt(max(0.001, 1.0 - dot(sphereCoord, sphereCoord)))));
+  vec3 sphereReflected = reflect(vec3(0.0, 0.0, -1.0), sphereNormalVec);
+  float lightDrift = mix(-0.12, 0.20, smoothEase(0.13, 0.30, t));
+  float softboxProfile = gaussianBell(sphereReflected.x - lightDrift, 1.05) * gaussianBell(sphereReflected.y - 0.56, 0.52);
+  float sphericalHighlight = softboxProfile * (1.0 - smoothEase(0.245, 0.36, t)) * glassPresence * uHighlights * 0.70;
+  compositeRGB += vec3(0.50, 0.61, 0.72) * sphericalHighlight * (1.0 - refractedColor.a * 0.85);
+  compositeAlpha = max(compositeAlpha, sphericalHighlight);
+
+  // Surface relief & perimeter glints
+  float arcLength = atan(pos.y, pos.x) * uUnit * 0.5;
   float grainScale = uUnit * 0.03;
-  float developed = ease(0.23, 0.48, t);
-  float cornerExposure = ease(0.12, 0.8, -2.0 * radial.x * radial.y);
-  float reliefScale = lensScale * developed * (0.2 + 0.8 * cornerExposure);
-  float sharedWarp = edgeWarp(arc, 0.0) * reliefScale;
-  float rimSd = sd + sharedWarp;
-  float innerSd = sd + sharedWarp * 0.7 + edgeWarp(arc, 41.0) * reliefScale * 0.4;
-  float inner2Sd = sd + sharedWarp * 0.45 + edgeWarp(arc, 83.0) * reliefScale * 0.6;
-  float thickness = 0.75 + 0.5 * contourNoise(arc / (uUnit * 0.013) + 13.0);
-  // The bright rim line is a liquid edge, not an etched one. Its segments shimmer
-  // in place and it bobs slightly across the edge as standing waves, so nothing
-  // slides along it; its glints move as separate particles.
-  float around = arc / (uUnit * 0.5);
-  float rimBob = uUnit * 0.0025 * developed * (0.6 * sin(7.0 * around + 0.4) * sin(t * 6.3 + 1.0) + 0.4 * sin(3.0 * around + 2.0) * sin(t * 4.1));
-  float rimLineSd = rimSd + rimBob;
-  float shimmer = mix(contourNoise(arc / grainScale), contourNoise(arc / grainScale + 211.0), 0.5 + 0.5 * sin(t * 5.0 + 6.2832 * contourNoise(arc / (grainScale * 3.0) + 7.0)));
-  float rim = bell(rimLineSd + uUnit * 0.002, uUnit * 0.0018 * thickness + aa * 0.3) * (0.6 + 0.8 * shimmer);
-  // The nested lines nearer the center clear first; the outer rim lingers.
-  float centerFade = 1.0 - ease(0.62, 0.92, t);
-  float inner = centerFade * bell(innerSd + uUnit * 0.012, uUnit * 0.0025 / thickness + aa * 0.2) * (0.55 + 0.9 * contourNoise(arc / grainScale + 41.0));
-  float inner2 = centerFade * bell(inner2Sd + uUnit * 0.022, uUnit * 0.0018 * thickness + aa * 0.1) * (0.5 + contourNoise(arc / grainScale + 83.0));
-  float key = pow(illumination, 5.0);
-  float rimVisibility = 1.0 - 0.55 * ease(0.75, 1.22, t);
-  float lowerRight = pow(0.5 + 0.5 * dot(outward, normalize(vec2(0.8, -0.6))), 5.0);
-  lowerRight *= ease(-0.25, -0.05, p.x / uUnit) * (1.0 - ease(-0.22, -0.02, p.y / uUnit));
-  // Two separated walls, not two strokes at the same edge. The back wall is
-  // inset by 7% of a tile edge, leaving a curved transmission channel between them.
-  vec2 insetPoint = p - vec2(0.002, -0.002) * uUnit * lensScale;
-  float wallGap = (0.055 - 0.023 * ease(0.18, 0.34, t)) + 0.050 * ease(0.14, 0.50, t) * (1.0 - 0.5 * ease(0.80, 1.22, t));
-  float insetHalf = halfSize - wallGap * uUnit * lensScale;
-  // The back face rounds off slightly later, giving the sphere and tile two visible
-  // moving boundaries rather than scaling a second outline with the front face.
-  float insetShape = max(2.0, 2.0 + (shape - 2.0) * ease(0.20, 0.55, t) - 0.45);
-  float insetRadius = superRadius(insetPoint / insetHalf, insetShape);
-  float insetSd = (insetRadius - 1.0) * insetHalf + sharedWarp * 0.4 + edgeWarp(arc, 151.0) * reliefScale * 0.7;
-  float channel = ease(-uUnit * 0.008, uUnit * 0.025, insetSd) * mask;
-  float echoMask = channel * lowerRight * glass * (1.0 - settle);
-  vec3 backFace = vec3(0.0);
-  float logoLight = 0.0;
-  if (echoMask * uRelief > 0.002) {
-    vec2 backNormal = normalize(mix(superNormal(insetPoint / insetHalf, insetShape), radial, 0.6));
-    float backSlope = ease(0.90, 1.10, insetRadius) * 1.55 * glass * uDropStrength;
-    // Sample a separate transmitted image across the whole bevel channel. Its
-    // changing normal pulls a second, chromatically split copy of the logo into it.
-    // A thick rim magnifies whatever lies closest behind it. Walk inward from the
-    // wall until the ray meets ink and refract from there, so every logo lights
-    // this corner from its own nearest shape; a logo with ink at the corner (like
-    // X) is found on the first step and keeps its direct image.
-    // The search starts where the wall already sends the ray, not at the wall.
-    vec2 inward = -normalize(insetPoint + vec2(0.001));
-    vec3 backRay = refract(vec3(0.0, 0.0, -1.0), normalize(vec3(backNormal * backSlope, 1.0)), 1.0 / 1.38);
-    vec2 landing = insetPoint + backRay.xy / max(-backRay.z, 0.25) * uUnit * uDepth * 0.80 * lensScale;
-    float reach = 0.0;
-    for (int i = 0; i < 20; i++) {
-      reach = float(i) * uUnit * lensScale * 0.03;
-      if (imageAt(uLogo, landing + inward * reach, uLogoBox * uArtScale).a > 0.2) break;
+  float fullyDeveloped = smoothEase(0.23, 0.48, t);
+  float cornerExposure = smoothEase(0.12, 0.8, -2.0 * radialDir.x * radialDir.y);
+  float reliefMagnitude = activeScale * fullyDeveloped * (0.2 + 0.8 * cornerExposure);
+  float uniformEdgeWarp = calculateEdgeWarp(arcLength, 0.0) * reliefMagnitude;
+
+  float rimSDF = signedDist + uniformEdgeWarp;
+  float innerSDF = signedDist + uniformEdgeWarp * 0.7 + calculateEdgeWarp(arcLength, 41.0) * reliefMagnitude * 0.4;
+  float innerSecondarySDF = signedDist + uniformEdgeWarp * 0.45 + calculateEdgeWarp(arcLength, 83.0) * reliefMagnitude * 0.6;
+  float wallThickness = 0.75 + 0.5 * edgeContourNoise(arcLength / (uUnit * 0.013) + 13.0);
+
+  float normalizedPerimeter = arcLength / (uUnit * 0.5);
+  float dynamicRimBob = uUnit * 0.0025 * fullyDeveloped * (0.6 * sin(7.0 * normalizedPerimeter + 0.4) * sin(t * 6.3 + 1.0) + 0.4 * sin(3.0 * normalizedPerimeter + 2.0) * sin(t * 4.1));
+  float rimContourSDF = rimSDF + dynamicRimBob;
+  float shimmerPattern = mix(edgeContourNoise(arcLength / grainScale), edgeContourNoise(arcLength / grainScale + 211.0), 0.5 + 0.5 * sin(t * 5.0 + 6.2831853 * edgeContourNoise(arcLength / (grainScale * 3.0) + 7.0)));
+  float rimCrest = gaussianBell(rimContourSDF + uUnit * 0.002, uUnit * 0.0018 * wallThickness + aaWidth * 0.3) * (0.6 + 0.8 * shimmerPattern);
+
+  float centerDecayProg = 1.0 - smoothEase(0.62, 0.92, t);
+  float innerCrest = centerDecayProg * gaussianBell(innerSDF + uUnit * 0.012, uUnit * 0.0025 / wallThickness + aaWidth * 0.2) * (0.55 + 0.9 * edgeContourNoise(arcLength / grainScale + 41.0));
+  float innerSecondaryCrest = centerDecayProg * gaussianBell(innerSecondarySDF + uUnit * 0.022, uUnit * 0.0018 * wallThickness + aaWidth * 0.1) * (0.5 + edgeContourNoise(arcLength / grainScale + 83.0));
+
+  float keyLightIntensity = pow(directIllumination, 5.0);
+  float rimVisibilityFactor = 1.0 - 0.55 * smoothEase(0.75, 1.22, t);
+  float lowerRightFill = pow(0.5 + 0.5 * dot(normalOutward, normalize(vec2(0.8, -0.6))), 5.0);
+  lowerRightFill *= smoothEase(-0.25, -0.05, pos.x / uUnit) * (1.0 - smoothEase(-0.22, -0.02, pos.y / uUnit));
+
+  vec2 insetCoord = pos - vec2(0.002, -0.002) * uUnit * activeScale;
+  float wallSeparation = (0.055 - 0.023 * smoothEase(0.18, 0.34, t)) + 0.050 * smoothEase(0.14, 0.50, t) * (1.0 - 0.5 * smoothEase(0.80, 1.22, t));
+  float insetHalfBoundary = halfBoundary - wallSeparation * uUnit * activeScale;
+  float insetCornerShape = max(2.0, 2.0 + (cornerShape - 2.0) * smoothEase(0.20, 0.55, t) - 0.45);
+  float insetSuperRadius = superellipticRadius(insetCoord / insetHalfBoundary, insetCornerShape);
+  float insetSignedDist = (insetSuperRadius - 1.0) * insetHalfBoundary + uniformEdgeWarp * 0.4 + calculateEdgeWarp(arcLength, 151.0) * reliefMagnitude * 0.7;
+
+  float bevelChannel = smoothEase(-uUnit * 0.008, uUnit * 0.025, insetSignedDist) * plateMask;
+  float backFaceMask = bevelChannel * lowerRightFill * glassPresence * (1.0 - settleProg);
+  vec3 transmittedBackFace = vec3(0.0);
+  float logoReflectedLuma = 0.0;
+
+  if (backFaceMask * uRelief > 0.002) {
+    vec2 backNormalDir = normalize(mix(superellipticNormal(insetCoord / insetHalfBoundary, insetCornerShape), radialDir, 0.6));
+    float backBevelSlope = smoothEase(0.90, 1.10, insetSuperRadius) * 1.55 * glassPresence * uDropStrength;
+    vec2 inwardDir = -normalize(insetCoord + vec2(0.001));
+    vec3 backRayVector = refract(vec3(0.0, 0.0, -1.0), normalize(vec3(backNormalDir * backBevelSlope, 1.0)), 1.0 / 1.38);
+    vec2 rayLanding = insetCoord + backRayVector.xy / max(-backRayVector.z, 0.25) * uUnit * uDepth * 0.80 * activeScale;
+
+    float searchReach = 0.0;
+    for (int stepIdx = 0; stepIdx < 20; stepIdx++) {
+      searchReach = float(stepIdx) * uUnit * activeScale * 0.03;
+      if (sampleArtworkLOD(uLogo, rayLanding + inwardDir * searchReach, uLogoBox * uArtScale).a > 0.2) break;
     }
-    vec4 backImage = refractedLogo(insetPoint + inward * reach, backNormal * backSlope, lensScale, glass, 1.6, sd);
-    backFace = backImage.rgb * vec3(0.03, 0.65, 1.0) * echoMask * 0.48 * uRelief * (1.0 - 0.70 * ease(0.75, 1.12, t));
-    // The lower-right light is this same refracted image, not a fixed lamp: it
-    // only lights where the back wall bends logo ink into the bevel, and takes
-    // that ink's shape as the logo or the refraction changes.
-    logoLight = ease(0.05, 0.6, backImage.a);
+    vec4 secondaryRefracted = computeRefractedArtwork(insetCoord + inwardDir * searchReach, backNormalDir * backBevelSlope, activeScale, glassPresence, 1.6, signedDist);
+    transmittedBackFace = secondaryRefracted.rgb * vec3(0.03, 0.65, 1.0) * backFaceMask * 0.48 * uRelief * (1.0 - 0.70 * smoothEase(0.75, 1.12, t));
+    logoReflectedLuma = smoothEase(0.05, 0.6, secondaryRefracted.a);
   }
-  lowerRight *= logoLight;
-  float wallRim = centerFade * bell(insetSd, uUnit * 0.0028 + aa * 0.25);
-  float wallShadow = centerFade * bell(insetSd + uUnit * 0.008, uUnit * 0.005);
-  vec2 pores = vec2(0.0);
-  if (developed * cornerExposure > 0.001) {
-    pores = glassPores(arc, (rimSd + uUnit * 0.003) / lensScale, 313.0);
-    pores += glassPores(arc, insetSd / lensScale, 617.0) * 0.6 * centerFade;
-    pores += glassPores(arc, (inner2Sd + uUnit * 0.027) / lensScale, 919.0) * 0.8 * centerFade;
-    pores *= developed * cornerExposure;
+  lowerRightFill *= logoReflectedLuma;
+
+  float innerWallRim = centerDecayProg * gaussianBell(insetSignedDist, uUnit * 0.0028 + aaWidth * 0.25);
+  float innerWallShadow = centerDecayProg * gaussianBell(insetSignedDist + uUnit * 0.008, uUnit * 0.005);
+
+  vec2 surfacePores = vec2(0.0);
+  if (fullyDeveloped * cornerExposure > 0.001) {
+    surfacePores = computeGlassMicroPores(arcLength, (rimSDF + uUnit * 0.003) / activeScale, 313.0);
+    surfacePores += computeGlassMicroPores(arcLength, insetSignedDist / activeScale, 617.0) * 0.6 * centerDecayProg;
+    surfacePores += computeGlassMicroPores(arcLength, (innerSecondarySDF + uUnit * 0.027) / activeScale, 919.0) * 0.8 * centerDecayProg;
+    surfacePores *= fullyDeveloped * cornerExposure;
   }
-  float angle = atan(p.y, p.x);
-  float upperSliver = 0.12 + 1.15 * bell(angle - 2.18, 0.32);
-  float lowerSliver = 0.12 + 1.10 * bell(angle + 0.85, 0.30);
-  // The inner wall holds a brighter line around the upper-left and lower-right
-  // corners, whatever the key light does. Each arc runs farther along the top or
-  // bottom edge than down the side: its window is wider toward the horizontal.
-  float tlOffset = angle - 0.75 * PI;
-  float brOffset = angle + 0.25 * PI;
+
+  float angularCoord = atan(pos.y, pos.x);
+  float upperSliver = 0.12 + 1.15 * gaussianBell(angularCoord - 2.18, 0.32);
+  float lowerSliver = 0.12 + 1.10 * gaussianBell(angularCoord + 0.85, 0.30);
+
+  float tlOffset = angularCoord - 0.75 * PI;
+  float brOffset = angularCoord + 0.25 * PI;
   float tlReach = tlOffset < 0.0 ? 0.65 : 0.42;
   float brReach = brOffset < 0.0 ? 0.65 : 0.42;
-  float wallCorner = max(
-    1.0 - ease(0.6 * tlReach, tlReach, abs(tlOffset)),
-    1.0 - ease(0.6 * brReach, brReach, abs(brOffset))
+  float cornerWallFocus = max(
+    1.0 - smoothEase(0.6 * tlReach, tlReach, abs(tlOffset)),
+    1.0 - smoothEase(0.6 * brReach, brReach, abs(brOffset))
   );
-  vec3 insetLight = vec3(0.60, 0.78, 0.91) * wallRim * (key * key * 0.8 * upperSliver + lowerRight * lowerRight * 0.75 * lowerSliver + 0.005 + 0.35 * wallCorner * uInnerWallFocus);
-  // The caustic follows the curved channel: a white-cyan core with blue lips, streaked
-  // by the glass it passes through.
-  // Filaments run parallel to the edge; their brightness drifts slowly along it.
-  float drift = 0.7 + 0.6 * contourNoise(arc / (uUnit * 0.09) + 7.0);
-  float filaments = (bell(innerSd + uUnit * 0.021, uUnit * 0.0035 * thickness) * 0.9 + bell(inner2Sd + uUnit * 0.028, uUnit * 0.004 / thickness) * 0.7) * centerFade + bell(rimSd + uUnit * 0.035, uUnit * 0.003 * thickness) * 0.5;
-  vec3 lowerRelief = (
-    vec3(0.03, 0.32, 1.0) * bell(sd + uUnit * 0.038, uUnit * 0.022 + aa * 0.2) * 0.55 +
-    vec3(0.22, 0.62, 1.0) * bell(sd + uUnit * 0.027, uUnit * 0.012 + aa * 0.1) * 0.7 +
-    vec3(0.75, 0.97, 1.0) * filaments * 1.35
-  ) * drift * lowerRight * glass * uHighlights * uRelief * (1.0 - 0.85 * ease(0.6, 1.0, t)) * (1.0 - settle);
-  lowerRelief *= 1.0 - pores.x * 0.22;
-  lowerRelief += vec3(0.45, 0.85, 1.0) * pores.y * 0.10 * lowerRight * glass * uHighlights * uRelief * (1.0 - settle);
-  // With focus at 0 the inner wall is drawn whole. Raising it keeps the wall on a
-  // pale plate to its strongly lit segments and its upper-left and lower-right
-  // arcs, since there its weak light clips to white and its shadow would
-  // otherwise outline the full contour.
-  float wallLit = clamp(key * key * 0.8 * upperSliver + lowerRight * lowerRight * 0.75 * lowerSliver, 0.0, 1.0);
-  float wallGate = mix(1.0, max(ease(0.2, 0.7, wallLit), wallCorner), uPageLight * uInnerWallFocus);
-  color *= 1.0 - wallShadow * wallGate * uRelief * 0.12 * (1.0 - ink.a);
-  color += backFace + lowerRelief + insetLight * wallGate * glass * uHighlights * uRelief * (1.0 - ink.a) * mix(rimVisibility, 0.9, key);
-  alpha = max(alpha, max(lowerRelief.r, max(lowerRelief.g, lowerRelief.b)));
-  float rimLight = rim * (0.07 + key * 0.55) + inner * (0.025 + key * 0.16) + inner2 * 0.025;
-  // Micro-bubbles along the lit edges, strongest where the key and the lower fill land.
-  float speckSize = max(uUnit * 0.0042, 0.8 / uDpr);
-  float bubbles = driftingSpecks(arc, rimLineSd + uUnit * 0.002, speckSize, 0.0, t) * 0.9;
-  bubbles += specks(arc, innerSd + uUnit * 0.012, speckSize * 0.8, 97.0) * 0.6 * centerFade;
-  bubbles += specks(arc, insetSd, speckSize * 0.9, 191.0) * 0.5 * centerFade;
-  rimLight += bubbles * (0.04 + key * 0.5 + lowerRight * 0.45);
-  rimLight = rimLight * (1.0 - pores.x * 0.35) + pores.y * (key * 0.16 + lowerRight * 0.12);
-  vec3 spectralRim = vec3(0.0);
-  vec3 spectralWeights = vec3(0.0);
-  for (int i = 0; i < BANDS; i++) {
-    float s = float(i) / float(BANDS - 1);
-    vec3 w = spectrum(s);
-    spectralRim += w * bell(rimSd + (s - 0.5) * uUnit * 0.011 * uDispersion + uUnit * 0.003, uUnit * 0.002 * thickness);
-    spectralWeights += w;
-  }
-  spectralRim /= spectralWeights;
-  vec3 reflection = (vec3(0.6, 0.76, 0.9) * rimLight * 1.15 + spectralRim * (0.02 + ink.a * 0.32)) * uHighlights * glass * mix(rimVisibility, 1.2, key);
-  float sphericalRim = (
-    bell(sd + uUnit * lensScale * 0.008, uUnit * lensScale * 0.009) * 0.60 +
-    bell(insetSd, uUnit * lensScale * 0.008) * 0.40
-  ) * (0.25 + 0.75 * abs(outward.y)) * (1.0 - ease(0.235, 0.34, t));
-  reflection += vec3(0.65, 0.80, 0.90) * sphericalRim * 1.4 * uHighlights * glass;
-  float cyanKey = pow(max(0.0, -outward.x), 8.0) * (1.0 - ease(0.235, 0.34, t));
-  float cyanLip = bell(sd + uUnit * lensScale * 0.020, uUnit * lensScale * 0.009);
-  cyanLip += bell(insetSd, uUnit * lensScale * 0.005) * 0.35;
-  reflection += vec3(0.015, 0.68, 1.0) * cyanLip * cyanKey * glass * uHighlights * 0.85;
-  // The young drop is full of scattered light: a milky glow behind the artwork.
-  float youth = 1.0 - ease(0.25, 0.37, t);
-  reflection += vec3(0.78, 0.84, 0.9) * youth * 0.07 * (0.5 + 0.5 * radius) * (1.0 - ink.a) * glass;
-  vec3 film = mix(vec3(0.32, 0.0, 0.20), vec3(0.32, 0.08, 0.02), ease(0.75, 1.12, t)) * bell(sd + uUnit * 0.001, uUnit * 0.002) * ink.a * glass * uHighlights;
-  color += reflection + film;
-  alpha = max(alpha, max(reflection.r, max(reflection.g, reflection.b)));
-  vec4 result = vec4(color * mask, alpha * mask);
 
-  // Reflections outside the body are faint glass echoes, not solid colored outlines.
-  float outer = bell(rimSd - uUnit * 0.012, uUnit * 0.0028 * thickness) * (0.04 + key * 0.2) * (0.5 + contourNoise(arc / grainScale + 131.0));
-  outer += specks(arc, rimSd - uUnit * 0.012, speckSize, 277.0) * (0.03 + key * 0.3 + lowerRight * 0.25);
-  // A single wave leaves the rim as the plate forms, stays close to it and fades.
-  float waveAge = ease(0.36, 1.1, t);
-  float wave = bell(sd - uUnit * (0.014 + 0.03 * waveAge), uUnit * 0.004 + aa * 0.3) * 0.05 * ease(0.34, 0.42, t) * (1.0 - waveAge);
-  // The echo is lit through the plate, so it can carry the plate's hue and, on a
-  // dark page, stay quieter than the rim it echoes.
-  vec3 echoTint = mix(vec3(0.43, 0.62, 0.79), uTile + (1.0 - uTile) * 0.4, 0.5 * uEchoTint);
-  float echoLevel = mix(1.0, mix(0.6, 1.0, uPageLight), uEchoTint);
-  // The echo line runs around all four sides. The wave stays faint on the left
-  // and right, where a full ring would read as streaks beside the glass.
-  float waveSides = mix(1.0, 0.10, ease(0.25, 0.80, abs(outward.x)));
-  vec3 ghost = (echoTint + ink.rgb * 0.6) * (outer + wave * waveSides) * glass * uHighlights * rimVisibility * echoLevel;
-  float exterior = max(ghost.r, max(ghost.g, ghost.b)) * 1.8;
-  result.rgb += exteriorColor(ghost * 1.8, exterior);
-  result.a = max(result.a, exterior);
-  // Resolve directly to the source, retaining its full size after the glass fades.
-  return mix(result * shown, source, settle);
+  vec3 insetLight = vec3(0.60, 0.78, 0.91) * innerWallRim * (keyLightIntensity * keyLightIntensity * 0.8 * upperSliver + lowerRightFill * lowerRightFill * 0.75 * lowerSliver + 0.005 + 0.35 * cornerWallFocus * uInnerWallFocus);
+
+  float filamentDrift = 0.7 + 0.6 * edgeContourNoise(arcLength / (uUnit * 0.09) + 7.0);
+  float causticFilaments = (gaussianBell(innerSDF + uUnit * 0.021, uUnit * 0.0035 * wallThickness) * 0.9 + gaussianBell(innerSecondarySDF + uUnit * 0.028, uUnit * 0.004 / wallThickness) * 0.7) * centerDecayProg + gaussianBell(rimSDF + uUnit * 0.035, uUnit * 0.003 * wallThickness) * 0.5;
+
+  vec3 lowerCausticRelief = (
+    vec3(0.03, 0.32, 1.0) * gaussianBell(signedDist + uUnit * 0.038, uUnit * 0.022 + aaWidth * 0.2) * 0.55 +
+    vec3(0.22, 0.62, 1.0) * gaussianBell(signedDist + uUnit * 0.027, uUnit * 0.012 + aaWidth * 0.1) * 0.7 +
+    vec3(0.75, 0.97, 1.0) * causticFilaments * 1.35
+  ) * filamentDrift * lowerRightFill * glassPresence * uHighlights * uRelief * (1.0 - 0.85 * smoothEase(0.6, 1.0, t)) * (1.0 - settleProg);
+
+  lowerCausticRelief *= 1.0 - surfacePores.x * 0.22;
+  lowerCausticRelief += vec3(0.45, 0.85, 1.0) * surfacePores.y * 0.10 * lowerRightFill * glassPresence * uHighlights * uRelief * (1.0 - settleProg);
+
+  float wallLitFactor = clamp(keyLightIntensity * keyLightIntensity * 0.8 * upperSliver + lowerRightFill * lowerRightFill * 0.75 * lowerSliver, 0.0, 1.0);
+  float wallGateFactor = mix(1.0, max(smoothEase(0.2, 0.7, wallLitFactor), cornerWallFocus), uPageLight * uInnerWallFocus);
+
+  compositeRGB *= 1.0 - innerWallShadow * wallGateFactor * uRelief * 0.12 * (1.0 - refractedColor.a);
+  compositeRGB += transmittedBackFace + lowerCausticRelief + insetLight * wallGateFactor * glassPresence * uHighlights * uRelief * (1.0 - refractedColor.a) * mix(rimVisibilityFactor, 0.9, keyLightIntensity);
+  compositeAlpha = max(compositeAlpha, max(lowerCausticRelief.r, max(lowerCausticRelief.g, lowerCausticRelief.b)));
+
+  float specularRimGlint = rimCrest * (0.07 + keyLightIntensity * 0.55) + innerCrest * (0.025 + keyLightIntensity * 0.16) + innerSecondaryCrest * 0.025;
+  float microBubbleSize = max(uUnit * 0.0042, 0.8 / uDpr);
+  float dynamicBubbles = generateDriftingSpecks(arcLength, rimContourSDF + uUnit * 0.002, microBubbleSize, 0.0, t) * 0.9;
+  dynamicBubbles += generateSpecks(arcLength, innerSDF + uUnit * 0.012, microBubbleSize * 0.8, 97.0) * 0.6 * centerDecayProg;
+  dynamicBubbles += generateSpecks(arcLength, insetSignedDist, microBubbleSize * 0.9, 191.0) * 0.5 * centerDecayProg;
+
+  specularRimGlint += dynamicBubbles * (0.04 + keyLightIntensity * 0.5 + lowerRightFill * 0.45);
+  specularRimGlint = specularRimGlint * (1.0 - surfacePores.x * 0.35) + surfacePores.y * (keyLightIntensity * 0.16 + lowerRightFill * 0.12);
+
+  vec3 dispersiveRimSpec = vec3(0.0);
+  vec3 dispersiveWeights = vec3(0.0);
+  for (int band = 0; band < NUM_SPECTRAL_BANDS; band++) {
+    float spectralProg = float(band) / float(NUM_SPECTRAL_BANDS - 1);
+    vec3 bandColor = evaluateSpectrum(spectralProg);
+    dispersiveRimSpec += bandColor * gaussianBell(rimSDF + (spectralProg - 0.5) * uUnit * 0.011 * uDispersion + uUnit * 0.003, uUnit * 0.002 * wallThickness);
+    dispersiveWeights += bandColor;
+  }
+  dispersiveRimSpec /= dispersiveWeights;
+
+  vec3 rimReflections = (vec3(0.6, 0.76, 0.9) * specularRimGlint * 1.15 + dispersiveRimSpec * (0.02 + refractedColor.a * 0.32)) * uHighlights * glassPresence * mix(rimVisibilityFactor, 1.2, keyLightIntensity);
+  float sphericalRimHighlight = (
+    gaussianBell(signedDist + uUnit * activeScale * 0.008, uUnit * activeScale * 0.009) * 0.60 +
+    gaussianBell(insetSignedDist, uUnit * activeScale * 0.008) * 0.40
+  ) * (0.25 + 0.75 * abs(normalOutward.y)) * (1.0 - smoothEase(0.235, 0.34, t));
+  rimReflections += vec3(0.65, 0.80, 0.90) * sphericalRimHighlight * 1.4 * uHighlights * glassPresence;
+
+  float cyanSpecular = pow(max(0.0, -normalOutward.x), 8.0) * (1.0 - smoothEase(0.235, 0.34, t));
+  float cyanLipHighlight = gaussianBell(signedDist + uUnit * activeScale * 0.020, uUnit * activeScale * 0.009);
+  cyanLipHighlight += gaussianBell(insetSignedDist, uUnit * activeScale * 0.005) * 0.35;
+  rimReflections += vec3(0.015, 0.68, 1.0) * cyanLipHighlight * cyanSpecular * glassPresence * uHighlights * 0.85;
+
+  float earlyYouth = 1.0 - smoothEase(0.25, 0.37, t);
+  rimReflections += vec3(0.78, 0.84, 0.9) * earlyYouth * 0.07 * (0.5 + 0.5 * superNormRadius) * (1.0 - refractedColor.a) * glassPresence;
+
+  vec3 thinFilmColor = mix(vec3(0.32, 0.0, 0.20), vec3(0.32, 0.08, 0.02), smoothEase(0.75, 1.12, t)) * gaussianBell(signedDist + uUnit * 0.001, uUnit * 0.002) * refractedColor.a * glassPresence * uHighlights;
+  compositeRGB += rimReflections + thinFilmColor;
+  compositeAlpha = max(compositeAlpha, max(rimReflections.r, max(rimReflections.g, rimReflections.b)));
+
+  vec4 finalPlateResult = vec4(compositeRGB * plateMask, compositeAlpha * plateMask);
+
+  // Exterior echo wave & reflections
+  float exteriorEcho = gaussianBell(rimSDF - uUnit * 0.012, uUnit * 0.0028 * wallThickness) * (0.04 + keyLightIntensity * 0.2) * (0.5 + edgeContourNoise(arcLength / grainScale + 131.0));
+  exteriorEcho += generateSpecks(arcLength, rimSDF - uUnit * 0.012, microBubbleSize, 277.0) * (0.03 + keyLightIntensity * 0.3 + lowerRightFill * 0.25);
+
+  float waveAgeProgress = smoothEase(0.36, 1.1, t);
+  float solitaryWave = gaussianBell(signedDist - uUnit * (0.014 + 0.03 * waveAgeProgress), uUnit * 0.004 + aaWidth * 0.3) * 0.05 * smoothEase(0.34, 0.42, t) * (1.0 - waveAgeProgress);
+
+  vec3 echoColorVector = mix(vec3(0.43, 0.62, 0.79), uTile + (1.0 - uTile) * 0.4, 0.5 * uEchoTint);
+  float echoStrength = mix(1.0, mix(0.6, 1.0, uPageLight), uEchoTint);
+  float lateralWaveSuppression = mix(1.0, 0.10, smoothEase(0.25, 0.80, abs(normalOutward.x)));
+
+  vec3 ghostEcho = (echoColorVector + refractedColor.rgb * 0.6) * (exteriorEcho + solitaryWave * lateralWaveSuppression) * glassPresence * uHighlights * rimVisibilityFactor * echoStrength;
+  float exteriorLuma = max(ghostEcho.r, max(ghostEcho.g, ghostEcho.b)) * 1.8;
+  finalPlateResult.rgb += calculateExteriorReflection(ghostEcho * 1.8, exteriorLuma);
+  finalPlateResult.a = max(finalPlateResult.a, exteriorLuma);
+
+  return mix(finalPlateResult * visibilityFade, restingArtwork, settleProg);
 }
 
-// The second drop is a radial lens with spherical aberration. Its core magnifies the
-// wordmark (inverting it while the drop is tall), so between center and edge the image
-// runs through focus and floods the drop; across its rim a thin ring of the image is
-// stretched outward, and ripples crossing the rim repeat that ring in bands.
-vec4 wordmarkLens(vec2 p) {
+// Wordmark second fluid drop simulation stage
+vec4 evaluateWordmarkFluid(vec2 pos) {
   float t = uTime;
   if (uWordmarkEnabled < 0.5) return vec4(0.0);
   if (t < 1.46) return vec4(0.0);
-  if (t >= 3.3) return imageAt(uText, p, uTextBox);
-  float radius = max(uDrop.x, 1.0);
-  float r = length(p);
-  if (r > radius + uUnit * 0.6) return vec4(0.0);
-  vec2 outward = p / max(r, 0.001);
-  float q = r / radius;
-  float aa = 1.0 / uDpr;
-  float edge = radius - r;
-  float mask = ease(-aa, aa, edge);
-  float young = 1.0 - ease(1.72, 2.02, t);
+  if (t >= 3.3) return sampleArtworkLOD(uText, pos, uTextBox);
 
-  float core = min(uDrop.y, radius);
-  float coreQ = r / max(core, 1.0);
-  float edgeLanding = core / max(uDropLens.x, 0.01);
-  float center = uDrop.w;
-  float landing = r < core
-    ? edgeLanding * coreQ * (center + (1.0 - center) * pow(coreQ, uDropLens.y))
-    : edgeLanding + (r - core) * uDrop.z;
-  float rimZone = ease(core * 0.9, core, r);
-  float k = 2.0 * PI / max(uDropLens.w, 1.0);
-  landing += uDropLens.z * sin(k * r - uDropWave.x) * ease(0.0, uDropLens.w, r) * mix(uDropWave.y, 1.0, rimZone);
-  vec2 bend = outward * (landing - r);
-  float spread = uDropWave.z * uDispersion * (0.15 + 0.85 * rimZone);
+  float dropRadius = max(uDrop.x, 1.0);
+  float distToCenter = length(pos);
+  if (distToCenter > dropRadius + uUnit * 0.6) return vec4(0.0);
 
-  vec3 color = vec3(0.0);
-  vec3 weights = vec3(0.0);
-  float alpha = 0.0;
-  float opacity = ease(1.46, 1.49, t);
-  for (int i = 0; i < BANDS; i++) {
-    float s = float(i) / float(BANDS - 1);
-    vec2 source = p + bend * (1.0 + spread * (s - 0.5));
-    vec4 ink = imageAt(uText, source, uTextBox);
-    vec3 w = spectrum(s);
-    color += ink.rgb * w;
-    alpha += ink.a * (w.r + w.g + w.b);
-    weights += w;
+  vec2 normalOutward = pos / max(distToCenter, 0.001);
+  float normalizedRadius = distToCenter / dropRadius;
+  float aaWidth = 1.0 / uDpr;
+  float edgeDist = dropRadius - distToCenter;
+  float dropletMask = smoothEase(-aaWidth, aaWidth, edgeDist);
+  float youngStage = 1.0 - smoothEase(1.72, 2.02, t);
+
+  float coreRadius = min(uDrop.y, dropRadius);
+  float coreNormalizedRadius = distToCenter / max(coreRadius, 1.0);
+  float rimLandingOffset = coreRadius / max(uDropLens.x, 0.01);
+  float centerExponent = uDrop.w;
+  float landingCoord = distToCenter < coreRadius
+    ? rimLandingOffset * coreNormalizedRadius * (centerExponent + (1.0 - centerExponent) * pow(coreNormalizedRadius, uDropLens.y))
+    : rimLandingOffset + (distToCenter - coreRadius) * uDrop.z;
+
+  float rimTransitionZone = smoothEase(coreRadius * 0.9, coreRadius, distToCenter);
+  float waveFrequency = 2.0 * PI / max(uDropLens.w, 1.0);
+  landingCoord += uDropLens.z * sin(waveFrequency * distToCenter - uDropWave.x) * smoothEase(0.0, uDropLens.w, distToCenter) * mix(uDropWave.y, 1.0, rimTransitionZone);
+
+  vec2 lateralDeflection = normalOutward * (landingCoord - distToCenter);
+  float chromaticSpread = uDropWave.z * uDispersion * (0.15 + 0.85 * rimTransitionZone);
+
+  vec3 accumulatedRGB = vec3(0.0);
+  vec3 accumulatedSpectralWeights = vec3(0.0);
+  float accumulatedAlpha = 0.0;
+  float dropletOpacity = smoothEase(1.46, 1.49, t);
+
+  for (int band = 0; band < NUM_SPECTRAL_BANDS; band++) {
+    float spectralProg = float(band) / float(NUM_SPECTRAL_BANDS - 1);
+    vec2 deflectedCoord = pos + lateralDeflection * (1.0 + chromaticSpread * (spectralProg - 0.5));
+    vec4 sampledInk = sampleArtworkLOD(uText, deflectedCoord, uTextBox);
+    vec3 bandColor = evaluateSpectrum(spectralProg);
+    accumulatedRGB += sampledInk.rgb * bandColor;
+    accumulatedAlpha += sampledInk.a * (bandColor.r + bandColor.g + bandColor.b);
+    accumulatedSpectralWeights += bandColor;
   }
-  color /= weights;
-  alpha /= weights.r + weights.g + weights.b;
-  color *= 1.0 + uCaustics * bell(edge, uUnit * 0.06) * 0.15;
-  color *= mask;
-  alpha *= mask;
-  // A fresh drop is full of scattered light: overexposed ink, a milky body and a cool
-  // spill around it, all fading as it flattens.
-  float fresh = 1.0 - ease(1.62, 1.95, t);
-  color = min(color * (1.0 + 0.6 * fresh), vec3(1.0));
-  float milk = mask * fresh * 0.30 * (0.6 + 0.4 * q) * uCaustics;
-  color += vec3(0.75, 0.82, 0.9) * milk * (1.0 - alpha);
-  float spill = exp(-max(r - radius, 0.0) / (uUnit * 0.17)) * (1.0 - mask) * fresh * 0.12;
-  // As it spreads, the drop keeps a faint blue haze that dies with the waves.
-  spill += exp(-max(r - radius, 0.0) / (uUnit * 0.4)) * (1.0 - fresh) * 0.035 * exp(-max(t - 1.95, 0.0) / 0.45) * (1.0 - ease(2.8, 3.1, t));
-  color += vec3(0.32, 0.6, 1.0) * spill;
-  alpha = max(alpha, max(milk, spill));
-  vec3 sphereNormal = normalize(vec3(p / radius, sqrt(max(0.005, 1.0 - q * q))));
-  vec3 reflected = reflect(vec3(0.0, 0.0, -1.0), sphereNormal);
-  float softbox = bell(reflected.x + 0.3, 0.2) * bell(reflected.y - 0.55, 0.15);
-  float smallLight = bell(reflected.x - 0.25, 0.14) * bell(reflected.y - 0.65, 0.08);
-  float broadLight = bell(reflected.x + 0.35, 0.65) * bell(reflected.y - 0.6, 0.45);
-  float surface = (softbox * 0.8 + smallLight * 0.6 + broadLight * 0.22) * young * uHighlights * mask;
-  color += vec3(0.85, 0.95, 1.0) * surface;
-  alpha = max(alpha, surface);
 
-  float key = pow(0.5 + 0.5 * dot(outward, normalize(vec2(-0.6, 0.8))), 7.0);
-  float rings = 0.0;
-  for (int i = 0; i < 4; i++) {
-    float j = float(i);
-    float ringRadius = radius + (j - 1.0) * uUnit * 0.022 * (1.0 + 0.55 * ease(1.8, 3.1, t));
-    rings += bell(r - ringRadius, uUnit * (0.003 + j * 0.001)) * (0.11 / (1.0 + j));
+  accumulatedRGB /= accumulatedSpectralWeights;
+  accumulatedAlpha /= (accumulatedSpectralWeights.r + accumulatedSpectralWeights.g + accumulatedSpectralWeights.b);
+
+  accumulatedRGB *= 1.0 + uCaustics * gaussianBell(edgeDist, uUnit * 0.06) * 0.15;
+  accumulatedRGB *= dropletMask;
+  accumulatedAlpha *= dropletMask;
+
+  float freshnessFactor = 1.0 - smoothEase(1.62, 1.95, t);
+  accumulatedRGB = min(accumulatedRGB * (1.0 + 0.6 * freshnessFactor), vec3(1.0));
+  float internalMilkyScattering = dropletMask * freshnessFactor * 0.30 * (0.6 + 0.4 * normalizedRadius) * uCaustics;
+  accumulatedRGB += vec3(0.75, 0.82, 0.9) * internalMilkyScattering * (1.0 - accumulatedAlpha);
+
+  float perimeterSpill = exp(-max(distToCenter - dropRadius, 0.0) / (uUnit * 0.17)) * (1.0 - dropletMask) * freshnessFactor * 0.12;
+  perimeterSpill += exp(-max(distToCenter - dropRadius, 0.0) / (uUnit * 0.4)) * (1.0 - freshnessFactor) * 0.035 * exp(-max(t - 1.95, 0.0) / 0.45) * (1.0 - smoothEase(2.8, 3.1, t));
+  accumulatedRGB += vec3(0.32, 0.6, 1.0) * perimeterSpill;
+  accumulatedAlpha = max(accumulatedAlpha, max(internalMilkyScattering, perimeterSpill));
+
+  vec3 dropletSphereNorm = normalize(vec3(pos / dropRadius, sqrt(max(0.005, 1.0 - normalizedRadius * normalizedRadius))));
+  vec3 dropletReflectedRay = reflect(vec3(0.0, 0.0, -1.0), dropletSphereNorm);
+  float softboxSpecular = gaussianBell(dropletReflectedRay.x + 0.3, 0.2) * gaussianBell(dropletReflectedRay.y - 0.55, 0.15);
+  float pinpointSpecular = gaussianBell(dropletReflectedRay.x - 0.25, 0.14) * gaussianBell(dropletReflectedRay.y - 0.65, 0.08);
+  float broadSpecular = gaussianBell(dropletReflectedRay.x + 0.35, 0.65) * gaussianBell(dropletReflectedRay.y - 0.6, 0.45);
+
+  float surfaceHighlights = (softboxSpecular * 0.8 + pinpointSpecular * 0.6 + broadSpecular * 0.22) * youngStage * uHighlights * dropletMask;
+  accumulatedRGB += vec3(0.85, 0.95, 1.0) * surfaceHighlights;
+  accumulatedAlpha = max(accumulatedAlpha, surfaceHighlights);
+
+  float directionalKey = pow(0.5 + 0.5 * dot(normalOutward, normalize(vec2(-0.6, 0.8))), 7.0);
+  float concentricRipples = 0.0;
+  for (int ringIdx = 0; ringIdx < 4; ringIdx++) {
+    float j = float(ringIdx);
+    float currentRingRadius = dropRadius + (j - 1.0) * uUnit * 0.022 * (1.0 + 0.55 * smoothEase(1.8, 3.1, t));
+    concentricRipples += gaussianBell(distToCenter - currentRingRadius, uUnit * (0.003 + j * 0.001)) * (0.11 / (1.0 + j));
   }
-  float age = max(0.0, t - 1.46);
-  float fade = exp(-age / max(uDecay, 0.1)) * (1.0 - ease(2.65, 3.3, t));
-  // Only the drop's own nested rims are lit; no broad glow or crest travels out
-  // beyond it.
-  float sideLight = pow(abs(outward.x), 10.0) * mix(1.0, 0.72, step(0.0, p.x));
-  vec3 reflection = vec3(0.4, 0.62, 0.79) * rings * (0.3 + key * 2.0 + sideLight * 1.8) * fade * uHighlights;
-  color += reflection;
-  alpha = max(alpha, max(reflection.r, max(reflection.g, reflection.b)));
-  return vec4(color, alpha) * opacity;
+
+  float waveAge = max(0.0, t - 1.46);
+  float waveAttenuation = exp(-waveAge / max(uDecay, 0.1)) * (1.0 - smoothEase(2.65, 3.3, t));
+  float lateralRays = pow(abs(normalOutward.x), 10.0) * mix(1.0, 0.72, step(0.0, pos.x));
+
+  vec3 rippleSpecular = vec3(0.4, 0.62, 0.79) * concentricRipples * (0.3 + directionalKey * 2.0 + lateralRays * 1.8) * waveAttenuation * uHighlights;
+  accumulatedRGB += rippleSpecular;
+  accumulatedAlpha = max(accumulatedAlpha, max(rippleSpecular.r, max(rippleSpecular.g, rippleSpecular.b)));
+
+  return vec4(accumulatedRGB, accumulatedAlpha) * dropletOpacity;
 }
 
 void main() {
-  vec2 p = (gl_FragCoord.xy - uResolution * 0.5) / uDpr;
-  vec4 icon = iconLens(p);
-  vec4 wordmark = wordmarkLens(p);
-  vec4 result = wordmark + icon * (1.0 - wordmark.a);
-  // RGB and alpha use the same coverage; preserve saturated spectral fringes when
-  // compositing onto transparent or colored backgrounds.
-  result.a = clamp(max(result.a, max(result.r, max(result.g, result.b))), 0.0, 1.0);
-  float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
-  outColor = vec4(clamp(result.rgb + dither * result.a, vec3(0.0), vec3(result.a)), result.a);
+  vec2 screenCoords = (gl_FragCoord.xy - uResolution * 0.5) / uDpr;
+  vec4 iconOutput = evaluateIconPlate(screenCoords);
+  vec4 wordmarkOutput = evaluateWordmarkFluid(screenCoords);
+
+  vec4 finalComposite = wordmarkOutput + iconOutput * (1.0 - wordmarkOutput.a);
+  finalComposite.a = clamp(max(finalComposite.a, max(finalComposite.r, max(finalComposite.g, finalComposite.b))), 0.0, 1.0);
+
+  // High-frequency subtle spatial dither to eliminate color banding in smooth gradients
+  float ditherNoise = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 255.0;
+  outColor = vec4(clamp(finalComposite.rgb + ditherNoise * finalComposite.a, vec3(0.0), vec3(finalComposite.a)), finalComposite.a);
 }
 `;
 
-// The photographic finish is independent of the logo and uses premultiplied coverage.
+/** Secondary fragment shader performing multi-scale optical bloom & filmic diffusion */
 export const liquidGlassLogoComposite = `#version 300 es
 precision highp float;
+
 uniform sampler2D uScene;
 uniform vec2 uResolution;
 uniform float uDpr;
@@ -594,32 +615,32 @@ uniform float uBloom;
 uniform float uTime;
 uniform float uFinish;
 uniform float uPageLight;
+
 out vec4 outColor;
 
-// Filter premultiplied color and coverage together. The footprint is in CSS
-// pixels, so the glass has the same optical softness on normal and retina screens.
-vec4 softenedWaves(vec2 uv, float lod) {
-  vec2 d = vec2(uDpr * 0.90) / uResolution;
-  vec4 blurred = textureLod(uScene, uv, lod) * 0.25;
-  blurred += textureLod(uScene, uv + vec2(d.x, 0.0), lod) * 0.125;
-  blurred += textureLod(uScene, uv - vec2(d.x, 0.0), lod) * 0.125;
-  blurred += textureLod(uScene, uv + vec2(0.0, d.y), lod) * 0.125;
-  blurred += textureLod(uScene, uv - vec2(0.0, d.y), lod) * 0.125;
-  blurred += textureLod(uScene, uv + d, lod) * 0.0625;
-  blurred += textureLod(uScene, uv - d, lod) * 0.0625;
-  blurred += textureLod(uScene, uv + vec2(d.x, -d.y), lod) * 0.0625;
-  blurred += textureLod(uScene, uv + vec2(-d.x, d.y), lod) * 0.0625;
-  return blurred;
+// Multi-tap Gaussian-weighted optical sample kernel
+vec4 filterOpticalSoftness(vec2 uvCoord, float lodLevel) {
+  vec2 texelStep = vec2(uDpr * 0.90) / uResolution;
+  vec4 filteredColor = textureLod(uScene, uvCoord, lodLevel) * 0.25;
+  filteredColor += textureLod(uScene, uvCoord + vec2(texelStep.x, 0.0), lodLevel) * 0.125;
+  filteredColor += textureLod(uScene, uvCoord - vec2(texelStep.x, 0.0), lodLevel) * 0.125;
+  filteredColor += textureLod(uScene, uvCoord + vec2(0.0, texelStep.y), lodLevel) * 0.125;
+  filteredColor += textureLod(uScene, uvCoord - vec2(0.0, texelStep.y), lodLevel) * 0.125;
+  filteredColor += textureLod(uScene, uvCoord + texelStep, lodLevel) * 0.0625;
+  filteredColor += textureLod(uScene, uvCoord - texelStep, lodLevel) * 0.0625;
+  filteredColor += textureLod(uScene, uvCoord + vec2(texelStep.x, -texelStep.y), lodLevel) * 0.0625;
+  filteredColor += textureLod(uScene, uvCoord + vec2(-texelStep.x, texelStep.y), lodLevel) * 0.0625;
+  return filteredColor;
 }
 
 void main() {
-  vec2 uv = gl_FragCoord.xy / uResolution;
-  vec4 base = textureLod(uScene, uv, 0.0);
-  float offset = log2(max(uDpr, 0.5));
-  // Only the exterior liquid is softened. The artwork and its final resting
-  // silhouette retain their native sharpness and original coverage.
+  vec2 uvCoord = gl_FragCoord.xy / uResolution;
+  vec4 baseSample = textureLod(uScene, uvCoord, 0.0);
+  float dprLodOffset = log2(max(uDpr, 0.5));
+
   float wavePhase = smoothstep(0.29, 0.41, uTime) * (1.0 - smoothstep(1.25, 1.50, uTime));
   float waveMask = 0.0;
+
   if (wavePhase > 0.001) {
     float enter = smoothstep(0.025, 0.16, uTime);
     float expand = enter * (0.64 + 0.41 * (1.0 - exp(-max(uTime - 0.16, 0.0) * 5.8)));
@@ -632,21 +653,24 @@ void main() {
     float distance = (radius - 1.0) * halfSize;
     waveMask = smoothstep(0.0, max(0.75, uUnit * 0.004), distance) * wavePhase;
     if (waveMask > 0.001) {
-      base = mix(base, softenedWaves(uv, max(0.0, offset + 0.15)), waveMask * 0.94);
+      baseSample = mix(baseSample, filterOpticalSoftness(uvCoord, max(0.0, dprLodOffset + 0.15)), waveMask * 0.94);
     }
   }
-  vec3 diffused = textureLod(uScene, uv, offset + 2.5).rgb * 0.50;
-  diffused += textureLod(uScene, uv, offset + 4.1).rgb * 0.32;
-  diffused += textureLod(uScene, uv, offset + 5.4).rgb * 0.18;
-  float light = max(base.r, max(base.g, base.b));
-  // Bright ink retains its calibrated color; light diffuses into its surroundings.
-  float effect = 1.0 - smoothstep(0.0, 1.0, uFinish);
-  // Bloom is light spilling onto a dark page. A pale page already holds that
-  // light, and adding it where the plate thins out reads as a flash.
-  vec3 glow = diffused * uBloom * 0.20 * (1.0 - min(1.0, light * 1.2)) * effect * (1.0 - uPageLight);
-  float alpha = clamp(max(base.a, max(glow.r, max(glow.g, glow.b))), 0.0, 1.0);
-  float grain = fract(sin(dot(gl_FragCoord.xy + floor(uTime * 24.0), vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
-  vec3 color = base.rgb + glow + grain * 0.009 * base.a * clamp(light * 3.0 + 0.05, 0.05, 1.0) * effect * (1.0 - waveMask * 0.85);
-  outColor = vec4(clamp(color, vec3(0.0), vec3(alpha)), alpha);
+
+  // Multi-tier Mip-Chain Pyramid for wide dispersion bloom
+  vec3 diffuseGlow = textureLod(uScene, uvCoord, dprLodOffset + 2.5).rgb * 0.50;
+  diffuseGlow += textureLod(uScene, uvCoord, dprLodOffset + 4.1).rgb * 0.32;
+  diffuseGlow += textureLod(uScene, uvCoord, dprLodOffset + 5.4).rgb * 0.18;
+
+  float peakLuma = max(baseSample.r, max(baseSample.g, baseSample.b));
+  float sequenceFinishMask = 1.0 - smoothstep(0.0, 1.0, uFinish);
+  vec3 opticalBloom = diffuseGlow * uBloom * 0.20 * (1.0 - min(1.0, peakLuma * 1.2)) * sequenceFinishMask * (1.0 - uPageLight);
+  float compositeAlpha = clamp(max(baseSample.a, max(opticalBloom.r, max(opticalBloom.g, opticalBloom.b))), 0.0, 1.0);
+
+  // Cinematic temporal grain
+  float temporalGrain = fract(sin(dot(gl_FragCoord.xy + floor(uTime * 24.0), vec2(12.9898, 78.233))) * 43758.5453) - 0.5;
+  vec3 compositeColor = baseSample.rgb + opticalBloom + temporalGrain * 0.009 * baseSample.a * clamp(peakLuma * 3.0 + 0.05, 0.05, 1.0) * sequenceFinishMask * (1.0 - waveMask * 0.85);
+
+  outColor = vec4(clamp(compositeColor, vec3(0.0), vec3(compositeAlpha)), compositeAlpha);
 }
 `;
