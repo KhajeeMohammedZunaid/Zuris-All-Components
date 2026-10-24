@@ -48,7 +48,14 @@ function Button({
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   const isNative =
     nativeButton ??
-    (React.isValidElement(render) ? render.type === "button" : undefined)
+    (React.isValidElement(render)
+      ? typeof render.type === "string"
+        ? render.type === "button"
+        : (render.type as any)?.displayName === "motion.button" ||
+          (render.type as any)?.name === "button"
+          ? true
+          : undefined
+      : undefined)
 
   return (
     <ButtonPrimitive

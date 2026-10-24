@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 
 import { motion } from "motion/react";
+import { BorderBeam } from "border-beam";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
@@ -294,29 +295,38 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
 
       {/* Main Hero Content: Centered in the middle */}
       <div className="relative z-10 w-full max-w-3xl mx-auto px-5 sm:px-8 my-auto py-5 sm:py-6 lg:py-4 flex flex-col items-center text-center">
-        {/* Top Growth Pill Badge: Single line guaranteed (powered by motion/react) */}
+        {/* Top Growth Pill Badge: Single line guaranteed (powered by border-beam) */}
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-          whileHover={{ scale: 1.02 }}
-          className="inline-flex items-center justify-center gap-1.5 xs:gap-2 px-3 py-1 rounded-full bg-[#0a183d]/70 hover:bg-[#0a183d]/90 backdrop-blur-md border border-white/15 hover:border-white/30 text-[11px] sm:text-xs text-white/90 mb-2.5 sm:mb-3.5 font-normal tracking-[-0.02em] whitespace-nowrap shrink-0 max-w-max select-none mx-auto transition-colors group cursor-pointer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.12 }}
+          className="mb-2.5 sm:mb-3.5 mx-auto inline-flex"
         >
-          <span className="whitespace-nowrap">#1 Cloud Platform</span>
-          <span className="text-white/30 text-[10px]">|</span>
-          <Link
-            href="#explore"
-            className="text-white font-medium hover:text-white/80 transition-colors inline-flex items-center gap-1 shrink-0 whitespace-nowrap"
+          <BorderBeam
+            size="sm"
+            colorVariant="ocean"
+            borderRadius={9999}
+            duration={2.5}
+            className="inline-flex rounded-full"
           >
-            <span>Explore platform</span>
-            <svg
-              className="w-2.5 h-2.5 stroke-current stroke-2 fill-none transition-transform duration-200 group-hover:translate-x-0.5"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </Link>
+            <div className="inline-flex items-center justify-center gap-1.5 xs:gap-2 px-3 py-1 rounded-full bg-[#0a183d]/90 backdrop-blur-md border border-white/15 text-[11px] sm:text-xs text-white/90 font-normal tracking-[-0.02em] whitespace-nowrap select-none">
+              <span className="whitespace-nowrap">#1 Cloud Platform</span>
+              <span className="text-white/30 text-[10px]">|</span>
+              <Link
+                href="#explore"
+                className="text-white font-medium inline-flex items-center gap-1 shrink-0 whitespace-nowrap"
+              >
+                <span>Explore platform</span>
+                <svg
+                  className="w-2.5 h-2.5 stroke-current stroke-2 fill-none"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+            </div>
+          </BorderBeam>
         </motion.div>
 
         {/* Main Headline: Word-by-word staggered reveal (powered by motion/react without clipping descenders) */}
@@ -373,8 +383,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           initial={{ opacity: 0, y: 18, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.55, delay: 0.64, ease: [0.16, 1, 0.3, 1] }}
-          whileHover={{ scale: 1.005 }}
-          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl transition-shadow duration-300 focus-within:ring-2 focus-within:ring-[#1864f7]/30 focus-within:border-blue-400"
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl focus-within:ring-2 focus-within:ring-[#1864f7]/30 focus-within:border-blue-400"
         >
           <input
             type="text"
@@ -387,13 +396,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             <Button
               type="submit"
               size="icon"
-              render={
-                <motion.button
-                  whileHover={{ scale: 1.08 }}
-                  whileTap={{ scale: 0.94 }}
-                />
-              }
-              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] hover:bg-[#1056e0] text-white flex items-center justify-center cursor-pointer shrink-0 shadow-sm hover:shadow-[0_0_12px_rgba(24,100,247,0.5)] transition-shadow border-none p-0"
+              className="w-7 h-7 sm:w-7.5 sm:h-7.5 rounded-full bg-[#1864f7] hover:bg-[#1056e0] text-white flex items-center justify-center cursor-pointer shrink-0 shadow-sm transition-colors border-none p-0"
               aria-label="Submit automation prompt"
             >
               <svg
