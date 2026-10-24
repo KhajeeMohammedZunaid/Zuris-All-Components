@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { motion, useMotionValue, useTransform, animate, PanInfo } from "motion/react";
-import { useTheme } from "next-themes";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { defaultArcCards, type ArcCardItemData } from "./arc-cards-data";
@@ -90,13 +89,9 @@ export function ArcCards({
   className,
   headline = "Designed for modern interfaces",
   cards = defaultArcCards,
-  showThemeToggle = true,
+  showThemeToggle: _showThemeToggle,
 }: ArcCardsProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme();
-  const [mounted, setMounted] = React.useState(false);
-
   React.useEffect(() => {
-    setMounted(true);
     // Preload and decode all unique card images immediately into memory so scrolling fast never flashes white
     cards.forEach((card) => {
       if (typeof window !== "undefined") {
@@ -106,7 +101,6 @@ export function ArcCards({
     });
   }, [cards]);
 
-  const isDark = mounted ? (theme === "dark" || resolvedTheme === "dark") : false;
   const { cardWidth, cardGap, cardHeight, imageHeight, isMounted } = useResponsiveArcMetrics();
   const cardStep = cardWidth + cardGap;
 
@@ -195,34 +189,6 @@ export function ArcCards({
       )}
     >
       <div className="relative max-w-[1400px] mx-auto flex flex-col items-center">
-        {/* Dark Mode Toggle */}
-        {showThemeToggle && (
-          <div className="flex items-center justify-center mb-6 z-20">
-            <button
-              type="button"
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium border border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm text-zinc-900 dark:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer shadow-none"
-              aria-label="Toggle dark mode"
-            >
-              {mounted && isDark ? (
-                <>
-                  <svg className="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="4" />
-                    <path strokeLinecap="round" d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41m14.14-14.14l-1.41 1.41" />
-                  </svg>
-                  <span>Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-3.5 h-3.5 stroke-current stroke-2 fill-none" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                  <span>Dark Mode</span>
-                </>
-              )}
-            </button>
-          </div>
-        )}
 
         {/* Main Section Heading: Exactly 4 simple words ("Designed for modern interfaces") */}
         <div className="text-center px-4 mb-6 sm:mb-12 z-10">
