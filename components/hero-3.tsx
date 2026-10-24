@@ -265,6 +265,10 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
         .marquee-track:hover .animate-marquee-ltr {
           animation-play-state: paused;
         }
+        html.dark .hero3-brand-logo,
+        .dark .hero3-brand-logo {
+          filter: invert(1) brightness(1.2) !important;
+        }
       `}</style>
 
       {/* =========================================================================
@@ -514,7 +518,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
                     return (
                       <div
                         key={`m1-${logo.name}`}
-                        className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
+                        className="hero3-brand-logo shrink-0 flex items-center justify-center transition-[filter] duration-200"
                       >
                         <LogoComp className={cn("w-auto shrink-0 select-none", logo.logoClass, logo.opacityClass)} />
                       </div>
@@ -532,7 +536,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
                     return (
                       <div
                         key={`m2-${logo.name}`}
-                        className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
+                        className="hero3-brand-logo shrink-0 flex items-center justify-center transition-[filter] duration-200"
                       >
                         <LogoComp className={cn("w-auto shrink-0 select-none", logo.logoClass, logo.opacityClass)} />
                       </div>
@@ -549,19 +553,21 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
                 return (
                   <motion.div
                     key={`desktop-${logo.name}`}
-                    initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
-                    whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: index * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                    className="shrink-0 flex items-center justify-center dark:invert dark:brightness-100"
+                    className="shrink-0 flex items-center justify-center"
                   >
-                    <LogoComp
-                      className={cn(
-                        "w-auto shrink-0 select-none transition-opacity duration-200 hover:opacity-100",
-                        logo.logoClass,
-                        logo.opacityClass
-                      )}
-                    />
+                    <div className="hero3-brand-logo flex items-center justify-center transition-[filter] duration-200">
+                      <LogoComp
+                        className={cn(
+                          "w-auto shrink-0 select-none transition-opacity duration-200 hover:opacity-100",
+                          logo.logoClass,
+                          logo.opacityClass
+                        )}
+                      />
+                    </div>
                   </motion.div>
                 );
               })}
