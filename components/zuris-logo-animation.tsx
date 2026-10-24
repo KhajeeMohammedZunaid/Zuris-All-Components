@@ -63,12 +63,12 @@ export function ZurisLogoAnimation({
         }
       }}
     >
-      {/* Step 1: Zuris Logo Mark (Animates into its fixed position, never shifts) */}
+      {/* Step 1: Zuris Logo Mark (Animates into its fixed position, slow & smooth) */}
       <motion.div
-        initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
+        initial={{ opacity: 0, y: 10, filter: "blur(5px)" }}
         animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
         transition={{
-          duration: 0.45,
+          duration: 1.1,
           ease: [0.16, 1, 0.3, 1],
         }}
         className="shrink-0 flex items-center justify-center z-10"
@@ -94,13 +94,13 @@ export function ZurisLogoAnimation({
         </svg>
       </motion.div>
 
-      {/* Step 2: Text emerges from the side of the logo with clip-path (Zero layout shift on logo or text) */}
+      {/* Step 2: Text emerges slowly from the side of the logo (Zero layout shift on logo or text) */}
       <motion.div
-        initial={{ opacity: 0, x: -12, clipPath: "inset(0 100% 0 0)" }}
-        animate={{ opacity: 1, x: 0, clipPath: "inset(0 0% 0 0)" }}
+        initial={{ opacity: 0, x: -14, clipPath: "inset(0 100% 0 0)", filter: "blur(4px)" }}
+        animate={{ opacity: 1, x: 0, clipPath: "inset(0 0% 0 0)", filter: "blur(0px)" }}
         transition={{
-          duration: 0.5,
-          delay: 0.35,
+          duration: 1.15,
+          delay: 0.8,
           ease: [0.16, 1, 0.3, 1],
         }}
         className={cn(
