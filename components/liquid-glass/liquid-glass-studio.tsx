@@ -202,7 +202,7 @@ export function LiquidGlassStudio() {
   };
 
   return (
-    <div className="w-full h-screen max-h-screen overflow-hidden flex flex-col p-3 sm:p-4 lg:p-5 box-border bg-[#f7f8fa] dark:bg-[#0a0b0e] text-neutral-900 dark:text-neutral-100 transition-colors duration-200 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div className="w-full h-screen max-h-screen overflow-hidden flex flex-col p-3 sm:p-4 lg:p-5 box-border bg-[#f7f8fa] dark:bg-[#0a0b0e] text-neutral-900 dark:text-neutral-100 transition-colors duration-200 font-['Inter'] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       
       {/* Main Two-Panel Workspace Grid */}
       <div className="w-full h-full max-h-full max-w-[1520px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch overflow-hidden">
@@ -222,7 +222,7 @@ export function LiquidGlassStudio() {
                   setAppTheme(nextT);
                   triggerReplay();
                 }}
-                className="px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition-colors"
+                className="px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-['Inter'] text-xs font-normal tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 transition-colors"
                 title="Toggle Theme"
               >
                 {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
@@ -230,7 +230,7 @@ export function LiquidGlassStudio() {
 
               <button
                 onClick={triggerReplay}
-                className="px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-xs font-medium text-neutral-700 dark:text-neutral-300 transition-colors flex items-center gap-1.5 active:scale-95"
+                className="px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 font-['Inter'] text-xs font-normal tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 transition-colors flex items-center gap-1.5 active:scale-95"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -248,10 +248,10 @@ export function LiquidGlassStudio() {
                     setPaused(true);
                   }
                 }}
-                className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors flex items-center gap-1.5 active:scale-95 ${
+                className={`px-3 py-1.5 rounded-lg border font-['Inter'] text-xs font-normal tracking-[-0.045em] transition-colors flex items-center gap-1.5 active:scale-95 ${
                   paused
                     ? 'border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                    : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-700 dark:text-neutral-300'
+                    : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-neutral-100'
                 }`}
               >
                 {paused ? 'Resume' : 'Pause'}
@@ -305,11 +305,8 @@ export function LiquidGlassStudio() {
           <div className="flex flex-col gap-3 pb-3 border-b border-neutral-100 dark:border-neutral-800/80 shrink-0">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-neutral-900 dark:text-white tracking-tight">
+                <p className="font-['Inter'] font-normal text-sm tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                   Parameters & Properties
-                </h3>
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400">
-                  Fine-tune optics, fluid mechanics, and styling
                 </p>
               </div>
 
@@ -326,7 +323,7 @@ export function LiquidGlassStudio() {
                   setSpeed(1);
                   triggerReplay();
                 }}
-                className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white px-2 py-1 rounded border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                className="font-['Inter'] text-xs font-normal tracking-[-0.045em] text-neutral-900 hover:text-black dark:text-neutral-100 dark:hover:text-white px-2 py-1 rounded border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                 title="Reset to default tuning"
               >
                 Reset
@@ -348,10 +345,10 @@ export function LiquidGlassStudio() {
                   <button
                     key={cat.id}
                     onClick={() => handleCategoryChange(cat.id as StudioCategory)}
-                    className={`relative px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${
+                    className={`relative px-3 py-1 rounded-lg text-xs whitespace-nowrap transition-colors tracking-[-0.045em] ${
                       isSelected
-                        ? 'text-white dark:text-neutral-900 font-semibold'
-                        : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white'
+                        ? 'text-white dark:text-neutral-900 font-medium'
+                        : 'text-neutral-900 dark:text-neutral-100 hover:text-black dark:hover:text-white font-normal'
                     }`}
                   >
                     {isSelected && (
@@ -382,9 +379,9 @@ export function LiquidGlassStudio() {
               {/* SECTION: BRAND & ASSETS */}
               {(activeCategory === 'all' || activeCategory === 'brand') && (
                 <div className="flex flex-col gap-3.5">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                  <h5 className="font-['Inter'] font-normal text-xs uppercase tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                     Assets & Silhouette
-                  </span>
+                  </h5>
 
               {/* Upload Dropzones */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -393,14 +390,15 @@ export function LiquidGlassStudio() {
                   onClick={() => bgInputRef.current?.click()}
                   className="border border-dashed border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600 bg-neutral-50/70 dark:bg-neutral-900/40 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300">
+                  <div className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-neutral-100">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                     </svg>
                   </div>
                   <div className="flex flex-col truncate">
-                    <span className="text-xs font-semibold text-neutral-900 dark:text-white truncate">Backdrop</span>
-                    <span className="text-[10px] text-neutral-400 truncate">Image behind glass</span>
+                    <p className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 truncate">
+                      Backdrop Artwork
+                    </p>
                   </div>
                   {backgroundImage && (
                     <button
@@ -420,14 +418,15 @@ export function LiquidGlassStudio() {
                   onClick={() => logoInputRef.current?.click()}
                   className="border border-dashed border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 dark:hover:border-neutral-600 bg-neutral-50/70 dark:bg-neutral-900/40 rounded-xl p-3 flex items-center gap-3 cursor-pointer transition-colors"
                 >
-                  <div className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-600 dark:text-neutral-300">
+                  <div className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 flex items-center justify-center text-neutral-900 dark:text-neutral-100">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
                     </svg>
                   </div>
                   <div className="flex flex-col truncate">
-                    <span className="text-xs font-semibold text-neutral-900 dark:text-white truncate">Logo SVG/PNG</span>
-                    <span className="text-[10px] text-neutral-400 truncate">Drop or select file</span>
+                    <p className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 truncate">
+                      Logo Vector Mark
+                    </p>
                   </div>
                   {logoChoice === 'Custom' && (
                     <span className="ml-auto text-[10px] text-emerald-600 dark:text-emerald-400 font-medium px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800">
@@ -439,7 +438,9 @@ export function LiquidGlassStudio() {
 
               {/* Logo Select */}
               <div className="flex flex-col gap-1.5">
-                <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300">Preset Vector Mark</span>
+                <p className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
+                  Preset Vector Mark
+                </p>
                 <div className="grid grid-cols-4 gap-2">
                   {(['Music', 'Nike', 'Apple', ...(customLogoUrl ? ['Custom'] : [])] as const).map((opt) => (
                     <button
@@ -448,10 +449,10 @@ export function LiquidGlassStudio() {
                         setLogoChoice(opt as any);
                         triggerReplay();
                       }}
-                      className={`py-1.5 px-2 rounded-lg text-xs font-medium border text-center transition-colors truncate ${
+                      className={`py-1.5 px-2 rounded-lg font-['Inter'] text-xs border text-center transition-colors truncate tracking-[-0.045em] ${
                         logoChoice === opt
-                          ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900'
-                          : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/60 text-neutral-700 dark:text-neutral-300 hover:border-neutral-300'
+                          ? 'border-neutral-900 bg-neutral-900 text-white dark:border-white dark:bg-white dark:text-neutral-900 font-medium'
+                          : 'border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/60 text-neutral-900 dark:text-neutral-100 hover:border-neutral-300 font-normal'
                       }`}
                     >
                       {opt}
@@ -537,9 +538,9 @@ export function LiquidGlassStudio() {
           {/* SECTION: GLASS OPTICS */}
           {(activeCategory === 'all' || activeCategory === 'optics') && (
             <div className="flex flex-col gap-3.5 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <h5 className="font-['Inter'] font-normal text-xs uppercase tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                 Glass Optics
-              </span>
+              </h5>
 
               <div className="flex flex-col gap-2.5">
                 <PropSlider
@@ -644,9 +645,9 @@ export function LiquidGlassStudio() {
           {/* SECTION: FLUID DYNAMICS */}
           {(activeCategory === 'all' || activeCategory === 'motion') && (
             <div className="flex flex-col gap-3.5 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <h5 className="font-['Inter'] font-normal text-xs uppercase tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                 Fluid Motion
-              </span>
+              </h5>
 
               <div className="flex flex-col gap-2.5">
                 <PropSlider
@@ -727,9 +728,9 @@ export function LiquidGlassStudio() {
           {/* SECTION: COLOR MATRIX */}
           {(activeCategory === 'all' || activeCategory === 'color') && (
             <div className="flex flex-col gap-3.5 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <h5 className="font-['Inter'] font-normal text-xs uppercase tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                 Color Palette
-              </span>
+              </h5>
 
               <div className="flex flex-col gap-2.5">
                 <PropColorField
@@ -765,9 +766,9 @@ export function LiquidGlassStudio() {
           {/* SECTION: VIDEO EXPORT */}
           {(activeCategory === 'all' || activeCategory === 'export') && (
             <div className="flex flex-col gap-3.5 pt-2 border-t border-neutral-100 dark:border-neutral-800/80">
-              <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+              <h5 className="font-['Inter'] font-normal text-xs uppercase tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
                 Video Export
-              </span>
+              </h5>
 
               <div className="grid grid-cols-2 gap-2.5">
                 <PropSelect
@@ -802,7 +803,7 @@ export function LiquidGlassStudio() {
               <button
                 onClick={handleExportVideo}
                 disabled={isExporting}
-                className="w-full py-2.5 px-4 rounded-xl border border-neutral-900 bg-neutral-900 dark:border-white dark:bg-white text-white dark:text-neutral-900 text-xs font-semibold hover:opacity-90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-xl border border-neutral-900 bg-neutral-900 dark:border-white dark:bg-white text-white dark:text-neutral-900 font-['Inter'] text-xs font-medium tracking-[-0.045em] hover:opacity-90 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-1 disabled:opacity-50"
               >
                 {isExporting ? (
                   <>
@@ -823,7 +824,7 @@ export function LiquidGlassStudio() {
                     initial={{ opacity: 0, y: -4 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
-                    className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium text-center"
+                    className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-['Inter'] text-xs font-normal tracking-[-0.045em] text-center"
                   >
                     ✓ {exportFeedback}
                   </motion.div>
@@ -878,7 +879,7 @@ function PropSlider({ label, value, min, max, step, unit = '', onChange }: PropS
   return (
     <div className="flex flex-col gap-1.5 p-2.5 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-900/40">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-neutral-600 dark:text-neutral-400 font-medium truncate">
+        <span className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 truncate">
           {label}
         </span>
 
@@ -896,12 +897,12 @@ function PropSlider({ label, value, min, max, step, unit = '', onChange }: PropS
               if (e.key === 'Escape') setIsEditing(false);
             }}
             onChange={(e) => setTempVal(e.target.value)}
-            className="w-14 px-1 py-0.5 text-right font-mono text-xs font-semibold bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded outline-none"
+            className="w-14 px-1 py-0.5 text-right font-mono text-xs font-medium text-neutral-900 dark:text-neutral-100 bg-white dark:bg-neutral-800 border border-neutral-300 dark:border-neutral-700 rounded outline-none"
           />
         ) : (
           <span
             onDoubleClick={() => setIsEditing(true)}
-            className="font-mono text-xs font-semibold text-neutral-800 dark:text-neutral-200 cursor-pointer hover:underline"
+            className="font-mono text-xs font-medium text-neutral-900 dark:text-neutral-100 cursor-pointer hover:underline"
             title="Double-click to type exact value"
           >
             {value}{unit}
@@ -939,7 +940,7 @@ function PropToggle({ label, checked, onChange }: PropToggleProps) {
       onClick={() => onChange(!checked)}
       className="flex items-center justify-between p-2.5 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-900/40 cursor-pointer select-none hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
     >
-      <span className="text-xs text-neutral-700 dark:text-neutral-300 font-medium truncate">
+      <span className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 truncate">
         {label}
       </span>
       <div
@@ -969,16 +970,16 @@ interface PropSelectProps {
 function PropSelect({ label, value, options, onChange }: PropSelectProps) {
   return (
     <div className="flex flex-col gap-1 p-2 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-900/40">
-      <span className="text-[11px] text-neutral-500 dark:text-neutral-400 font-medium truncate">
+      <span className="font-['Inter'] font-normal text-[11px] tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 truncate">
         {label}
       </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full bg-transparent text-xs font-semibold text-neutral-800 dark:text-neutral-200 outline-none cursor-pointer py-0.5"
+        className="w-full bg-transparent font-['Inter'] text-xs font-medium tracking-[-0.045em] text-neutral-900 dark:text-neutral-100 outline-none cursor-pointer py-0.5"
       >
         {options.map((opt) => (
-          <option key={opt} value={opt} className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white">
+          <option key={opt} value={opt} className="bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white font-normal">
             {opt}
           </option>
         ))}
@@ -1037,7 +1038,7 @@ function PropColorField({ label, value, onChange }: PropColorFieldProps) {
   return (
     <div className="flex flex-col gap-2 p-2.5 rounded-xl border border-neutral-200/80 dark:border-neutral-800 bg-neutral-50/60 dark:bg-neutral-900/40">
       <div className="flex items-center justify-between">
-        <span className="text-xs text-neutral-600 dark:text-neutral-400 font-medium">
+        <span className="font-['Inter'] font-normal text-xs tracking-[-0.045em] text-neutral-900 dark:text-neutral-100">
           {label}
         </span>
         <div className="flex items-center gap-1">
@@ -1045,10 +1046,10 @@ function PropColorField({ label, value, onChange }: PropColorFieldProps) {
             <button
               key={fmt}
               onClick={() => setMode(fmt)}
-              className={`px-1 rounded text-[9px] font-semibold uppercase ${
+              className={`px-1.5 py-0.5 rounded text-[10px] font-medium uppercase font-['Inter'] tracking-[-0.045em] transition-colors ${
                 mode === fmt
                   ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900'
-                  : 'text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'
+                  : 'text-neutral-900 dark:text-neutral-100 hover:bg-neutral-200/60 dark:hover:bg-neutral-800'
               }`}
             >
               {fmt}
@@ -1068,7 +1069,7 @@ function PropColorField({ label, value, onChange }: PropColorFieldProps) {
           <div className="w-full h-full" style={{ backgroundColor: normalizedHex }} />
         </label>
 
-        <span className="font-mono text-xs text-neutral-800 dark:text-neutral-200 truncate flex-1">
+        <span className="font-mono text-xs font-normal text-neutral-900 dark:text-neutral-100 truncate flex-1">
           {displayString}
         </span>
 
