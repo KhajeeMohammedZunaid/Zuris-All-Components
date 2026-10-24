@@ -178,8 +178,8 @@ export function Hero2({ onGetStarted, onViewDemo, onLogin }: Hero2Props) {
               variants={logoItemVariants}
               className="h-18 sm:h-22 flex items-center justify-center px-4 group transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900/40"
             >
-              <div className="w-36 sm:w-44 lg:w-48 flex items-center justify-center dark:invert dark:brightness-100 opacity-90 group-hover:opacity-100 transition-all duration-200 group-hover:scale-[1.03]">
-                <OpenAI className="w-full h-auto max-h-10 sm:max-h-12" />
+              <div className="w-22 sm:w-26 lg:w-28 flex items-center justify-center dark:invert dark:brightness-100 opacity-90 group-hover:opacity-100 transition-all duration-200 group-hover:scale-[1.03]">
+                <OpenAI className="w-full h-auto max-h-5 sm:max-h-6" />
               </div>
             </motion.div>
 
