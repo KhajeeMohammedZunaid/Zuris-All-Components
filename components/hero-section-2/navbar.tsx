@@ -39,6 +39,12 @@ export function NavbarHero2({
     setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
+  const isDark = mounted
+    ? resolvedTheme === "dark"
+    : typeof document !== "undefined"
+    ? document.documentElement.classList.contains("dark")
+    : false;
+
   return (
     <>
       <header className="w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-md sticky top-0 z-50 font-[family-name:var(--font-jakarta-display)] select-none">
@@ -107,7 +113,8 @@ export function NavbarHero2({
               type="button"
               variant="ghost"
               onClick={onLoginClick}
-              className="flex items-center justify-center px-6 h-full border-0 border-l border-zinc-200 dark:border-zinc-800 text-sm font-normal text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 tracking-[-0.03em] cursor-pointer transition-colors rounded-none shadow-none active:translate-y-0"
+              className="flex items-center justify-center px-6 h-full border-0 border-l border-zinc-200 dark:border-zinc-800 text-sm font-normal text-zinc-800 dark:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-900 tracking-[-0.03em] cursor-pointer transition-colors rounded-none shadow-none !translate-y-0 active:!translate-y-0 active:!transform-none"
+              style={{ transform: "none" }}
             >
               Login
             </Button>
@@ -115,14 +122,13 @@ export function NavbarHero2({
             <Button
               type="button"
               onClick={toggleTheme}
-              className="rounded-none border-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 font-normal tracking-[-0.03em] text-sm px-6 h-full shadow-none cursor-pointer flex items-center justify-center transition-colors active:translate-y-0"
+              className="w-[124px] min-w-[124px] rounded-none border-0 border-l border-zinc-200 dark:border-zinc-800 bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200 font-normal tracking-[-0.03em] text-sm h-full shadow-none cursor-pointer flex items-center justify-center transition-colors !translate-y-0 active:!translate-y-0 active:!transform-none"
+              style={{ transform: "none" }}
               aria-label="Toggle theme"
             >
-              {mounted
-                ? resolvedTheme === "dark"
-                  ? "Light Mode"
-                  : "Dark Mode"
-                : "Theme"}
+              <span suppressHydrationWarning className="inline-block text-center whitespace-nowrap">
+                {isDark ? "Light Mode" : "Dark Mode"}
+              </span>
             </Button>
           </div>
 
@@ -247,11 +253,12 @@ export function NavbarHero2({
             type="button"
             variant="outline"
             onClick={toggleTheme}
-            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-xs h-10 cursor-pointer flex items-center justify-between px-4 transition-colors shadow-none"
+            className="w-full rounded-none border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-white/40 dark:hover:bg-zinc-900/40 font-normal tracking-[-0.03em] text-xs h-10 cursor-pointer flex items-center justify-between px-4 transition-colors shadow-none !translate-y-0 active:!translate-y-0 active:!transform-none"
+            style={{ transform: "none" }}
           >
             <span>Switch Theme</span>
-            <span className="font-normal text-zinc-950 dark:text-zinc-50">
-              {mounted ? (resolvedTheme === "dark" ? "Light Mode" : "Dark Mode") : "Theme"}
+            <span suppressHydrationWarning className="font-normal text-zinc-950 dark:text-zinc-50">
+              {isDark ? "Light Mode" : "Dark Mode"}
             </span>
           </Button>
         </div>
