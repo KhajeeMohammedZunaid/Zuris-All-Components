@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function ArcCardsShowcasePage() {
   return (
-    <main className="min-h-screen bg-[#111215]">
+    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#09090b] transition-colors duration-300">
       <ArcCards />
     </main>
   );
