@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { motion, type HTMLMotionProps } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type StuxColorScheme =
@@ -11,6 +12,8 @@ export type StuxColorScheme =
   | "white"
   | "violet"
   | "emerald";
+
+export type StuxButtonSize = "sm" | "default" | "lg";
 
 export interface StuxColorConfig {
   accentBg: string;
@@ -80,14 +83,58 @@ export const STUX_COLOR_SCHEMES: Record<StuxColorScheme, StuxColorConfig> = {
   },
 };
 
+const SIZES: Record<
+  StuxButtonSize,
+  {
+    height: number;
+    endcapWidth: number;
+    paddingX: number;
+    fontSize: number;
+    iconSize: number;
+    shift: number;
+  }
+> = {
+  sm: {
+    height: 44,
+    endcapWidth: 44,
+    paddingX: 20,
+    fontSize: 14,
+    iconSize: 16,
+    shift: 38,
+  },
+  default: {
+    height: 52,
+    endcapWidth: 52,
+    paddingX: 28,
+    fontSize: 16,
+    iconSize: 19,
+    shift: 44,
+  },
+  lg: {
+    height: 62,
+    endcapWidth: 62,
+    paddingX: 36,
+    fontSize: 18,
+    iconSize: 22,
+    shift: 52,
+  },
+};
+
+const SPRING_TRANSITION = {
+  type: "spring" as const,
+  stiffness: 380,
+  damping: 30,
+  mass: 0.8,
+};
+
 export interface StuxButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  extends Omit<HTMLMotionProps<"button">, "children"> {
   menuOpen?: boolean;
-  onMenuOpenChange?: (open: boolean) => void;
   text?: string;
-  size?: "default" | "sm" | "lg";
+  size?: StuxButtonSize;
   colorScheme?: StuxColorScheme;
   customAccent?: string;
+  children?: React.ReactNode;
 }
 
 /**
@@ -95,9 +142,9 @@ export interface StuxButtonProps
  * - High-contrast architectural button with responsive theme adaptivity.
  * - Solid 3px border (#040404 in light mode, dark:border-white/30 in dark mode) with smooth 600ms [0.22, 1, 0.36, 1] slide physics.
  * - Typography: Inter, <p> base tag (text-base), 0 mutedness, 0 tracking (tracking-normal), 400 weight (font-normal).
+ * - Framer Motion smooth size transitions across Small, Good Size (default), and Large.
  * - Exact sections-1 dual-arrow fly-through pass animation:
  *   Travels all the way across the square endcap to the top-right edge and enters from the below edge.
- * - Proportional button sizing with matching square endcap container.
  */
 export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
   (
@@ -111,47 +158,18 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
       size = "default",
       colorScheme = "yellow",
       customAccent,
+      style,
       ...props
     },
     ref
   ) => {
     const isOpen = menuOpen;
+    const cfg = SIZES[size] ?? SIZES.default;
+    const scheme = STUX_COLOR_SCHEMES[colorScheme] ?? STUX_COLOR_SCHEMES.yellow;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(e);
     };
-
-    const scheme = STUX_COLOR_SCHEMES[colorScheme] ?? STUX_COLOR_SCHEMES.yellow;
-
-    // Sizing matrix: height matches endcap width for a perfectly square icon container
-    const sizeMap = {
-      sm: {
-        height: "h-10 sm:h-11 md:h-12",
-        endcap: "w-10 sm:w-11 md:w-12",
-        padding: "px-4 sm:px-5 md:px-6",
-        icon: "w-4 h-4",
-        shift: 38,
-        text: "text-sm sm:text-[15px] md:text-base",
-      },
-      default: {
-        height: "h-11 sm:h-12 md:h-[54px]",
-        endcap: "w-11 sm:w-12 md:w-[54px]",
-        padding: "px-5 sm:px-6 md:px-8",
-        icon: "w-[18px] h-[18px] md:w-5 md:h-5",
-        shift: 44,
-        text: "text-base",
-      },
-      lg: {
-        height: "h-13 sm:h-14 md:h-16",
-        endcap: "w-13 sm:w-14 md:w-16",
-        padding: "px-6 sm:px-7 md:px-10",
-        icon: "w-5 h-5 md:w-6 md:h-6",
-        shift: 52,
-        text: "text-base sm:text-[17px] md:text-lg",
-      },
-    };
-
-    const currentSize = sizeMap[size] ?? sizeMap.default;
 
     return (
       <>
@@ -186,16 +204,22 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
           }
         `}</style>
 
-        <button
+        <motion.button
           ref={ref}
           type="button"
           id={id}
           onClick={handleClick}
           aria-expanded={isOpen}
+          initial={false}
+          animate={{
+            height: cfg.height,
+          }}
+          transition={SPRING_TRANSITION}
           style={
             {
-              "--arrow-dist": `${currentSize.shift}px`,
+              "--arrow-dist": `${cfg.shift}px`,
               ...(customAccent ? { "--stux-accent": customAccent } : {}),
+              ...style,
             } as React.CSSProperties
           }
           className={cn(
@@ -205,51 +229,65 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
             isOpen
               ? cn(scheme.accentBg, scheme.darkActiveBorder)
               : "bg-black dark:bg-[#0c0d10]",
-            currentSize.height,
             className
           )}
           {...props}
         >
-          {/* Responsive sliding panel: Sits behind right endcap at rest, smoothly sweeps full-width on hover / open */}
-          <div
+          {/* Responsive sliding panel: Smoothly morphs resting width with size, sweeps full-width on hover */}
+          <motion.div
+            initial={false}
+            animate={{
+              width: isOpen ? "100%" : cfg.endcapWidth,
+            }}
+            transition={SPRING_TRANSITION}
             className={cn(
-              "absolute top-0 right-0 bottom-0 transition-all duration-[600ms] ease-[0.22,1,0.36,1] z-0",
-              scheme.accentBg,
-              currentSize.endcap,
-              isOpen ? "w-full" : "group-hover:w-full"
+              "absolute top-0 right-0 bottom-0 transition-[width] duration-[600ms] ease-[0.22,1,0.36,1] z-0 group-hover:!w-full",
+              scheme.accentBg
             )}
           />
 
-          {/* Text Container: Inter font, <p> base tag, 0 mutedness (pure white / pure black), 0 tracking, 400 weight */}
-          <p
+          {/* Text Container: Inter font, <p> tag, smooth font-size & padding morphing, 0 mutedness, 0 tracking, 400 weight */}
+          <motion.p
+            initial={false}
+            animate={{
+              paddingLeft: cfg.paddingX,
+              paddingRight: cfg.paddingX,
+              fontSize: cfg.fontSize,
+            }}
+            transition={SPRING_TRANSITION}
             className={cn(
               "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
-              currentSize.text,
-              currentSize.padding,
               isOpen
                 ? scheme.textColorOnHover.replace("group-hover:", "")
                 : cn("text-white", scheme.textColorOnHover)
             )}
           >
             {children ?? text}
-          </p>
+          </motion.p>
 
           {/* Square Icon Container: Clipped at the button border edge so arrow travels all the way across the endcap */}
-          <div
+          <motion.div
+            initial={false}
+            animate={{
+              width: cfg.endcapWidth,
+            }}
+            transition={SPRING_TRANSITION}
             className={cn(
-              "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden",
-              currentSize.endcap,
+              "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden h-full",
               isOpen
                 ? "border-black/15 dark:border-black/25"
                 : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
             )}
           >
             {/* Arrow wrapper: Does NOT clip, allowing arrows to fly freely across the full square endcap */}
-            <span
-              className={cn(
-                "relative flex items-center justify-center pointer-events-none select-none shrink-0",
-                currentSize.icon
-              )}
+            <motion.span
+              initial={false}
+              animate={{
+                width: cfg.iconSize,
+                height: cfg.iconSize,
+              }}
+              transition={SPRING_TRANSITION}
+              className="stux-arrow-wrapper relative flex items-center justify-center pointer-events-none select-none shrink-0"
             >
               {/* Primary Arrow: shoots from center all the way out to top-right edge */}
               <svg
@@ -280,9 +318,9 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 <line x1="7" y1="17" x2="17" y2="7" />
                 <polyline points="7 7 17 7 17 17" />
               </svg>
-            </span>
-          </div>
-        </button>
+            </motion.span>
+          </motion.div>
+        </motion.button>
       </>
     );
   }
