@@ -72,13 +72,21 @@ function SequencePlayer({
   const [themeIndex, setThemeIndex] = React.useState(0);
   const [phase, setPhase] = React.useState<"cycling" | "revealing">("cycling");
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const [isMobile, setIsMobile] = React.useState(false);
 
-  // Synchronously compute initial centering offset based on viewport breakpoint to avoid any mount shift
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Synchronously compute initial centering offset based on viewport breakpoint to match larger text-4xl/text-5xl size
   const [centerOffset] = React.useState(() => {
     if (typeof window !== "undefined" && window.innerWidth < 640) {
-      return 44;
+      return 53;
     }
-    return 53;
+    return 65;
   });
 
   // Cycle through 5 theme variations
@@ -137,7 +145,7 @@ function SequencePlayer({
         animate={
           phase === "revealing"
             ? {
-                x: -180,
+                x: -200,
                 opacity: 0,
                 scale: 0.85,
                 filter: "blur(8px)",
@@ -158,7 +166,7 @@ function SequencePlayer({
         style={{
           backgroundImage: elementGradient(palette.colors),
         }}
-        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-36 h-36 sm:w-44 sm:h-44 md:w-52 md:h-52 rounded-[32px] sm:rounded-[40px] md:rounded-[46px] overflow-hidden flex items-center justify-center z-0 will-change-transform"
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 rounded-[36px] sm:rounded-[44px] md:rounded-[50px] overflow-hidden flex items-center justify-center z-0 will-change-transform"
       >
         <canvas
           ref={canvasRef}
@@ -202,7 +210,7 @@ function SequencePlayer({
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             className={cn(
-              "h-9 sm:h-11 w-auto shrink-0 select-none pointer-events-none transition-colors duration-700 ease-out",
+              "h-11 sm:h-[50px] w-auto shrink-0 select-none pointer-events-none transition-colors duration-700 ease-out",
               phase === "revealing"
                 ? "text-zinc-950 dark:text-zinc-50"
                 : "text-white"
@@ -246,9 +254,9 @@ function SequencePlayer({
             delay: phase === "revealing" ? 0.32 : 0,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="pl-3 sm:pl-3.5 flex items-center z-0 pointer-events-none"
+          className="pl-3.5 sm:pl-4 flex items-center z-0 pointer-events-none"
         >
-          <h4 className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-zinc-950 dark:text-zinc-50 leading-none select-none whitespace-nowrap m-0 text-3xl sm:text-4xl">
+          <h4 className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-zinc-950 dark:text-zinc-50 leading-none select-none whitespace-nowrap m-0 text-4xl sm:text-5xl">
             Zuris
           </h4>
         </motion.div>

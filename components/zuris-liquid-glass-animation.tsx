@@ -69,9 +69,9 @@ function LiquidGlassPlayer({
   const isDark = mounted ? resolvedTheme === "dark" : true;
 
   // Center offset to place the logo dead-center of the screen during glass phase
-  const centerOffset = isMobile ? 44 : 53;
-  // Reduced resizing: targetScale kept larger so the resting logo stays bigger & more prominent
-  const targetScale = isMobile ? 0.54 : 0.65;
+  const centerOffset = isMobile ? 53 : 65;
+  // Scaled up: resting logo stays bigger & more prominent
+  const targetScale = isMobile ? 0.60 : 0.72;
 
   // Let the liquid-glass fluid simulation run and settle (~1.9s) before starting the reveal transition
   React.useEffect(() => {
@@ -102,8 +102,8 @@ function LiquidGlassPlayer({
     >
       {/* Brand Lockup: Logo Slot + Brand Typography */}
       <div className="relative z-10 flex items-center">
-        {/* Anchor Slot for Logo: Sized to match the larger resting logo and maintain tight shader-sequence gap */}
-        <div className="w-[58px] h-[41px] sm:w-[70px] sm:h-[50px] shrink-0 relative flex items-center justify-center">
+        {/* Anchor Slot for Logo: Scaled up for the bigger resting logo */}
+        <div className="w-[70px] h-[50px] sm:w-[86px] sm:h-[61px] shrink-0 relative flex items-center justify-center">
           {/* The Same Liquid Glass Logo: Starts big & centered on screen, then resizes smoothly down into this slot */}
           <motion.div
             initial={{
@@ -125,7 +125,7 @@ function LiquidGlassPlayer({
               duration: 1.1,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] flex items-center justify-center will-change-transform"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[320px] h-[320px] sm:w-[360px] sm:h-[360px] flex items-center justify-center will-change-transform"
           >
             <LiquidGlassLogo
               logo={ZURIS_SVG_DATA_URI}
@@ -135,8 +135,8 @@ function LiquidGlassPlayer({
               logoColor={isDark ? "#ffffff" : "#09111b"}
               tileColor={isDark ? "#060c18" : "#e4e6ea"}
               background="transparent"
-              logoSize={180}
-              logoScale={0.72}
+              logoSize={220}
+              logoScale={0.76}
               finalLogoScale={1}
               logoRelief={1}
               depth={2.9}
@@ -186,9 +186,9 @@ function LiquidGlassPlayer({
             delay: phase === "revealing" ? 0.32 : 0,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="pl-3 sm:pl-3.5 flex items-center z-0 pointer-events-none"
+          className="pl-3.5 sm:pl-4 flex items-center z-0 pointer-events-none"
         >
-          <h4 className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-zinc-950 dark:text-zinc-50 leading-none select-none whitespace-nowrap m-0 text-3xl sm:text-4xl">
+          <h4 className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-zinc-950 dark:text-zinc-50 leading-none select-none whitespace-nowrap m-0 text-4xl sm:text-5xl">
             Zuris
           </h4>
         </motion.div>
