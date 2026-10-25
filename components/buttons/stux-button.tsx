@@ -91,85 +91,18 @@ export interface StuxButtonProps
 }
 
 /**
- * Dual-arrow pass-through fly animation identical to sections-1.tsx:
- * - arrow-main: at rest at (0, 0), glides out to (34px, -34px) on hover / open.
- * - arrow-clone: at rest at (-34px, 34px), glides in to (0, 0) on hover / open.
- * - Easing: cubic-bezier(0.22, 1, 0.36, 1) over 550ms.
- */
-export function SectionsArrow({
-  className,
-  isOpen = false,
-  iconColor = "text-[#040404]",
-}: {
-  className?: string;
-  isOpen?: boolean;
-  iconColor?: string;
-}) {
-  return (
-    <span
-      className={cn(
-        "relative flex items-center justify-center overflow-hidden pointer-events-none select-none shrink-0",
-        className
-      )}
-    >
-      {/* Primary Arrow: resting at center (0,0), shoots out to top-right on hover / open */}
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className={cn(
-          "absolute inset-0 size-full stroke-current pointer-events-none transition-transform duration-[550ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform block",
-          iconColor,
-          isOpen
-            ? "translate-x-[34px] -translate-y-[34px]"
-            : "translate-x-0 translate-y-0 group-hover:translate-x-[34px] group-hover:-translate-y-[34px] group-focus-visible:translate-x-[34px] group-focus-visible:-translate-y-[34px]"
-        )}
-      >
-        <line x1="7" y1="17" x2="17" y2="7" />
-        <polyline points="7 7 17 7 17 17" />
-      </svg>
-
-      {/* Clone Arrow: enters from bottom-left (-34px, 34px) into center (0,0) on hover / open */}
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-        className={cn(
-          "absolute inset-0 size-full stroke-current pointer-events-none transition-transform duration-[550ms] ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform block",
-          iconColor,
-          isOpen
-            ? "translate-x-0 translate-y-0"
-            : "-translate-x-[34px] translate-y-[34px] group-hover:translate-x-0 group-hover:translate-y-0 group-focus-visible:translate-x-0 group-focus-visible:translate-y-0"
-        )}
-      >
-        <line x1="7" y1="17" x2="17" y2="7" />
-        <polyline points="7 7 17 7 17 17" />
-      </svg>
-    </span>
-  );
-}
-
-/**
  * StuxButton ("LET'S TALK"):
  * - High-contrast architectural button with responsive theme adaptivity.
  * - Solid 3px border (#040404 in light mode, dark:border-white/30 in dark mode) with smooth 600ms [0.22, 1, 0.36, 1] slide physics.
  * - Typography: Inter, <p> base tag (text-base), 0 mutedness, 0 tracking (tracking-normal), 400 weight (font-normal).
- * - Exact sections-1 dual-arrow fly-through pass animation.
+ * - Exact sections-1 dual-arrow fly-through pass animation:
+ *   Travels all the way across the square endcap to the top-right edge and enters from the below edge.
  * - Proportional button sizing with matching square endcap container.
  */
 export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
   (
     {
-      menuOpen: controlledMenuOpen,
-      onMenuOpenChange,
+      menuOpen = false,
       onClick,
       text = "LET'S TALK",
       children,
@@ -182,15 +115,9 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
     },
     ref
   ) => {
-    const [internalOpen, setInternalOpen] = React.useState(false);
-    const isControlled = controlledMenuOpen !== undefined;
-    const isOpen = isControlled ? controlledMenuOpen : internalOpen;
+    const isOpen = menuOpen;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-      if (!isControlled) {
-        setInternalOpen((prev) => !prev);
-      }
-      onMenuOpenChange?.(!isOpen);
       onClick?.(e);
     };
 
@@ -203,6 +130,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         endcap: "w-10 sm:w-11 md:w-12",
         padding: "px-4 sm:px-5 md:px-6",
         icon: "w-4 h-4",
+        shift: 38,
         text: "text-sm sm:text-[15px] md:text-base",
       },
       default: {
@@ -210,6 +138,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         endcap: "w-11 sm:w-12 md:w-[54px]",
         padding: "px-5 sm:px-6 md:px-8",
         icon: "w-[18px] h-[18px] md:w-5 md:h-5",
+        shift: 44,
         text: "text-base",
       },
       lg: {
@@ -217,6 +146,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         endcap: "w-13 sm:w-14 md:w-16",
         padding: "px-6 sm:px-7 md:px-10",
         icon: "w-5 h-5 md:w-6 md:h-6",
+        shift: 52,
         text: "text-base sm:text-[17px] md:text-lg",
       },
     };
@@ -224,72 +154,136 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
     const currentSize = sizeMap[size] ?? sizeMap.default;
 
     return (
-      <button
-        ref={ref}
-        type="button"
-        id={id}
-        onClick={handleClick}
-        aria-expanded={isOpen}
-        style={
-          customAccent
-            ? ({
-                "--stux-accent": customAccent,
-              } as React.CSSProperties)
-            : undefined
-        }
-        className={cn(
-          "relative flex items-stretch select-none overflow-hidden focus:outline-none shadow-lg group pointer-events-auto border-[3px] border-[#040404] dark:border-white/30 transition-all duration-300 cursor-pointer will-change-transform",
-          scheme.darkHoverBorder,
-          isOpen
-            ? cn(scheme.accentBg, scheme.darkActiveBorder)
-            : "bg-black dark:bg-[#0c0d10]",
-          currentSize.height,
-          className
-        )}
-        {...props}
-      >
-        {/* Responsive sliding panel: Sits behind right endcap at rest, smoothly sweeps full-width on hover / open */}
-        <div
-          className={cn(
-            "absolute top-0 right-0 bottom-0 transition-all duration-[600ms] ease-[0.22,1,0.36,1] z-0",
-            scheme.accentBg,
-            currentSize.endcap,
-            isOpen ? "w-full" : "group-hover:w-full"
-          )}
-        />
+      <>
+        {/* Scoped CSS for full-span arrow movement from center to edge and back from below edge */}
+        <style>{`
+          .stux-btn-${id} .stux-arrow-main,
+          .stux-btn-${id} .stux-arrow-clone {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
+          }
+          .stux-btn-${id} .stux-arrow-main {
+            transform: translate(0, 0);
+          }
+          .stux-btn-${id} .stux-arrow-clone {
+            transform: translate(calc(-1 * var(--arrow-dist)), var(--arrow-dist));
+          }
+          .stux-btn-${id}:hover .stux-arrow-main,
+          .stux-btn-${id}:focus-visible .stux-arrow-main,
+          .stux-btn-${id}[aria-expanded="true"] .stux-arrow-main {
+            transform: translate(var(--arrow-dist), calc(-1 * var(--arrow-dist)));
+          }
+          .stux-btn-${id}:hover .stux-arrow-clone,
+          .stux-btn-${id}:focus-visible .stux-arrow-clone,
+          .stux-btn-${id}[aria-expanded="true"] .stux-arrow-clone {
+            transform: translate(0, 0);
+          }
+        `}</style>
 
-        {/* Text Container: Inter font, <p> base tag, 0 mutedness (pure white / pure black), 0 tracking, 400 weight */}
-        <p
+        <button
+          ref={ref}
+          type="button"
+          id={id}
+          onClick={handleClick}
+          aria-expanded={isOpen}
+          style={
+            {
+              "--arrow-dist": `${currentSize.shift}px`,
+              ...(customAccent ? { "--stux-accent": customAccent } : {}),
+            } as React.CSSProperties
+          }
           className={cn(
-            "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
-            currentSize.text,
-            currentSize.padding,
+            `stux-btn-${id}`,
+            "relative flex items-stretch select-none overflow-hidden focus:outline-none shadow-lg group pointer-events-auto border-[3px] border-[#040404] dark:border-white/30 transition-all duration-300 cursor-pointer will-change-transform active:scale-[0.98] active:translate-y-[1px]",
+            scheme.darkHoverBorder,
             isOpen
-              ? scheme.textColorOnHover.replace("group-hover:", "")
-              : cn("text-white", scheme.textColorOnHover)
+              ? cn(scheme.accentBg, scheme.darkActiveBorder)
+              : "bg-black dark:bg-[#0c0d10]",
+            currentSize.height,
+            className
           )}
+          {...props}
         >
-          {children ?? text}
-        </p>
-
-        {/* Square Icon Container with 3px interior divider line */}
-        <div
-          className={cn(
-            "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden",
-            currentSize.endcap,
-            isOpen
-              ? "border-black/15 dark:border-black/25"
-              : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
-          )}
-        >
-          {/* Exact sections-1 dual-arrow fly-through animation */}
-          <SectionsArrow
-            className={currentSize.icon}
-            isOpen={isOpen}
-            iconColor={scheme.iconColor}
+          {/* Responsive sliding panel: Sits behind right endcap at rest, smoothly sweeps full-width on hover / open */}
+          <div
+            className={cn(
+              "absolute top-0 right-0 bottom-0 transition-all duration-[600ms] ease-[0.22,1,0.36,1] z-0",
+              scheme.accentBg,
+              currentSize.endcap,
+              isOpen ? "w-full" : "group-hover:w-full"
+            )}
           />
-        </div>
-      </button>
+
+          {/* Text Container: Inter font, <p> base tag, 0 mutedness (pure white / pure black), 0 tracking, 400 weight */}
+          <p
+            className={cn(
+              "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
+              currentSize.text,
+              currentSize.padding,
+              isOpen
+                ? scheme.textColorOnHover.replace("group-hover:", "")
+                : cn("text-white", scheme.textColorOnHover)
+            )}
+          >
+            {children ?? text}
+          </p>
+
+          {/* Square Icon Container: Clipped at the button border edge so arrow travels all the way across the endcap */}
+          <div
+            className={cn(
+              "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden",
+              currentSize.endcap,
+              isOpen
+                ? "border-black/15 dark:border-black/25"
+                : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
+            )}
+          >
+            {/* Arrow wrapper: Does NOT clip, allowing arrows to fly freely across the full square endcap */}
+            <span
+              className={cn(
+                "relative flex items-center justify-center pointer-events-none select-none shrink-0",
+                currentSize.icon
+              )}
+            >
+              {/* Primary Arrow: shoots from center all the way out to top-right edge */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className={cn("stux-arrow-main block", scheme.iconColor)}
+              >
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
+
+              {/* Clone Arrow: enters from below edge into the center */}
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className={cn("stux-arrow-clone block", scheme.iconColor)}
+              >
+                <line x1="7" y1="17" x2="17" y2="7" />
+                <polyline points="7 7 17 7 17 17" />
+              </svg>
+            </span>
+          </div>
+        </button>
+      </>
     );
   }
 );

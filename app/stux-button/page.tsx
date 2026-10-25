@@ -16,19 +16,17 @@ export default function StuxButtonPage() {
 
   const [isGrid, setIsGrid] = React.useState(true);
   const [size, setSize] = React.useState<ButtonSize>("default");
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const [colorScheme, setColorScheme] = React.useState<StuxColorScheme>("yellow");
 
   React.useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Keyboard shortcut: if user presses Ctrl+S / Cmd+S, prevent browser save dialog and toggle button
+  // Prevent browser save dialog if user hits Ctrl+S / Cmd+S
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
         e.preventDefault();
-        setIsMenuOpen((prev) => !prev);
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -63,8 +61,6 @@ export default function StuxButtonPage() {
         <StuxButton
           size={size}
           colorScheme={colorScheme}
-          menuOpen={isMenuOpen}
-          onMenuOpenChange={setIsMenuOpen}
         />
       </div>
 
@@ -109,30 +105,6 @@ export default function StuxButtonPage() {
             )}
           />
 
-          {/* State Toggle */}
-          <button
-            type="button"
-            onClick={() => setIsMenuOpen((prev) => !prev)}
-            className={cn(
-              "px-3 py-1 rounded-full transition-all cursor-pointer select-none font-medium text-xs whitespace-nowrap",
-              isMenuOpen
-                ? isDark
-                  ? "bg-white text-zinc-950 font-semibold shadow-sm"
-                  : "bg-zinc-950 text-white font-semibold shadow-sm"
-                : isDark
-                ? "text-zinc-400 hover:text-white"
-                : "text-zinc-600 hover:text-zinc-950"
-            )}
-          >
-            {isMenuOpen ? "Open" : "Resting"}
-          </button>
-
-          <span
-            className={cn(
-              "w-px h-3.5 mx-0.5",
-              isDark ? "bg-zinc-700" : "bg-zinc-300"
-            )}
-          />
 
           {/* Grid Toggle: Responsive for Both Themes */}
           <button
