@@ -17,31 +17,31 @@ export const cloudServicesData: CloudServiceItem[] = [
     num: "01",
     title: "CLOUD COMPUTE",
     desc: "Elastic serverless compute engines architected for high-concurrency workloads and instantaneous auto-scaling.",
-    img: "/acc-1.png",
+    img: "/acc-1.webp",
   },
   {
     num: "02",
     title: "EDGE NETWORK",
     desc: "Global low-latency edge distribution with automated caching, dynamic routing, and DDoS mitigation.",
-    img: "/acc-2.png",
+    img: "/acc-2.webp",
   },
   {
     num: "03",
     title: "OBJECT STORAGE",
     desc: "Highly resilient multi-region cloud object storage optimized for real-time asset delivery and petabyte-scale throughput.",
-    img: "/acc-3.png",
+    img: "/acc-3.webp",
   },
   {
     num: "04",
     title: "DATA & TELEMETRY",
     desc: "Managed distributed data streaming and query engines delivering sub-second insights across real-time pipelines.",
-    img: "/acc-4.png",
+    img: "/acc-4.webp",
   },
   {
     num: "05",
     title: "SECURITY & IAM",
     desc: "Zero-trust identity governance, end-to-end cryptographic key management, and continuous compliance enforcement.",
-    img: "/acc-5.png",
+    img: "/acc-5.webp",
   },
 ];
 
@@ -136,7 +136,7 @@ export function Sections3Accordion({
               },
             }}
             className={cn(
-              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-[width,height,flex-grow,background-color] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20",
+              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-[width,height,flex-grow,background-color] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 will-change-[width,flex-grow] [transform:translateZ(0)]",
               isActive
                 ? "cursor-default w-full md:flex-grow h-[500px] md:h-full bg-white select-auto"
                 : "cursor-pointer w-full md:w-[80px] lg:w-[100px] xl:w-[120px] h-[70px] sm:h-[80px] md:h-full bg-[#fafafa] hover:bg-[#f4f4f4]"
@@ -199,15 +199,14 @@ export function Sections3Accordion({
                 </div>
 
                 {/* Image: Restored original height and proportions, static without hover scale */}
-                <div className="w-full max-w-[400px] sm:max-w-[500px] md:max-w-[520px] lg:max-w-[640px] h-[260px] sm:h-[320px] md:h-[320px] lg:h-[400px] overflow-hidden relative mt-auto border border-black/5">
+                <div className="w-full max-w-[400px] sm:max-w-[500px] md:max-w-[520px] lg:max-w-[640px] h-[260px] sm:h-[320px] md:h-[320px] lg:h-[400px] overflow-hidden relative mt-auto border border-black/5 [transform:translateZ(0)] [contain:paint]">
                   <Image
                     src={item.img}
                     alt={item.title}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
                     priority={index === 0}
-                    unoptimized
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover [transform:translateZ(0)] [backface-visibility:hidden]"
                   />
                 </div>
               </div>

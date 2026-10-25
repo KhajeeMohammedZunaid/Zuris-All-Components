@@ -21,35 +21,35 @@ export const DESTINATIONS: DestinationSlide[] = [
     id: 1,
     title: "Utula'aina Lookout",
     location: "Vava'u, Tonga",
-    image: "/acc-1.png",
+    image: "/acc-1.webp",
     description: "Towering oceanic cliffs overlooking turquoise Pacific lagoons.",
   },
   {
     id: 2,
     title: "Nankumba Peninsula",
     location: "Lake Malawi, Malawi",
-    image: "/acc-2.png",
+    image: "/acc-2.webp",
     description: "Granite boulders and lush tropical greenery resting on crystalline freshwater.",
   },
   {
     id: 3,
     title: "Bayan-Ölgii Highlands",
     location: "Altai Mountains, Mongolia",
-    image: "/acc-3.png",
+    image: "/acc-3.webp",
     description: "Wild equestrian herds roaming vast golden steppes beneath dramatic peaks.",
   },
   {
     id: 4,
     title: "Emerald Mountain Pass",
     location: "Southern Fjords, Norway",
-    image: "/acc-4.png",
+    image: "/acc-4.webp",
     description: "Misty evergreen slopes plunging into calm glacial waters.",
   },
   {
     id: 5,
     title: "Anse Source d'Argent",
     location: "La Digue, Seychelles",
-    image: "/acc-5.png",
+    image: "/acc-5.webp",
     description: "Spectacular weathered sea stacks standing sentinel over coral shallows.",
   },
 ];
@@ -271,23 +271,24 @@ export function ArcCarousel({
                 opacity,
               }}
               className={cn(
-                "absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[112px] xs:w-[128px] sm:w-[155px] md:w-[172px] aspect-[3/4] transition-all duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] origin-bottom cursor-pointer",
+                "absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 w-[112px] xs:w-[128px] sm:w-[155px] md:w-[172px] aspect-[3/4] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.25,1,0.5,1)] will-change-[transform,opacity] [transform-style:preserve-3d] [backface-visibility:hidden] origin-bottom cursor-pointer",
                 (!isVisible || (device === "mobile" && Math.abs(diff) === 2)) && "pointer-events-none"
               )}
             >
               <Card
                 className={cn(
-                  "w-full h-full p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-zinc-900 shadow-md dark:shadow-2xl relative group transition-shadow cursor-pointer",
+                  "w-full h-full p-0 overflow-hidden rounded-[20px] sm:rounded-[24px] border border-zinc-200/80 dark:border-white/15 bg-white dark:bg-zinc-900 shadow-md dark:shadow-2xl relative group transition-shadow cursor-pointer [transform:translateZ(0)] [backface-visibility:hidden]",
                   isCenter &&
                     "ring-1 ring-zinc-300 dark:ring-white/30 shadow-[0_18px_40px_rgba(0,0,0,0.18)] dark:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.85)]"
                 )}
               >
-                <CardContent className="p-0 w-full h-full relative cursor-pointer">
+                <CardContent className="p-0 w-full h-full relative cursor-pointer [contain:paint]">
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-cover select-none pointer-events-none"
-                    loading="eager"
+                    className="w-full h-full object-cover select-none pointer-events-none [transform:translateZ(0)] [backface-visibility:hidden]"
+                    loading={isCenter ? "eager" : "lazy"}
+                    decoding="async"
                   />
                   {/* Subtle edge vignette */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10 pointer-events-none" />
@@ -438,8 +439,9 @@ export function SingleCardCarousel({
                   <img
                     src={slide.image}
                     alt={slide.title}
-                    className="w-full h-full object-cover select-none pointer-events-none"
-                    loading="eager"
+                    className="w-full h-full object-cover select-none pointer-events-none [transform:translateZ(0)] [backface-visibility:hidden]"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               ))}
