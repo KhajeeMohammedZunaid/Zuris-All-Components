@@ -667,12 +667,7 @@ export function TypographyLab() {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5">
-            <span className="size-2 rounded-full bg-emerald-500 inline-block" />
-            <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-800 dark:text-zinc-200">
-              TORPH · FLUID MORPH
-            </span>
-          </div>
+
         </div>
 
         {/* Scroll-Contained Canvas with TORPH TextMorph */}
