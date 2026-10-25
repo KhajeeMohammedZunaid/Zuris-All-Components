@@ -56,7 +56,12 @@ function LiquidGlassPlayer({
   const [phase, setPhase] = React.useState<"glass" | "revealing">("glass");
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth < 640;
+    }
+    return false;
+  });
 
   React.useEffect(() => {
     setMounted(true);
@@ -70,8 +75,8 @@ function LiquidGlassPlayer({
 
   // Center offset to place the logo dead-center of the screen during glass phase
   const centerOffset = isMobile ? 53 : 65;
-  // Scaled up: resting logo stays bigger & more prominent
-  const targetScale = isMobile ? 0.60 : 0.72;
+  // Precise target scale to match resting logo size in shader sequence (50px desktop / 44px mobile)
+  const targetScale = isMobile ? 0.483 : 0.488;
 
   // Let the liquid-glass fluid simulation run and settle (~1.9s) before starting the reveal transition
   React.useEffect(() => {
@@ -102,8 +107,8 @@ function LiquidGlassPlayer({
     >
       {/* Brand Lockup: Logo Slot + Brand Typography */}
       <div className="relative z-10 flex items-center">
-        {/* Anchor Slot for Logo: Scaled up for the bigger resting logo */}
-        <div className="w-[70px] h-[50px] sm:w-[86px] sm:h-[61px] shrink-0 relative flex items-center justify-center">
+        {/* Anchor Slot for Logo: Exactly matches shader sequence logo dimensions (70x50 desktop, 62x44 mobile) */}
+        <div className="w-[62px] h-[44px] sm:w-[70px] sm:h-[50px] shrink-0 relative flex items-center justify-center">
           {/* The Same Liquid Glass Logo: Starts big & centered on screen, then resizes smoothly down into this slot */}
           <motion.div
             initial={{
