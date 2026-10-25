@@ -91,7 +91,7 @@ export function ZurisAppIcon({
         viewBox="0 0 292 208"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
-        className="relative z-10 w-16 sm:w-20 md:w-24 h-auto text-white shrink-0 select-none pointer-events-none"
+        className="relative z-10 w-20 sm:w-28 md:w-32 h-auto text-white shrink-0 select-none pointer-events-none"
         aria-hidden="true"
       >
         <path

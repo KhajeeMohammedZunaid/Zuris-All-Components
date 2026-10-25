@@ -70,8 +70,8 @@ function LiquidGlassPlayer({
 
   // Center offset to place the logo dead-center of the screen during glass phase
   const centerOffset = isMobile ? 44 : 53;
-  // Precise target scale to resize the 130px canvas logo to the exact 61.8px (desktop) / 50.5px (mobile) lockup size
-  const targetScale = isMobile ? 0.39 : 0.48;
+  // Reduced resizing: targetScale kept larger so the resting logo stays bigger & more prominent
+  const targetScale = isMobile ? 0.54 : 0.65;
 
   // Let the liquid-glass fluid simulation run and settle (~1.9s) before starting the reveal transition
   React.useEffect(() => {
@@ -102,9 +102,9 @@ function LiquidGlassPlayer({
     >
       {/* Brand Lockup: Logo Slot + Brand Typography */}
       <div className="relative z-10 flex items-center">
-        {/* Anchor Slot for Logo: Exactly h-9 sm:h-11 to preserve lockup layout */}
-        <div className="w-[51px] h-[36px] sm:w-[62px] sm:h-[44px] shrink-0 relative flex items-center justify-center">
-          {/* The Same Liquid Glass Logo: Starts big & centered on screen, then resizes precisely down into this slot */}
+        {/* Anchor Slot for Logo: Sized to match the larger resting logo and maintain tight shader-sequence gap */}
+        <div className="w-[58px] h-[41px] sm:w-[70px] sm:h-[50px] shrink-0 relative flex items-center justify-center">
+          {/* The Same Liquid Glass Logo: Starts big & centered on screen, then resizes smoothly down into this slot */}
           <motion.div
             initial={{
               x: centerOffset,
@@ -125,7 +125,7 @@ function LiquidGlassPlayer({
               duration: 1.1,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[260px] h-[260px] flex items-center justify-center will-change-transform"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] h-[280px] flex items-center justify-center will-change-transform"
           >
             <LiquidGlassLogo
               logo={ZURIS_SVG_DATA_URI}
@@ -135,8 +135,8 @@ function LiquidGlassPlayer({
               logoColor={isDark ? "#ffffff" : "#09111b"}
               tileColor={isDark ? "#060c18" : "#e4e6ea"}
               background="transparent"
-              logoSize={200}
-              logoScale={0.65}
+              logoSize={180}
+              logoScale={0.72}
               finalLogoScale={1}
               logoRelief={1}
               depth={2.9}
