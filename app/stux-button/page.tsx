@@ -68,10 +68,10 @@ export default function StuxButtonPage() {
       <div className="fixed bottom-6 inset-x-0 mx-auto flex items-center justify-center z-50 pointer-events-none px-4">
         <div
           className={cn(
-            "pointer-events-auto inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full border shadow-2xl backdrop-blur-xl text-xs font-sans transition-all duration-300",
+            "pointer-events-auto inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full border shadow-none backdrop-blur-xl text-xs font-sans transition-all duration-300",
             isDark
-              ? "bg-zinc-900/90 border-zinc-800 text-zinc-100 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-              : "bg-white/95 border-zinc-200 text-zinc-900 shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+              ? "bg-zinc-900/90 border-zinc-800 text-zinc-100"
+              : "bg-white/95 border-zinc-200 text-zinc-900"
           )}
         >
           {/* Color Palette Switcher */}

@@ -200,7 +200,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
           }
           className={cn(
             `stux-btn-${id}`,
-            "relative flex items-stretch select-none overflow-hidden focus:outline-none shadow-lg group pointer-events-auto border-[3px] border-[#040404] dark:border-white/30 transition-all duration-300 cursor-pointer will-change-transform active:scale-[0.98] active:translate-y-[1px]",
+            "relative flex items-stretch select-none overflow-hidden focus:outline-none shadow-none group pointer-events-auto border-[3px] border-[#040404] dark:border-white/30 transition-all duration-300 cursor-pointer will-change-transform active:scale-[0.98] active:translate-y-[1px]",
             scheme.darkHoverBorder,
             isOpen
               ? cn(scheme.accentBg, scheme.darkActiveBorder)
