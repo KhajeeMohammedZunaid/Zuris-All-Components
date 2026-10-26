@@ -211,20 +211,23 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
             transform: translate(0, 0);
           }
 
-          /* --- Variant 2: Seamless Edge Fill (Top-Left to Right through edges) --- */
+          /* --- Variant 2: Seamless Edge Fill (Cross-Angled Left-to-Right Sweep) --- */
           .stux-btn-${id} .stux-edge-fill-layer {
             position: absolute;
-            inset: -3px;
+            top: -3px;
+            bottom: -3px;
+            left: -3px;
+            width: calc(100% + 90px);
             pointer-events: none;
             z-index: 0;
-            clip-path: polygon(0 0, 0 0, 0 0, 0 0);
-            transition: clip-path 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: clip-path;
+            transform: translateX(-105%) skewX(-25deg);
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: transform;
           }
           .stux-btn-${id}:hover .stux-edge-fill-layer,
           .stux-btn-${id}:focus-visible .stux-edge-fill-layer,
           .stux-btn-${id}[aria-expanded="true"] .stux-edge-fill-layer {
-            clip-path: polygon(0 0, 220% 0, 100% 220%, 0 100%);
+            transform: translateX(-20px) skewX(-25deg);
           }
         `}</style>
 
@@ -259,15 +262,15 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         >
           {isEdgeFill ? (
             /* =========================================================================
-               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Zero gaps, Left-Top to Right)
+               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Cross-Angled Left-to-Right)
                ========================================================================= */
             <>
-              {/* Seamless Edge Fill Layer: Inset -3px to guarantee zero border gap */}
+              {/* Seamless Edge Fill Layer: Inset -3px, sweeps diagonally across from left to right */}
               <div
                 className={cn(
                   "stux-edge-fill-layer",
                   scheme.accentBg,
-                  isOpen && "!clip-path-none [clip-path:polygon(0_0,220%_0,100%_220%,0_100%)]"
+                  isOpen && "![transform:translateX(-20px)_skewX(-25deg)]"
                 )}
               />
 
