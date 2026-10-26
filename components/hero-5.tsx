@@ -217,33 +217,14 @@ const CARDS: FloatingCard[] = [
     floatDistance: 7,
   },
 
-  // 11. BOTTOM-LEFT FAR BACKGROUND (Blurred depth-of-field, appearing ONLY HALF cut off at bottom)
-  {
-    id: "bg-bottom-left",
-    src: "/acc-5.webp",
-    styleDesktop: {
-      bottom: "-65px",
-      left: "5%",
-      width: "205px",
-      aspectRatio: "16/10",
-      zIndex: 6,
-    },
-    blur: "md",
-    opacity: 0.65,
-    floatDelay: 0.3,
-    floatDuration: 6.8,
-    floatDistance: 5,
-    hideOnMobile: true,
-  },
-
-  // 12. BOTTOM-RIGHT FAR BACKGROUND (Blurred depth-of-field, appearing ONLY HALF cut off at bottom)
+  // 11. BOTTOM-RIGHT FAR BACKGROUND (Shifted left & lower, appearing half cut off)
   {
     id: "bg-bottom-right",
     src: "/acc-1.webp",
     styleDesktop: {
-      bottom: "-70px",
-      right: "5%",
-      width: "215px",
+      bottom: "-95px",
+      right: "13%",
+      width: "220px",
       aspectRatio: "16/10",
       zIndex: 6,
     },
@@ -251,7 +232,7 @@ const CARDS: FloatingCard[] = [
     opacity: 0.65,
     floatDelay: 0.5,
     floatDuration: 7.2,
-    floatDistance: 5,
+    floatDistance: 4,
     hideOnMobile: true,
   },
 ];
@@ -303,17 +284,8 @@ export function Hero5() {
                   ease: "easeInOut",
                   delay: (card.floatDelay || 0) * 1.5,
                 }}
-                whileHover={
-                  !isBlurred
-                    ? {
-                        scale: 1.04,
-                        y: -6,
-                        transition: { duration: 0.25, ease: "easeOut" },
-                      }
-                    : undefined
-                }
                 className={cn(
-                  "flex flex-col items-center group transition-transform duration-300",
+                  "flex flex-col items-center",
                   isBlurred && "pointer-events-none select-none"
                 )}
               >
@@ -323,12 +295,12 @@ export function Hero5() {
                     aspectRatio: card.styleDesktop.aspectRatio,
                   }}
                   className={cn(
-                    "relative w-full overflow-hidden rounded-[20px] sm:rounded-[24px] bg-zinc-200 dark:bg-zinc-800 transition-all duration-300",
+                    "relative w-full overflow-hidden rounded-[20px] sm:rounded-[24px] bg-zinc-200 dark:bg-zinc-800",
                     isBlurred
                       ? card.blur === "lg"
                         ? "blur-[10px] sm:blur-[12px] brightness-105"
                         : "blur-[6px] sm:blur-[8px]"
-                      : "border border-black/[0.08] dark:border-white/[0.12] shadow-none group-hover:border-black/20 dark:group-hover:border-white/30"
+                      : "border border-black/[0.08] dark:border-white/[0.12] shadow-none"
                   )}
                 >
                   <Image
@@ -345,7 +317,7 @@ export function Hero5() {
 
                 {/* Name Label Centered Below */}
                 {card.name && !isBlurred && (
-                  <span className="mt-2 text-[12px] sm:text-[13px] font-['Plus_Jakarta_Sans',sans-serif] font-normal text-zinc-500 dark:text-zinc-400 tracking-[-0.01em] select-none transition-colors group-hover:text-zinc-950 dark:group-hover:text-zinc-100">
+                  <span className="mt-2 text-[12px] sm:text-[13px] font-['Plus_Jakarta_Sans',sans-serif] font-normal text-zinc-500 dark:text-zinc-400 tracking-[-0.01em] select-none">
                     {card.name}
                   </span>
                 )}
