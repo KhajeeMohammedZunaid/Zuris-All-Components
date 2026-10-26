@@ -14,6 +14,7 @@ export type StuxColorScheme =
   | "emerald";
 
 export type StuxButtonSize = "sm" | "default" | "lg";
+export type StuxButtonVariant = "default" | "edge-fill";
 
 export interface StuxColorConfig {
   accentBg: string;
@@ -129,6 +130,7 @@ const SPRING_TRANSITION = {
 
 export interface StuxButtonProps
   extends Omit<HTMLMotionProps<"button">, "children"> {
+  variant?: StuxButtonVariant;
   menuOpen?: boolean;
   text?: string;
   size?: StuxButtonSize;
@@ -138,23 +140,25 @@ export interface StuxButtonProps
 }
 
 /**
- * StuxButton ("LET'S TALK"):
+ * StuxButton:
  * - High-contrast architectural button with responsive theme adaptivity.
- * - Solid 3px border (#040404 in light mode, dark:border-white/30 in dark mode) with smooth 600ms [0.22, 1, 0.36, 1] slide physics.
- * - Typography: Inter, <p> base tag (text-base), 0 mutedness, 0 tracking (tracking-normal), 400 weight (font-normal).
- * - Framer Motion smooth size transitions across Small, Good Size (default), and Large.
- * - Exact sections-1 dual-arrow fly-through pass animation:
- *   Travels all the way across the square endcap to the top-right edge and enters from the below edge.
+ * - Solid 3px border (#040404 in light mode, dark:border-white/30 in dark mode).
+ * - Typography: Inter, 0 tracking, clean contrast.
+ * - Variants:
+ *   1. "default" (Split Arrow): Dual-arrow fly-through pass animation on right square endcap.
+ *   2. "edge-fill" (Seamless Text-Only): No icon, zero gap between outer/inner border,
+ *      and vibrant color fill sweeping on hover from top-left to right through the edges.
  */
 export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
   (
     {
+      variant = "default",
       menuOpen = false,
       onClick,
-      text = "LET'S TALK",
+      text,
       children,
       className,
-      id = "stux-lets-talk-btn",
+      id = "stux-btn",
       size = "default",
       colorScheme = "yellow",
       customAccent,
@@ -163,6 +167,9 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
     },
     ref
   ) => {
+    const isEdgeFill = variant === "edge-fill";
+    const defaultText = isEdgeFill ? "ALL PROJECTS" : "LET'S TALK";
+    const displayText = children ?? text ?? defaultText;
     const isOpen = menuOpen;
     const cfg = SIZES[size] ?? SIZES.default;
     const scheme = STUX_COLOR_SCHEMES[colorScheme] ?? STUX_COLOR_SCHEMES.yellow;
@@ -173,8 +180,9 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
 
     return (
       <>
-        {/* Scoped CSS for full-span arrow movement from center to edge and back from below edge */}
+        {/* Scoped CSS for precise micro-animations */}
         <style>{`
+          /* --- Variant 1: Dual Arrow Fly-Through Physics --- */
           .stux-btn-${id} .stux-arrow-main,
           .stux-btn-${id} .stux-arrow-clone {
             position: absolute;
@@ -201,6 +209,22 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
           .stux-btn-${id}:focus-visible .stux-arrow-clone,
           .stux-btn-${id}[aria-expanded="true"] .stux-arrow-clone {
             transform: translate(0, 0);
+          }
+
+          /* --- Variant 2: Seamless Edge Fill (Top-Left to Right through edges) --- */
+          .stux-btn-${id} .stux-edge-fill-layer {
+            position: absolute;
+            inset: -3px;
+            pointer-events: none;
+            z-index: 0;
+            clip-path: polygon(0 0, 0 0, 0 0, 0 0);
+            transition: clip-path 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: clip-path;
+          }
+          .stux-btn-${id}:hover .stux-edge-fill-layer,
+          .stux-btn-${id}:focus-visible .stux-edge-fill-layer,
+          .stux-btn-${id}[aria-expanded="true"] .stux-edge-fill-layer {
+            clip-path: polygon(0 0, 220% 0, 100% 220%, 0 100%);
           }
         `}</style>
 
@@ -233,93 +257,129 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
           )}
           {...props}
         >
-          {/* Responsive sliding panel: Smoothly morphs resting width with size, sweeps full-width on hover */}
-          <motion.div
-            initial={false}
-            animate={{
-              width: isOpen ? "100%" : cfg.endcapWidth,
-            }}
-            transition={SPRING_TRANSITION}
-            className={cn(
-              "absolute top-0 right-0 bottom-0 transition-[width] duration-[600ms] ease-[0.22,1,0.36,1] z-0 group-hover:!w-full",
-              scheme.accentBg
-            )}
-          />
+          {isEdgeFill ? (
+            /* =========================================================================
+               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Zero gaps, Left-Top to Right)
+               ========================================================================= */
+            <>
+              {/* Seamless Edge Fill Layer: Inset -3px to guarantee zero border gap */}
+              <div
+                className={cn(
+                  "stux-edge-fill-layer",
+                  scheme.accentBg,
+                  isOpen && "!clip-path-none [clip-path:polygon(0_0,220%_0,100%_220%,0_100%)]"
+                )}
+              />
 
-          {/* Text Container: Inter font, <p> tag, smooth font-size & padding morphing, 0 mutedness, 0 tracking, 400 weight */}
-          <motion.p
-            initial={false}
-            animate={{
-              paddingLeft: cfg.paddingX,
-              paddingRight: cfg.paddingX,
-              fontSize: cfg.fontSize,
-            }}
-            transition={SPRING_TRANSITION}
-            className={cn(
-              "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
-              isOpen
-                ? scheme.textColorOnHover.replace("group-hover:", "")
-                : cn("text-white", scheme.textColorOnHover)
-            )}
-          >
-            {children ?? text}
-          </motion.p>
-
-          {/* Square Icon Container: Clipped at the button border edge so arrow travels all the way across the endcap */}
-          <motion.div
-            initial={false}
-            animate={{
-              width: cfg.endcapWidth,
-            }}
-            transition={SPRING_TRANSITION}
-            className={cn(
-              "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden h-full",
-              isOpen
-                ? "border-black/15 dark:border-black/25"
-                : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
-            )}
-          >
-            {/* Arrow wrapper: Does NOT clip, allowing arrows to fly freely across the full square endcap */}
-            <motion.span
-              initial={false}
-              animate={{
-                width: cfg.iconSize,
-                height: cfg.iconSize,
-              }}
-              transition={SPRING_TRANSITION}
-              className="stux-arrow-wrapper relative flex items-center justify-center pointer-events-none select-none shrink-0"
-            >
-              {/* Primary Arrow: shoots from center all the way out to top-right edge */}
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className={cn("stux-arrow-main block", scheme.iconColor)}
+              {/* Text Container: Symmetrical balanced padding, crisp color transition */}
+              <motion.p
+                initial={false}
+                animate={{
+                  paddingLeft: cfg.paddingX + 12,
+                  paddingRight: cfg.paddingX + 12,
+                  fontSize: cfg.fontSize,
+                }}
+                transition={SPRING_TRANSITION}
+                className={cn(
+                  "relative z-10 m-0 w-full font-['Inter',sans-serif] font-medium tracking-[0.02em] uppercase flex items-center justify-center transition-colors duration-[500ms] select-none whitespace-nowrap leading-none",
+                  isOpen
+                    ? scheme.textColorOnHover.replace("group-hover:", "")
+                    : cn("text-white", scheme.textColorOnHover)
+                )}
               >
-                <line x1="7" y1="17" x2="17" y2="7" />
-                <polyline points="7 7 17 7 17 17" />
-              </svg>
+                {displayText}
+              </motion.p>
+            </>
+          ) : (
+            /* =========================================================================
+               VARIANT 1: SPLIT ARROW (Original Dual-Arrow Pass Physics)
+               ========================================================================= */
+            <>
+              {/* Responsive sliding panel */}
+              <motion.div
+                initial={false}
+                animate={{
+                  width: isOpen ? "100%" : cfg.endcapWidth,
+                }}
+                transition={SPRING_TRANSITION}
+                className={cn(
+                  "absolute top-0 right-0 bottom-0 transition-[width] duration-[600ms] ease-[0.22,1,0.36,1] z-0 group-hover:!w-full",
+                  scheme.accentBg
+                )}
+              />
 
-              {/* Clone Arrow: enters from below edge into the center */}
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className={cn("stux-arrow-clone block", scheme.iconColor)}
+              {/* Text Container */}
+              <motion.p
+                initial={false}
+                animate={{
+                  paddingLeft: cfg.paddingX,
+                  paddingRight: cfg.paddingX,
+                  fontSize: cfg.fontSize,
+                }}
+                transition={SPRING_TRANSITION}
+                className={cn(
+                  "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
+                  isOpen
+                    ? scheme.textColorOnHover.replace("group-hover:", "")
+                    : cn("text-white", scheme.textColorOnHover)
+                )}
               >
-                <line x1="7" y1="17" x2="17" y2="7" />
-                <polyline points="7 7 17 7 17 17" />
-              </svg>
-            </motion.span>
-          </motion.div>
+                {displayText}
+              </motion.p>
+
+              {/* Square Icon Container with Dual-Arrow Fly-Through */}
+              <motion.div
+                initial={false}
+                animate={{
+                  width: cfg.endcapWidth,
+                }}
+                transition={SPRING_TRANSITION}
+                className={cn(
+                  "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden h-full",
+                  isOpen
+                    ? "border-black/15 dark:border-black/25"
+                    : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
+                )}
+              >
+                <motion.span
+                  initial={false}
+                  animate={{
+                    width: cfg.iconSize,
+                    height: cfg.iconSize,
+                  }}
+                  transition={SPRING_TRANSITION}
+                  className="stux-arrow-wrapper relative flex items-center justify-center pointer-events-none select-none shrink-0"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className={cn("stux-arrow-main block", scheme.iconColor)}
+                  >
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className={cn("stux-arrow-clone block", scheme.iconColor)}
+                  >
+                    <line x1="7" y1="17" x2="17" y2="7" />
+                    <polyline points="7 7 17 7 17 17" />
+                  </svg>
+                </motion.span>
+              </motion.div>
+            </>
+          )}
         </motion.button>
       </>
     );

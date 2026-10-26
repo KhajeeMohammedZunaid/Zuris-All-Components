@@ -7,6 +7,7 @@ import {
   StuxButton,
   StuxColorScheme,
   StuxButtonSize,
+  StuxButtonVariant,
 } from "@/components/buttons/stux-button";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +16,7 @@ export default function StuxButtonPage() {
   const [mounted, setMounted] = React.useState(false);
 
   const [isGrid, setIsGrid] = React.useState(true);
+  const [variant, setVariant] = React.useState<StuxButtonVariant>("edge-fill");
   const [size, setSize] = React.useState<StuxButtonSize>("default");
   const [colorScheme, setColorScheme] = React.useState<StuxColorScheme>("yellow");
 
@@ -59,14 +61,60 @@ export default function StuxButtonPage() {
       <motion.div
         layout
         transition={{ type: "spring", stiffness: 380, damping: 30 }}
-        className="flex items-center justify-center z-10"
+        className="flex flex-col items-center justify-center gap-6 z-10"
       >
-        <StuxButton size={size} colorScheme={colorScheme} />
+        <StuxButton
+          key={variant}
+          variant={variant}
+          size={size}
+          colorScheme={colorScheme}
+        />
       </motion.div>
 
-      {/* Floating Bottom Pill Controls: 100% Theme-Responsive, Zero Ugly Text */}
+      {/* Floating Bottom Pill Controls: 100% Theme-Responsive */}
       <div className="fixed bottom-6 inset-x-0 mx-auto flex items-center justify-center z-50 pointer-events-none px-4">
         <div className="pointer-events-auto inline-flex flex-wrap items-center justify-center gap-1.5 p-1.5 rounded-full border border-zinc-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/90 text-zinc-900 dark:text-zinc-100 shadow-none backdrop-blur-xl text-xs font-sans">
+          
+          {/* Variant Switcher: Edge Fill vs Split Arrow */}
+          <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-zinc-100 dark:bg-zinc-950/60 border border-zinc-200/60 dark:border-zinc-800/60">
+            {(
+              [
+                { key: "edge-fill", label: "Edge Fill (Seamless)" },
+                { key: "default", label: "Split Arrow" },
+              ] as const
+            ).map((v) => {
+              const active = variant === v.key;
+              return (
+                <button
+                  key={v.key}
+                  type="button"
+                  onClick={() => setVariant(v.key)}
+                  className={cn(
+                    "relative px-3 py-1 rounded-full transition-colors cursor-pointer select-none font-medium text-xs whitespace-nowrap",
+                    active
+                      ? "text-zinc-950 dark:text-white font-semibold"
+                      : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="active-variant-pill"
+                      className="absolute inset-0 rounded-full bg-white dark:bg-zinc-800 shadow-sm"
+                      transition={{
+                        type: "spring",
+                        stiffness: 420,
+                        damping: 32,
+                      }}
+                    />
+                  )}
+                  <span className="relative z-10">{v.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
+
           {/* Color Palette Switcher */}
           <div className="flex items-center gap-1 px-1">
             {colors.map((c) => {
@@ -88,22 +136,6 @@ export default function StuxButtonPage() {
               );
             })}
           </div>
-
-          <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
-
-          {/* Grid Toggle: Responsive for Both Themes */}
-          <button
-            type="button"
-            onClick={() => setIsGrid((prev) => !prev)}
-            className={cn(
-              "px-3 py-1.5 rounded-full transition-colors cursor-pointer select-none font-medium text-xs whitespace-nowrap",
-              isGrid
-                ? "bg-zinc-200/90 dark:bg-zinc-800 text-zinc-950 dark:text-white font-semibold"
-                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
-            )}
-          >
-            {isGrid ? "Grid: On" : "Grid: Off"}
-          </button>
 
           <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
 
@@ -148,7 +180,23 @@ export default function StuxButtonPage() {
 
           <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
 
-          {/* Theme Switcher: Direct next-themes toggle with zero flash */}
+          {/* Grid Toggle */}
+          <button
+            type="button"
+            onClick={() => setIsGrid((prev) => !prev)}
+            className={cn(
+              "px-3 py-1.5 rounded-full transition-colors cursor-pointer select-none font-medium text-xs whitespace-nowrap",
+              isGrid
+                ? "bg-zinc-200/90 dark:bg-zinc-800 text-zinc-950 dark:text-white font-semibold"
+                : "text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white"
+            )}
+          >
+            {isGrid ? "Grid: On" : "Grid: Off"}
+          </button>
+
+          <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
+
+          {/* Theme Switcher: Direct next-themes toggle */}
           <button
             type="button"
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
