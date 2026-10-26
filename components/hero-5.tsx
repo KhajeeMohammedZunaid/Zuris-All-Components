@@ -9,19 +9,17 @@ interface FloatingCard {
   id: string;
   name?: string;
   src: string;
-  // Position percentage or style
   styleDesktop: {
     top?: string;
     bottom?: string;
     left?: string;
     right?: string;
     width: string;
-    aspectRatio?: string;
+    aspectRatio: string;
     zIndex?: number;
   };
   blur?: "none" | "sm" | "md" | "lg";
   opacity?: number;
-  rotation?: number;
   floatDelay?: number;
   floatDuration?: number;
   floatDistance?: number;
@@ -29,67 +27,64 @@ interface FloatingCard {
 }
 
 const CARDS: FloatingCard[] = [
-  // 1. Far background top-left (Soft scenic, heavy depth blur)
+  // 1. TOP-LEFT FAR BACKGROUND (Blurred depth-of-field, perfectly straight)
   {
     id: "bg-top-left",
     src: "/acc-1.webp",
     styleDesktop: {
-      top: "6%",
-      left: "3%",
+      top: "5%",
+      left: "4%",
       width: "180px",
-      aspectRatio: "16/10",
+      aspectRatio: "4/3",
       zIndex: 5,
     },
     blur: "md",
     opacity: 0.65,
-    rotation: -2,
     floatDelay: 0.2,
     floatDuration: 6.5,
-    floatDistance: 8,
+    floatDistance: 6,
     hideOnMobile: true,
   },
 
-  // 2. Atharva (Top-left midground, sharp)
+  // 2. ATHARVA (Top-left midground, sharp, straight)
   {
     id: "atharva",
     name: "Atharva",
     src: "/n1.png",
     styleDesktop: {
       top: "12%",
-      left: "17%",
+      left: "18%",
       width: "135px",
       aspectRatio: "1/1",
       zIndex: 15,
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
     floatDelay: 0.4,
     floatDuration: 5.5,
     floatDistance: 7,
   },
 
-  // 3. Vishesh (Top center-left, sharp, black & white / outdoor portrait)
+  // 3. VISHESH (Top center-left, sharp, straight)
   {
     id: "vishesh",
     name: "Vishesh",
     src: "/n2.png",
     styleDesktop: {
-      top: "5%",
-      left: "36%",
+      top: "4%",
+      left: "37%",
       width: "140px",
       aspectRatio: "1/1",
       zIndex: 20,
     },
     blur: "none",
     opacity: 1,
-    rotation: 1,
     floatDelay: 0.6,
     floatDuration: 6.2,
-    floatDistance: 9,
+    floatDistance: 8,
   },
 
-  // 4. Ruchit (Top center-right, sharp, white shirt & sunglasses)
+  // 4. RUCHIT (Top center-right, sharp, straight)
   {
     id: "ruchit",
     name: "Ruchit",
@@ -97,65 +92,62 @@ const CARDS: FloatingCard[] = [
     styleDesktop: {
       top: "4%",
       right: "26%",
-      width: "150px",
-      aspectRatio: "1/1.05",
+      width: "145px",
+      aspectRatio: "1/1",
       zIndex: 20,
     },
     blur: "none",
     opacity: 1,
-    rotation: -1,
     floatDelay: 0.3,
     floatDuration: 5.8,
-    floatDistance: 8,
+    floatDistance: 7,
   },
 
-  // 5. Far background top-right (Green hills / blue sky scenic, heavy depth blur)
+  // 5. TOP-RIGHT FAR BACKGROUND (Blurred depth-of-field, perfectly straight)
   {
     id: "bg-top-right",
     src: "/acc-2.webp",
     styleDesktop: {
       top: "4%",
       right: "4%",
-      width: "190px",
-      aspectRatio: "16/11",
+      width: "185px",
+      aspectRatio: "4/3",
       zIndex: 5,
     },
     blur: "lg",
     opacity: 0.7,
-    rotation: 2,
-    floatDelay: 0.8,
+    floatDelay: 0.7,
     floatDuration: 7,
-    floatDistance: 10,
+    floatDistance: 8,
     hideOnMobile: true,
   },
 
-  // 6. Kanishka (Mid-right foreground, balcony / horizon view)
+  // 6. KANISHKA (Mid-right foreground, sharp, straight)
   {
     id: "kanishka",
     name: "Kanishka",
     src: "/acc-3.webp",
     styleDesktop: {
-      top: "32%",
-      right: "3%",
-      width: "185px",
+      top: "34%",
+      right: "4%",
+      width: "180px",
       aspectRatio: "16/11",
       zIndex: 18,
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
     floatDelay: 0.5,
-    floatDuration: 6.8,
-    floatDistance: 9,
+    floatDuration: 6.6,
+    floatDistance: 8,
   },
 
-  // 7. Kashish (Mid-left foreground, indoor portrait with glasses)
+  // 7. KASHISH (Mid-left foreground, sharp, straight)
   {
     id: "kashish",
     name: "Kashish",
     src: "/n4.png",
     styleDesktop: {
-      top: "44%",
+      top: "42%",
       left: "4%",
       width: "145px",
       aspectRatio: "1/1",
@@ -163,19 +155,18 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
-    floatDelay: 0.7,
+    floatDelay: 0.6,
     floatDuration: 5.9,
     floatDistance: 7,
   },
 
-  // 8. Eemon (Bottom-left foreground, upright stage/portrait)
+  // 8. EEMON (Bottom-left foreground, sharp, straight upright card)
   {
     id: "eemon",
     name: "Eemon",
     src: "/acc-4.webp",
     styleDesktop: {
-      bottom: "6%",
+      bottom: "8%",
       left: "19%",
       width: "135px",
       aspectRatio: "3/4",
@@ -183,13 +174,12 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
     floatDelay: 0.2,
     floatDuration: 6.4,
-    floatDistance: 8,
+    floatDistance: 7,
   },
 
-  // 9. June (Bottom-center foreground, seated by ruins)
+  // 9. JUNE (Bottom-center foreground, sharp, straight)
   {
     id: "june",
     name: "June",
@@ -197,36 +187,72 @@ const CARDS: FloatingCard[] = [
     styleDesktop: {
       bottom: "3%",
       left: "44%",
-      width: "155px",
+      width: "150px",
       aspectRatio: "1/1",
       zIndex: 20,
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
     floatDelay: 0.5,
     floatDuration: 5.6,
-    floatDistance: 7,
+    floatDistance: 6,
   },
 
-  // 10. Sameen (Bottom-right foreground, reading book by window)
+  // 10. SAMEEN (Bottom-right foreground, sharp, straight)
   {
     id: "sameen",
     name: "Sameen",
     src: "/alone-upscaled.png",
     styleDesktop: {
-      bottom: "8%",
-      right: "18%",
-      width: "160px",
+      bottom: "9%",
+      right: "19%",
+      width: "155px",
       aspectRatio: "1/1",
       zIndex: 22,
     },
     blur: "none",
     opacity: 1,
-    rotation: 0,
     floatDelay: 0.4,
     floatDuration: 6.6,
-    floatDistance: 8,
+    floatDistance: 7,
+  },
+
+  // 11. BOTTOM-LEFT FAR BACKGROUND (Blurred depth-of-field, appearing ONLY HALF cut off at bottom)
+  {
+    id: "bg-bottom-left",
+    src: "/acc-5.webp",
+    styleDesktop: {
+      bottom: "-65px",
+      left: "5%",
+      width: "205px",
+      aspectRatio: "16/10",
+      zIndex: 6,
+    },
+    blur: "md",
+    opacity: 0.65,
+    floatDelay: 0.3,
+    floatDuration: 6.8,
+    floatDistance: 5,
+    hideOnMobile: true,
+  },
+
+  // 12. BOTTOM-RIGHT FAR BACKGROUND (Blurred depth-of-field, appearing ONLY HALF cut off at bottom)
+  {
+    id: "bg-bottom-right",
+    src: "/acc-1.webp",
+    styleDesktop: {
+      bottom: "-70px",
+      right: "5%",
+      width: "215px",
+      aspectRatio: "16/10",
+      zIndex: 6,
+    },
+    blur: "lg",
+    opacity: 0.65,
+    floatDelay: 0.5,
+    floatDuration: 7.2,
+    floatDistance: 5,
+    hideOnMobile: true,
   },
 ];
 
@@ -234,27 +260,21 @@ export function Hero5() {
   return (
     <section className="relative w-full min-h-screen flex flex-col justify-center items-center overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-[#111111] dark:text-zinc-50 select-none py-20 px-4 sm:px-6">
       
-      {/* Subtle Background Glow / Texture */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.02),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.03),transparent_70%)]" />
-
-      {/* Foreground Luminous Bokeh Orb (Bottom-Right Accent from user image) */}
-      <div 
-        aria-hidden="true"
-        className="absolute -bottom-10 right-2 sm:bottom-4 sm:right-10 w-44 h-44 sm:w-60 sm:h-60 rounded-full bg-gradient-to-tr from-cyan-400 via-teal-300 to-emerald-400 blur-3xl opacity-75 dark:opacity-45 pointer-events-none z-30" 
-      />
+      {/* Clean subtle radial background lighting */}
+      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.015),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.025),transparent_70%)]" />
 
       {/* =========================================================================
           DESKTOP FLOATING GALLERY CANVAS (md and up)
-          100% faithful to reference: depth blurs, spatial positioning, names
+          Straight cards, optical depth blurs top & bottom (half-visible cut off at bottom)
          ========================================================================= */}
-      <div className="hidden md:block absolute inset-0 w-full h-full max-w-[1600px] mx-auto pointer-events-none">
+      <div className="hidden md:block absolute inset-0 w-full h-full max-w-[1600px] mx-auto pointer-events-none overflow-hidden">
         {CARDS.map((card) => {
           const isBlurred = card.blur && card.blur !== "none";
           
           return (
             <motion.div
               key={card.id}
-              initial={{ opacity: 0, scale: 0.85, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 15 }}
               animate={{ opacity: card.opacity ?? 1, scale: 1, y: 0 }}
               transition={{
                 duration: 0.9,
@@ -272,15 +292,10 @@ export function Hero5() {
               }}
               className="pointer-events-auto"
             >
-              {/* Continuous micro-bobbing floating animation */}
+              {/* Pure straight vertical micro-float (Zero rotation tilt) */}
               <motion.div
                 animate={{
-                  y: [0, -(card.floatDistance || 8), 0],
-                  rotate: [
-                    card.rotation || 0,
-                    (card.rotation || 0) + 0.8,
-                    card.rotation || 0,
-                  ],
+                  y: [0, -(card.floatDistance || 7), 0],
                 }}
                 transition={{
                   duration: card.floatDuration || 6,
@@ -291,9 +306,9 @@ export function Hero5() {
                 whileHover={
                   !isBlurred
                     ? {
-                        scale: 1.05,
-                        y: -8,
-                        transition: { duration: 0.3, ease: "easeOut" },
+                        scale: 1.04,
+                        y: -6,
+                        transition: { duration: 0.25, ease: "easeOut" },
                       }
                     : undefined
                 }
@@ -302,13 +317,13 @@ export function Hero5() {
                   isBlurred && "pointer-events-none select-none"
                 )}
               >
-                {/* Photo Card Container with Precision Radius */}
+                {/* Photo Card Container: Straight, Precision-Rounded */}
                 <div
                   style={{
-                    aspectRatio: card.styleDesktop.aspectRatio || "1/1",
+                    aspectRatio: card.styleDesktop.aspectRatio,
                   }}
                   className={cn(
-                    "relative w-full overflow-hidden rounded-[22px] sm:rounded-[26px] bg-zinc-200 dark:bg-zinc-800 transition-all duration-300",
+                    "relative w-full overflow-hidden rounded-[20px] sm:rounded-[24px] bg-zinc-200 dark:bg-zinc-800 transition-all duration-300",
                     isBlurred
                       ? card.blur === "lg"
                         ? "blur-[10px] sm:blur-[12px] brightness-105"
@@ -320,15 +335,15 @@ export function Hero5() {
                     src={card.src}
                     alt={card.name || "Team member"}
                     fill
-                    sizes="220px"
+                    sizes="240px"
                     priority={!isBlurred}
                     className="w-full h-full object-cover select-none pointer-events-none"
                   />
-                  {/* Subtle inner card border glaze */}
-                  <div className="absolute inset-0 rounded-[22px] sm:rounded-[26px] ring-1 ring-inset ring-black/5 dark:ring-white/10 pointer-events-none" />
+                  {/* Subtle inner glaze border */}
+                  <div className="absolute inset-0 rounded-[20px] sm:rounded-[24px] ring-1 ring-inset ring-black/5 dark:ring-white/10 pointer-events-none" />
                 </div>
 
-                {/* Name Label Centered Below (Exact typography from image) */}
+                {/* Name Label Centered Below */}
                 {card.name && !isBlurred && (
                   <span className="mt-2 text-[12px] sm:text-[13px] font-['Plus_Jakarta_Sans',sans-serif] font-normal text-zinc-500 dark:text-zinc-400 tracking-[-0.01em] select-none transition-colors group-hover:text-zinc-950 dark:group-hover:text-zinc-100">
                     {card.name}
@@ -341,13 +356,13 @@ export function Hero5() {
       </div>
 
       {/* =========================================================================
-          CENTER HERO HEADLINE (Strict Specs: Plus Jakarta Sans, h2, 500 weight, -5.5% tracking)
+          CENTER HERO HEADLINE (Plus Jakarta Sans, h2, 500 weight, -5.5% tracking)
          ========================================================================= */}
       <div className="relative z-25 max-w-2xl mx-auto text-center px-4 flex flex-col items-center pointer-events-auto">
         <motion.h2
-          initial={{ opacity: 0, y: 24, filter: "blur(4px)" }}
+          initial={{ opacity: 0, y: 20, filter: "blur(4px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           className="font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-[58px] leading-[1.12] tracking-[-0.055em] [word-spacing:normal] text-[#111111] dark:text-zinc-50 m-0"
         >
           The humans behind the
@@ -357,8 +372,7 @@ export function Hero5() {
       </div>
 
       {/* =========================================================================
-          MOBILE RESPONSIVE CLOUD (Shown only on small screens < md)
-          Neatly flows the cards above and below the center title without clipping
+          MOBILE RESPONSIVE CLOUD (< md)
          ========================================================================= */}
       <div className="md:hidden w-full max-w-sm mx-auto mt-10 grid grid-cols-3 gap-3.5 z-20">
         {CARDS.filter((c) => !c.hideOnMobile).slice(0, 6).map((card, idx) => (
