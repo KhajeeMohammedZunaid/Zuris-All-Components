@@ -13,6 +13,7 @@ export type StuxColorScheme =
   | "violet"
   | "emerald";
 
+// Core button configuration types and supported creative fill patterns
 export type StuxButtonSize = "sm" | "default" | "lg";
 export type StuxButtonVariant = "default" | "edge-fill";
 export type StuxFillPattern = "cross" | "wave" | "cyber" | "arc" | "zigzag";
