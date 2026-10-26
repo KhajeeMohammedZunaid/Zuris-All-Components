@@ -17,6 +17,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Hero 2 (Zuris CMS)", href: "/hero-2", description: "Zero-roundedness architectural grid hero with Plus Jakarta Sans & CMS SaaS workspace" },
       { name: "Hero 3", href: "/hero-3", description: "Minimalist fintech hero with Plus Jakarta Sans, marquee brand logos & dual image slots" },
       { name: "Hero 4 (MindCloud)", href: "/hero-4", description: "Curved canvas gradient hero with Inter typography & automation prompt" },
+      { name: "Hero 5", href: "/hero-5", description: "Hero 5 blank canvas" },
     ],
   },
   {
