@@ -17,6 +17,7 @@ export default function StuxButtonPage() {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
 
+  // Interactive playground state: theme, variant, svg pattern, size, and color
   const [isGrid, setIsGrid] = React.useState(true);
   const [variant, setVariant] = React.useState<StuxButtonVariant>("edge-fill");
   const [fillPattern, setFillPattern] = React.useState<StuxFillPattern>("cross");
