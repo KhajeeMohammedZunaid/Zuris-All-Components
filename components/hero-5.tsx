@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+// Configuration interface for community showcase floating cards
 interface FloatingCard {
   id: string;
   name?: string;
