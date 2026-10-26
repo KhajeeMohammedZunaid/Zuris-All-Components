@@ -15,6 +15,7 @@ export type StuxColorScheme =
 
 export type StuxButtonSize = "sm" | "default" | "lg";
 export type StuxButtonVariant = "default" | "edge-fill";
+export type StuxFillPattern = "cross" | "wave" | "cyber" | "arc" | "zigzag";
 
 export interface StuxColorConfig {
   accentBg: string;
@@ -84,6 +85,41 @@ export const STUX_COLOR_SCHEMES: Record<StuxColorScheme, StuxColorConfig> = {
   },
 };
 
+/**
+ * Creative SVG Path Fills for the Edge-Fill Variant:
+ * All paths sweep horizontally from left to right with distinct leading contours.
+ */
+export const STUX_SVG_PATTERNS: Record<
+  StuxFillPattern,
+  { label: string; description: string; path: string }
+> = {
+  cross: {
+    label: "Cross Cut",
+    description: "Sharp diagonal -38° cross-angled blade sweep",
+    path: "M 0 0 L 126 0 L 94 100 L 0 100 Z",
+  },
+  wave: {
+    label: "Liquid Wave",
+    description: "Organic liquid fluid S-curve wave sweep",
+    path: "M 0 0 L 110 0 C 132 25, 88 75, 110 100 L 0 100 Z",
+  },
+  cyber: {
+    label: "Cyber Chevron",
+    description: "Futuristic tech chevron > cutting across",
+    path: "M 0 0 L 100 0 L 126 50 L 100 100 L 0 100 Z",
+  },
+  arc: {
+    label: "Convex Arc",
+    description: "Smooth parabolic convex dome curve",
+    path: "M 0 0 L 100 0 Q 126 50, 100 100 L 0 100 Z",
+  },
+  zigzag: {
+    label: "Sawtooth Blade",
+    description: "Geometric serrated zigzag tech cut",
+    path: "M 0 0 L 100 0 L 120 25 L 100 50 L 120 75 L 100 100 L 0 100 Z",
+  },
+};
+
 const SIZES: Record<
   StuxButtonSize,
   {
@@ -131,6 +167,7 @@ const SPRING_TRANSITION = {
 export interface StuxButtonProps
   extends Omit<HTMLMotionProps<"button">, "children"> {
   variant?: StuxButtonVariant;
+  fillPattern?: StuxFillPattern;
   menuOpen?: boolean;
   text?: string;
   size?: StuxButtonSize;
@@ -146,13 +183,14 @@ export interface StuxButtonProps
  * - Typography: Inter, 0 tracking, clean contrast.
  * - Variants:
  *   1. "default" (Split Arrow): Dual-arrow fly-through pass animation on right square endcap.
- *   2. "edge-fill" (Seamless Text-Only): No icon, zero gap between outer/inner border,
- *      and vibrant color fill sweeping on hover from top-left to right through the edges.
+ *   2. "edge-fill" (Seamless Text-Only with Creative SVG Paths): No icon, zero gap,
+ *      and creative SVG path fills (cross, wave, cyber, arc, zigzag) sweeping smoothly from left to right.
  */
 export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
   (
     {
       variant = "default",
+      fillPattern = "cross",
       menuOpen = false,
       onClick,
       text,
@@ -173,6 +211,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
     const isOpen = menuOpen;
     const cfg = SIZES[size] ?? SIZES.default;
     const scheme = STUX_COLOR_SCHEMES[colorScheme] ?? STUX_COLOR_SCHEMES.yellow;
+    const currentPattern = STUX_SVG_PATTERNS[fillPattern] ?? STUX_SVG_PATTERNS.cross;
 
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       onClick?.(e);
@@ -210,25 +249,6 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
           .stux-btn-${id}[aria-expanded="true"] .stux-arrow-clone {
             transform: translate(0, 0);
           }
-
-          /* --- Variant 2: Seamless Edge Fill (Steeper Cross-Angled Left-to-Right Sweep, Slower Physics) --- */
-          .stux-btn-${id} .stux-edge-fill-layer {
-            position: absolute;
-            top: -3px;
-            bottom: -3px;
-            left: -3px;
-            width: calc(100% + 140px);
-            pointer-events: none;
-            z-index: 0;
-            transform: translateX(-110%) skewX(-38deg);
-            transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: transform;
-          }
-          .stux-btn-${id}:hover .stux-edge-fill-layer,
-          .stux-btn-${id}:focus-visible .stux-edge-fill-layer,
-          .stux-btn-${id}[aria-expanded="true"] .stux-edge-fill-layer {
-            transform: translateX(-40px) skewX(-38deg);
-          }
         `}</style>
 
         <motion.button
@@ -262,17 +282,25 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         >
           {isEdgeFill ? (
             /* =========================================================================
-               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Steeper Cross-Angled Left-to-Right)
+               VARIANT 2: SEAMLESS EDGE FILL (Creative SVG Paths, Pure Left-to-Right)
                ========================================================================= */
             <>
-              {/* Seamless Edge Fill Layer: Inset -3px, sweeps diagonally across from left to right */}
-              <div
-                className={cn(
-                  "stux-edge-fill-layer",
-                  scheme.accentBg,
-                  isOpen && "![transform:translateX(-40px)_skewX(-38deg)]"
-                )}
-              />
+              {/* Creative SVG Path Fill: Inset -3px to guarantee zero border gap */}
+              <div className="absolute -inset-[3px] overflow-hidden pointer-events-none z-0">
+                <svg
+                  viewBox="0 0 220 100"
+                  preserveAspectRatio="none"
+                  className={cn(
+                    "absolute top-0 bottom-0 left-0 h-full w-[220%] pointer-events-none will-change-transform",
+                    "transition-transform duration-[850ms] ease-[0.22,1,0.36,1]",
+                    "translate-x-[-58%] group-hover:translate-x-0 group-focus-visible:translate-x-0",
+                    isOpen && "!translate-x-0"
+                  )}
+                  style={{ fill: customAccent ?? scheme.accentHex }}
+                >
+                  <path d={currentPattern.path} />
+                </svg>
+              </div>
 
               {/* Text Container: Symmetrical balanced padding, crisp color transition */}
               <motion.p

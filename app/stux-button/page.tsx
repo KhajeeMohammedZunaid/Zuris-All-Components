@@ -8,6 +8,8 @@ import {
   StuxColorScheme,
   StuxButtonSize,
   StuxButtonVariant,
+  StuxFillPattern,
+  STUX_SVG_PATTERNS,
 } from "@/components/buttons/stux-button";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +19,7 @@ export default function StuxButtonPage() {
 
   const [isGrid, setIsGrid] = React.useState(true);
   const [variant, setVariant] = React.useState<StuxButtonVariant>("edge-fill");
+  const [fillPattern, setFillPattern] = React.useState<StuxFillPattern>("cross");
   const [size, setSize] = React.useState<StuxButtonSize>("default");
   const [colorScheme, setColorScheme] = React.useState<StuxColorScheme>("yellow");
 
@@ -47,6 +50,14 @@ export default function StuxButtonPage() {
     { key: "emerald", label: "Emerald", hex: "#10b981" },
   ];
 
+  const patterns: { key: StuxFillPattern; label: string }[] = [
+    { key: "cross", label: "Cross Cut" },
+    { key: "wave", label: "Liquid Wave" },
+    { key: "cyber", label: "Cyber Chevron" },
+    { key: "arc", label: "Convex Arc" },
+    { key: "zigzag", label: "Sawtooth Blade" },
+  ];
+
   return (
     <main
       className={cn(
@@ -61,14 +72,21 @@ export default function StuxButtonPage() {
       <motion.div
         layout
         transition={{ type: "spring", stiffness: 380, damping: 30 }}
-        className="flex flex-col items-center justify-center gap-6 z-10"
+        className="flex flex-col items-center justify-center gap-4 z-10"
       >
         <StuxButton
-          key={variant}
+          key={`${variant}-${fillPattern}`}
           variant={variant}
+          fillPattern={fillPattern}
           size={size}
           colorScheme={colorScheme}
         />
+
+        {variant === "edge-fill" && (
+          <p className="text-[12px] font-sans font-medium text-zinc-400 dark:text-zinc-500 m-0 select-none">
+            {STUX_SVG_PATTERNS[fillPattern]?.description}
+          </p>
+        )}
       </motion.div>
 
       {/* Floating Bottom Pill Controls: 100% Theme-Responsive */}
@@ -79,7 +97,7 @@ export default function StuxButtonPage() {
           <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-zinc-100 dark:bg-zinc-950/60 border border-zinc-200/60 dark:border-zinc-800/60">
             {(
               [
-                { key: "edge-fill", label: "Edge Fill (Seamless)" },
+                { key: "edge-fill", label: "Edge Fill (SVG)" },
                 { key: "default", label: "Split Arrow" },
               ] as const
             ).map((v) => {
@@ -112,6 +130,44 @@ export default function StuxButtonPage() {
               );
             })}
           </div>
+
+          {/* SVG Fill Pattern Switcher (Shown when Edge Fill is selected) */}
+          {variant === "edge-fill" && (
+            <>
+              <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
+              <div className="inline-flex items-center gap-1 p-0.5 rounded-full bg-zinc-100 dark:bg-zinc-950/60 border border-zinc-200/60 dark:border-zinc-800/60">
+                {patterns.map((p) => {
+                  const active = fillPattern === p.key;
+                  return (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => setFillPattern(p.key)}
+                      className={cn(
+                        "relative px-2.5 py-1 rounded-full transition-colors cursor-pointer select-none font-medium text-xs whitespace-nowrap",
+                        active
+                          ? "text-zinc-950 dark:text-white font-semibold"
+                          : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                      )}
+                    >
+                      {active && (
+                        <motion.span
+                          layoutId="active-pattern-pill"
+                          className="absolute inset-0 rounded-full bg-white dark:bg-zinc-800 shadow-sm"
+                          transition={{
+                            type: "spring",
+                            stiffness: 420,
+                            damping: 32,
+                          }}
+                        />
+                      )}
+                      <span className="relative z-10">{p.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
 
           <span className="w-px h-3.5 mx-0.5 bg-zinc-300 dark:bg-zinc-700" />
 
