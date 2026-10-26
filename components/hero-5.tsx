@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Image from "next/image";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 interface FloatingCard {
@@ -19,11 +20,12 @@ interface FloatingCard {
   };
   blur?: "none" | "sm" | "md" | "lg";
   opacity?: number;
+  delay?: number;
   hideOnMobile?: boolean;
 }
 
 const CARDS: FloatingCard[] = [
-  // 1. TOP-LEFT FAR BACKGROUND (Blurred depth-of-field, straight, rock solid)
+  // 1. TOP-LEFT FAR BACKGROUND (Blurred depth-of-field, straight)
   {
     id: "bg-top-left",
     src: "/acc-1.webp",
@@ -36,6 +38,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "md",
     opacity: 0.65,
+    delay: 0.1,
     hideOnMobile: true,
   },
 
@@ -53,6 +56,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.25,
   },
 
   // 3. VISHESH (Top center-left, sharp, straight)
@@ -69,6 +73,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.35,
   },
 
   // 4. RUCHIT (Top center-right, sharp, straight)
@@ -85,9 +90,10 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.2,
   },
 
-  // 5. TOP-RIGHT FAR BACKGROUND (Blurred depth-of-field, straight, rock solid)
+  // 5. TOP-RIGHT FAR BACKGROUND (Blurred depth-of-field, straight)
   {
     id: "bg-top-right",
     src: "/acc-2.webp",
@@ -100,6 +106,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "lg",
     opacity: 0.7,
+    delay: 0.45,
     hideOnMobile: true,
   },
 
@@ -117,6 +124,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.3,
   },
 
   // 7. KASHISH (Mid-left foreground, sharp, straight)
@@ -133,6 +141,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.4,
   },
 
   // 8. EEMON (Bottom-left foreground, sharp, straight upright card)
@@ -149,6 +158,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.15,
   },
 
   // 9. JUNE (Bottom-center foreground, sharp, straight)
@@ -165,6 +175,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.3,
   },
 
   // 10. SAMEEN (Bottom-right foreground, sharp, straight)
@@ -181,6 +192,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "none",
     opacity: 1,
+    delay: 0.25,
   },
 
   // 11. BOTTOM-RIGHT FAR BACKGROUND (Shifted left & lower, appearing half cut off)
@@ -196,6 +208,7 @@ const CARDS: FloatingCard[] = [
     },
     blur: "lg",
     opacity: 0.65,
+    delay: 0.5,
     hideOnMobile: true,
   },
 ];
@@ -208,16 +221,23 @@ export function Hero5() {
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.015),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(255,255,255,0.025),transparent_70%)]" />
 
       {/* =========================================================================
-          DESKTOP STATIC GALLERY CANVAS (md and up)
-          100% stable, fixed positions, zero motion, zero floating, zero wobbling
+          DESKTOP GALLERY CANVAS (md and up)
+          Smooth entrance animation, then stays 100% stable in place (zero bobbing)
          ========================================================================= */}
       <div className="hidden md:block absolute inset-0 w-full h-full max-w-[1600px] mx-auto pointer-events-none overflow-hidden">
         {CARDS.map((card) => {
           const isBlurred = card.blur && card.blur !== "none";
           
           return (
-            <div
+            <motion.div
               key={card.id}
+              initial={{ opacity: 0, scale: 0.88, y: 18 }}
+              animate={{ opacity: card.opacity ?? 1, scale: 1, y: 0 }}
+              transition={{
+                duration: 0.85,
+                delay: card.delay || 0.2,
+                ease: [0.16, 1, 0.3, 1],
+              }}
               style={{
                 position: "absolute",
                 top: card.styleDesktop.top,
@@ -225,12 +245,11 @@ export function Hero5() {
                 left: card.styleDesktop.left,
                 right: card.styleDesktop.right,
                 width: card.styleDesktop.width,
-                opacity: card.opacity ?? 1,
                 zIndex: card.styleDesktop.zIndex || 10,
               }}
               className="pointer-events-auto flex flex-col items-center"
             >
-              {/* Photo Card Container: Straight, Precision-Rounded, Completely Stable */}
+              {/* Photo Card Container: Straight, Precision-Rounded */}
               <div
                 style={{
                   aspectRatio: card.styleDesktop.aspectRatio,
@@ -262,30 +281,38 @@ export function Hero5() {
                   {card.name}
                 </span>
               )}
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* =========================================================================
-          CENTER HERO HEADLINE (Completely stable, Plus Jakarta Sans, h2, 500 weight, -5.5% tracking)
+          CENTER HERO HEADLINE (Cinematic entrance reveal, then 100% stable)
          ========================================================================= */}
       <div className="relative z-25 max-w-2xl mx-auto text-center px-4 flex flex-col items-center pointer-events-auto">
-        <h2 className="font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-[58px] leading-[1.12] tracking-[-0.055em] [word-spacing:normal] text-[#111111] dark:text-zinc-50 m-0 select-none">
+        <motion.h2
+          initial={{ opacity: 0, y: 22, filter: "blur(4px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          className="font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] xl:text-[58px] leading-[1.12] tracking-[-0.055em] [word-spacing:normal] text-[#111111] dark:text-zinc-50 m-0 select-none"
+        >
           The humans behind the
           <br />
           prompts &amp; pixels
-        </h2>
+        </motion.h2>
       </div>
 
       {/* =========================================================================
           MOBILE RESPONSIVE CLOUD (< md)
-          Completely stable, zero motion
+          Staggered entrance reveal, then stays stable
          ========================================================================= */}
       <div className="md:hidden w-full max-w-sm mx-auto mt-10 grid grid-cols-3 gap-3.5 z-20">
-        {CARDS.filter((c) => !c.hideOnMobile).slice(0, 6).map((card) => (
-          <div
+        {CARDS.filter((c) => !c.hideOnMobile).slice(0, 6).map((card, idx) => (
+          <motion.div
             key={`mobile-${card.id}`}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: idx * 0.08, ease: [0.16, 1, 0.3, 1] }}
             className="flex flex-col items-center"
           >
             <div className="relative w-full aspect-square rounded-[18px] overflow-hidden bg-zinc-200 dark:bg-zinc-800 border border-black/10 dark:border-white/10">
@@ -302,7 +329,7 @@ export function Hero5() {
                 {card.name}
               </span>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
 
