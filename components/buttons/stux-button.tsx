@@ -211,23 +211,23 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
             transform: translate(0, 0);
           }
 
-          /* --- Variant 2: Seamless Edge Fill (Cross-Angled Left-to-Right Sweep) --- */
+          /* --- Variant 2: Seamless Edge Fill (Steeper Cross-Angled Left-to-Right Sweep, Slower Physics) --- */
           .stux-btn-${id} .stux-edge-fill-layer {
             position: absolute;
             top: -3px;
             bottom: -3px;
             left: -3px;
-            width: calc(100% + 90px);
+            width: calc(100% + 140px);
             pointer-events: none;
             z-index: 0;
-            transform: translateX(-105%) skewX(-25deg);
-            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            transform: translateX(-110%) skewX(-38deg);
+            transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
             will-change: transform;
           }
           .stux-btn-${id}:hover .stux-edge-fill-layer,
           .stux-btn-${id}:focus-visible .stux-edge-fill-layer,
           .stux-btn-${id}[aria-expanded="true"] .stux-edge-fill-layer {
-            transform: translateX(-20px) skewX(-25deg);
+            transform: translateX(-40px) skewX(-38deg);
           }
         `}</style>
 
@@ -262,7 +262,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         >
           {isEdgeFill ? (
             /* =========================================================================
-               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Cross-Angled Left-to-Right)
+               VARIANT 2: SEAMLESS EDGE FILL (Text-only, Steeper Cross-Angled Left-to-Right)
                ========================================================================= */
             <>
               {/* Seamless Edge Fill Layer: Inset -3px, sweeps diagonally across from left to right */}
@@ -270,7 +270,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 className={cn(
                   "stux-edge-fill-layer",
                   scheme.accentBg,
-                  isOpen && "![transform:translateX(-20px)_skewX(-25deg)]"
+                  isOpen && "![transform:translateX(-40px)_skewX(-38deg)]"
                 )}
               />
 
@@ -284,7 +284,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 }}
                 transition={SPRING_TRANSITION}
                 className={cn(
-                  "relative z-10 m-0 w-full font-['Inter',sans-serif] font-medium tracking-[0.02em] uppercase flex items-center justify-center transition-colors duration-[500ms] select-none whitespace-nowrap leading-none",
+                  "relative z-10 m-0 w-full font-['Inter',sans-serif] font-medium tracking-[0.02em] uppercase flex items-center justify-center transition-colors duration-[700ms] select-none whitespace-nowrap leading-none",
                   isOpen
                     ? scheme.textColorOnHover.replace("group-hover:", "")
                     : cn("text-white", scheme.textColorOnHover)
