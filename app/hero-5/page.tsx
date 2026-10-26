@@ -7,7 +7,7 @@ export const metadata = {
 
 export default function Hero5Page() {
   return (
-    <main className="min-h-screen w-full bg-[#fafafa] dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors duration-200">
+    <main className="w-full h-screen h-[100dvh] overflow-hidden bg-[#fafafa] dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors duration-200">
       <Hero5 />
     </main>
   );
