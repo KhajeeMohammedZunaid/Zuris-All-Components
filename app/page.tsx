@@ -54,6 +54,7 @@ const DIRECTORY_ROUTES: PageRoute[] = [
       { name: "Logo Animation", href: "/logo-animation", description: "Micro-interactive Zuris logo entrance and side-sliding text reveal" },
       { name: "Zuris App Icon", href: "/zuris-icon", description: "Zuris app icon with Liquid Glass simulation, shader variations & sequential reveal" },
       { name: "Stux Button", href: "/stux-button", description: "High-contrast architectural 'LET'S TALK' button with 600ms yellow slide physics" },
+      { name: "Duo Animation", href: "/duo-animation", description: "WebGL page curl transition animation with interactive image uploads" },
     ],
   },
 ];
