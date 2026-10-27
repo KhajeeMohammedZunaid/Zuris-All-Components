@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function DuoAnimationPage() {
   return (
-    <main className="w-full h-screen h-[100dvh] overflow-hidden bg-[#fafafa] dark:bg-[#09090b]">
+    <main className="w-full h-screen h-[100dvh] overflow-hidden">
       <PageCurlTransition />
     </main>
   );
