@@ -15,6 +15,7 @@ export interface ZurisLogoAnimationProps {
  * - Text expands & slides out horizontally from beside the logo
  * - Uses Inter font, <h4> tag, 400 weight (font-normal), -4.5% tracking (-0.045em)
  * - Click anywhere on the component to replay the animation
+ * - Supports responsive sizing presets: sm, md, and lg
  */
 export function ZurisLogoAnimation({
   className,
