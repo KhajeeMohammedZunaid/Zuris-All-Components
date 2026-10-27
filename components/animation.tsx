@@ -77,6 +77,7 @@ export const VARIANTS: Record<AnimationVariantKey, VariantSettings> = {
 const CARD_W = 4.0
 const CARD_H = 3.0
 const H = 3.0 // reference height in 3D world coordinates
+// H=3 world units precisely align camera FOV with viewport bounding box for 100% full-bleed coverage
 
 // Smoothstep utility matching duo.html
 const ss = (a: number, b: number, x: number) => {
