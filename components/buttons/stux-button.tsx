@@ -16,6 +16,7 @@ export type StuxColorScheme =
 // Core button configuration types and supported creative fill patterns
 export type StuxButtonSize = "sm" | "default" | "lg";
 export type StuxButtonVariant = "default" | "edge-fill";
+// Edge-fill variant eliminates border gaps and sweeps SVG fill across container boundaries
 export type StuxFillPattern = "cross" | "wave" | "cyber" | "arc" | "zigzag";
 
 export interface StuxColorConfig {
