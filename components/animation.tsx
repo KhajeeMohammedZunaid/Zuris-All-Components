@@ -4,16 +4,13 @@ import React, { useEffect, useRef, useState } from 'react'
 
 /* ============================== CONFIG ============================== */
 // Measured exact parameters from duo.html
-const UNSPLASH_IDS = [
-  '1506744038136-46273834b3fb',
-  '1470071459604-3b5ec3a7fe05',
-  '1441974231531-c6227db76b6e',
-  '1469474968028-56623f02e42e',
-  '1501785888041-af3ef285b470',
-  '1519681393784-d120267933ba',
+const DEFAULT_IMAGES = [
+  '/acc-1.webp',
+  '/acc-2.webp',
+  '/acc-3.webp',
+  '/acc-4.webp',
+  '/acc-5.webp',
 ]
-const getUnsplashUrl = (id: string) =>
-  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1600&q=80`
 
 const PERIOD = 2.03 // seconds per page (measured)
 const TRANS = 0.80  // seconds of curl (measured)
@@ -62,13 +59,11 @@ export default function PageCurlTransition() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [loading, setLoading] = useState(true)
-  const [count, setCount] = useState(UNSPLASH_IDS.length)
+  const [count, setCount] = useState(DEFAULT_IMAGES.length)
   const [error, setError] = useState<string | null>(null)
 
-  // Current image URLs (defaults to Unsplash, or user uploaded)
-  const [imageUrls, setImageUrls] = useState<string[]>(() =>
-    UNSPLASH_IDS.map((id) => getUnsplashUrl(id))
-  )
+  // Current image URLs (defaults to acc-1 to acc-5.webp, or user uploaded)
+  const [imageUrls, setImageUrls] = useState<string[]>(DEFAULT_IMAGES)
 
   useEffect(() => {
     let disposed = false
@@ -271,7 +266,7 @@ export default function PageCurlTransition() {
   }
 
   const onReset = () => {
-    setImageUrls(UNSPLASH_IDS.map((id) => getUnsplashUrl(id)))
+    setImageUrls(DEFAULT_IMAGES)
   }
 
   return (
