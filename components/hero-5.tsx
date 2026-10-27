@@ -18,6 +18,7 @@ interface FloatingCard {
   opacity?: number;
   delay?: number;
   showOnMobile?: boolean; // Set to false for mid-side cards on narrow phones to guarantee zero text collision
+  // Stage container clamp preserves 16:9 aspect ratio and prevents vertical tower distortion
 }
 
 const CARDS: FloatingCard[] = [
