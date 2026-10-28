@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import {
@@ -64,7 +65,7 @@ export function UniversalFeatureCard({
       viewport={{ once: true, amount: 0.15 }}
       transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
-        "border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-4 sm:gap-4.5 text-left overflow-hidden w-full",
+        "border border-zinc-200/80 dark:border-zinc-800/80 bg-white dark:bg-[#121215] flex flex-col gap-4 sm:gap-4.5 text-left overflow-hidden w-full transform-gpu will-change-[transform,opacity]",
         className
       )}
       style={{
@@ -72,32 +73,33 @@ export function UniversalFeatureCard({
         padding: `${CARD_PADDING}px ${CARD_PADDING}px ${CARD_PADDING - 2}px ${CARD_PADDING}px`,
       }}
     >
-      {/* Stage: Hardware-masked to guarantee 100% smooth rounded corner at right-bottom edge */}
+      {/* Stage: Hardware-isolated rounded container with zero composite thrashing */}
       <div
         className={cn(
-          "relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex select-none",
+          "relative w-full h-[275px] sm:h-[295px] lg:h-[290px] overflow-hidden flex select-none transform-gpu [contain:paint]",
           stageClassName
         )}
         style={{
           borderRadius: `${INNER_RADIUS}px`,
-          WebkitMaskImage: "-webkit-radial-gradient(white, black)",
-          maskImage: "radial-gradient(white, black)",
           isolation: "isolate",
         }}
       >
-        {/* Layer 1: Image Background (smoothly cross-faded) */}
+        {/* Layer 1: Image Background (engineered via Next.js Image for lightweight ~35KB responsive WebP) */}
         <div
           className={cn(
-            "absolute inset-0 transition-opacity duration-300 ease-in-out pointer-events-none",
+            "absolute inset-0 transition-opacity duration-300 ease-in-out pointer-events-none overflow-hidden transform-gpu [contain:paint]",
             hasImage ? "opacity-100" : "opacity-0"
           )}
           style={{ borderRadius: `${INNER_RADIUS}px` }}
         >
-          <img
+          <Image
             src={bgImage}
-            alt=""
-            className="w-full h-full object-cover object-center select-none pointer-events-none"
-            style={{ borderRadius: `${INNER_RADIUS}px` }}
+            alt="Feature background"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px"
+            quality={80}
+            priority={delay === 0}
+            className="w-full h-full object-cover object-center select-none pointer-events-none [transform:translateZ(0)]"
           />
           <div
             className="absolute inset-0 bg-black/5 dark:bg-black/35 pointer-events-none"
@@ -124,7 +126,7 @@ export function UniversalFeatureCard({
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: resolvedTextDelay, ease: [0.22, 1, 0.36, 1] }}
-        className="flex flex-col gap-2.5 md:gap-2 px-1 pb-0.5 pt-0.5 text-left items-start"
+        className="flex flex-col gap-2.5 md:gap-2 px-1 pb-0.5 pt-0.5 text-left items-start transform-gpu will-change-[transform,opacity]"
       >
         <h4 className="font-medium text-xl sm:text-[1.22rem] leading-[1.25] tracking-[-0.025em] text-zinc-950 dark:text-zinc-50 font-sans text-left m-0">
           {title}
