@@ -35,13 +35,13 @@ const CARDS: FloatingCard[] = [
     showOnMobile: false,
   },
 
-  // 2. ATHARVA (Top-left accent card on mobile, precisely positioned)
+  // 2. ATHARVA (Top-left on mobile, comfortably spaced from notch and left bezel)
   {
     id: "atharva",
     name: "Atharva",
     src: "/n1.png",
-    positionClass: "top-[4.5%] xs:top-[5%] sm:top-[6%] md:top-[8%] lg:top-[10%] left-[3%] xs:left-[4%] sm:left-[6%] md:left-[12%] lg:left-[16%] xl:left-[17%] z-[15]",
-    sizeClass: "w-[66px] xs:w-[72px] sm:w-[84px] md:w-[112px] lg:w-[130px] xl:w-[140px]",
+    positionClass: "top-[8.5%] xs:top-[9%] sm:top-[7%] md:top-[8%] lg:top-[10%] left-[6%] xs:left-[7%] sm:left-[8%] md:left-[12%] lg:left-[16%] xl:left-[17%] z-[15]",
+    sizeClass: "w-[70px] xs:w-[76px] sm:w-[86px] md:w-[112px] lg:w-[130px] xl:w-[140px]",
     aspectRatio: "1/1",
     blur: "none",
     opacity: 1,
@@ -49,12 +49,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 3. VISHESH (Top left/center on mobile, moved below a little)
+  // 3. VISHESH (Top center-left on mobile, gracefully stepped down)
   {
     id: "vishesh",
     name: "Vishesh",
     src: "/n2.png",
-    positionClass: "top-[14%] xs:top-[15%] sm:top-[7%] md:top-[3%] lg:top-[4%] left-[22%] xs:left-[24%] sm:left-[28%] md:left-[35%] lg:left-[36%] z-[20]",
+    positionClass: "top-[13%] xs:top-[14%] sm:top-[7%] md:top-[3%] lg:top-[4%] left-[34%] xs:left-[36%] sm:left-[36%] md:left-[35%] lg:left-[36%] z-[20]",
     sizeClass: "w-[76px] xs:w-[82px] sm:w-[94px] md:w-[116px] lg:w-[134px] xl:w-[145px]",
     aspectRatio: "1/1",
     blur: "none",
@@ -63,12 +63,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 4. RUCHIT (Top right/center on mobile, moved below a little)
+  // 4. RUCHIT (Top right on mobile, gracefully stepped down)
   {
     id: "ruchit",
     name: "Ruchit",
     src: "/n3.png",
-    positionClass: "top-[19%] xs:top-[20%] sm:top-[11%] md:top-[4%] lg:top-[5%] right-[7%] xs:right-[8%] sm:right-[10%] md:right-[16%] lg:right-[22%] xl:right-[24%] z-[20]",
+    positionClass: "top-[17%] xs:top-[18%] sm:top-[11%] md:top-[4%] lg:top-[5%] right-[6%] xs:right-[8%] sm:right-[10%] md:right-[16%] lg:right-[22%] xl:right-[24%] z-[20]",
     sizeClass: "w-[74px] xs:w-[80px] sm:w-[92px] md:w-[114px] lg:w-[132px] xl:w-[145px]",
     aspectRatio: "1/1",
     blur: "none",
