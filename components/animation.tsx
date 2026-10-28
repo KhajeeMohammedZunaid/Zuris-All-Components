@@ -41,8 +41,8 @@ export const VARIANTS: Record<AnimationVariantKey, VariantSettings> = {
   slow: {
     label: 'Slow',
     description: 'Gentle, leisurely, cinematic flow',
-    period: 3.60,
-    trans: 1.40,
+    period: 3.80,
+    trans: 1.50,
     lift: 0.90,
     blur: 0.07,
     squeeze: 0.10,
@@ -50,13 +50,13 @@ export const VARIANTS: Record<AnimationVariantKey, VariantSettings> = {
   },
   drape: {
     label: 'Drape',
-    description: 'Exact Duo physics: new page comes, old page stays, closes cleanly at end',
-    period: 2.03,
-    trans: 0.80,
+    description: 'Graceful physical cloth drape with smooth curling and closing',
+    period: 2.60,
+    trans: 1.10,
     lift: 0.90,
     blur: 0.07,
     squeeze: 0.10,
-    wNew: 0.28,
+    wNew: 0.30,
   },
   fast: {
     label: 'Fast',
