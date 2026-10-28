@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useTheme } from 'next-themes'
 
 /* ============================== PRESET DATA ============================== */
 export const LOCAL_IMAGES = [
@@ -33,51 +32,47 @@ export interface VariantSettings {
   trans: number    // seconds of curl transition
   lift: number     // max lift toward camera -> top/bottom 3D flare
   blur: number     // max horizontal blur (uv) at the seam
-  squeeze: number  // new-page content gather/squeeze near the seam
-  wOld: number     // lifted OLD page extent right of seam
+  squeeze: number  // incoming-page content wrap near the seam
   wNew: number     // lifted NEW page extent left of seam
 }
 
+// Measured exact parameters from duo.html
 export const VARIANTS: Record<AnimationVariantKey, VariantSettings> = {
   slow: {
     label: 'Slow',
     description: 'Gentle, leisurely, cinematic flow',
-    period: 3.8,
-    trans: 1.5,
-    lift: 0.72,
-    blur: 0.05,
-    squeeze: 0.08,
-    wOld: 0.40,
-    wNew: 0.22,
+    period: 3.60,
+    trans: 1.40,
+    lift: 0.90,
+    blur: 0.07,
+    squeeze: 0.10,
+    wNew: 0.28,
   },
   drape: {
     label: 'Drape',
-    description: 'Deep physical cloth drape with heavy flare',
-    period: 2.3,
-    trans: 0.95,
-    lift: 1.30,
-    blur: 0.09,
-    squeeze: 0.15,
-    wOld: 0.56,
-    wNew: 0.34,
+    description: 'Exact Duo physics: new page comes, old page stays, closes cleanly at end',
+    period: 2.03,
+    trans: 0.80,
+    lift: 0.90,
+    blur: 0.07,
+    squeeze: 0.10,
+    wNew: 0.28,
   },
   fast: {
     label: 'Fast',
-    description: 'Crisp, brisk, snappy page curl',
-    period: 1.4,
+    description: 'Crisp, brisk, snappy page turn',
+    period: 1.35,
     trans: 0.45,
-    lift: 0.60,
-    blur: 0.04,
-    squeeze: 0.06,
-    wOld: 0.30,
-    wNew: 0.18,
+    lift: 0.85,
+    blur: 0.06,
+    squeeze: 0.08,
+    wNew: 0.24,
   },
 }
 
 const CARD_W = 4.0
 const CARD_H = 3.0
 const H = 3.0 // reference height in 3D world coordinates
-// H=3 world units precisely align camera FOV with viewport bounding box for 100% full-bleed coverage
 
 // Smoothstep utility matching duo.html
 const ss = (a: number, b: number, x: number) => {
@@ -129,8 +124,6 @@ export default function PageCurlTransition({
 }: PageCurlTransitionProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const { resolvedTheme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -154,18 +147,6 @@ export default function PageCurlTransition({
     if (sourceKey === 'custom' && customImages.length > 0) return customImages
     return LOCAL_IMAGES
   }, [sourceKey, customImages])
-
-  const [count, setCount] = useState(currentImages.length)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const isDark = mounted ? resolvedTheme === 'dark' : false
-  const isDarkRef = useRef(isDark)
-  useEffect(() => {
-    isDarkRef.current = isDark
-  }, [isDark])
 
   // Setup Three.js scene & animation
   useEffect(() => {
@@ -246,7 +227,10 @@ export default function PageCurlTransition({
 
         camera.position.z = getTargetCameraZ(1, sizeModeRef.current)
 
-        // 4. Dynamic GLSL Shader Material supporting live variant + size mode updates
+        // 4. Dynamic GLSL Shader Material
+        // Physics:
+        // - Old page (dd >= 0.0) stays completely still and flat at z=0 with zero translation.
+        // - New page (dd < 0.0) curls in from the left over the old page, and flattens/closes cleanly at the end.
         const mat = new THREE.ShaderMaterial({
           transparent: true,
           uniforms: {
@@ -255,27 +239,24 @@ export default function PageCurlTransition({
             cA: { value: new THREE.Vector4(0, 0, 1, 1) },
             cB: { value: new THREE.Vector4(0, 0, 1, 1) },
             seam: { value: -1 },
-            wo: { value: 0 },
             wn: { value: 0 },
             uLift: { value: variantRef.current.lift },
             uBlur: { value: variantRef.current.blur },
             uSqueeze: { value: variantRef.current.squeeze },
-            uWOld: { value: variantRef.current.wOld },
             uWNew: { value: variantRef.current.wNew },
-            uDark: { value: isDarkRef.current ? 1.0 : 0.0 },
             uCardMode: { value: sizeModeRef.current === 'card' ? 1.0 : 0.0 },
           },
           vertexShader: `
-            uniform float seam, wo, wn;
-            uniform float uLift, uWOld, uWNew;
+            uniform float seam, wn;
+            uniform float uLift, uWNew;
             varying vec2 vUv;
             varying float vLift;
             void main(){
               vUv = uv;
               float dd = uv.x - seam;
-              // Lift is highest AT the straight seam and falls off with distance (concave, steep at the seam).
-              float l = dd >= 0.0 ? wo * pow(1.0 - clamp( dd / uWOld, 0.0, 1.0), 2.0)
-                                  : wn * pow(1.0 - clamp(-dd / uWNew, 0.0, 1.0), 2.0);
+              // Old page (dd >= 0.0) stays completely flat and still at z=0.
+              // New page (dd < 0.0) curls in from the left, lifting toward camera with flare.
+              float l = dd < 0.0 ? wn * pow(1.0 - clamp(-dd / uWNew, 0.0, 1.0), 2.0) : 0.0;
               vLift = l;
               vec3 p = position;
               p.z += l * uLift;
@@ -284,7 +265,7 @@ export default function PageCurlTransition({
           fragmentShader: `
             uniform sampler2D A, B;
             uniform vec4 cA, cB;
-            uniform float seam, wo, wn, uDark;
+            uniform float seam, wn;
             uniform float uBlur, uSqueeze, uCardMode;
             varying vec2 vUv;
             varying float vLift;
@@ -297,9 +278,12 @@ export default function PageCurlTransition({
 
             void main(){
               bool isNew = vUv.x < seam; // crisp straight seam: chosen per pixel
-              float lw = isNew ? wn : wo;
-              float r = uBlur * vLift;
+              
+              // Motion blur applies only to the curling new page near the seam
+              float r = isNew ? uBlur * vLift : 0.0;
+              // Squeeze applies only to incoming new page; old page stays right there itself with zero translation
               float x0 = vUv.x + (isNew ? uSqueeze * vLift : 0.0);
+              
               vec3 col = vec3(0.0);
               float ws = 0.0;
               for (int i = -7; i <= 7; i++){
@@ -309,17 +293,28 @@ export default function PageCurlTransition({
               }
               col /= ws;
 
-              // Faint veil on the lifted strip: adaptive to dark/light theme
-              vec3 veilCol = mix(vec3(1.0), vec3(0.85, 0.88, 0.95), uDark);
-              col = mix(col, veilCol, 0.15 * vLift);
+              // Faint veil/paper sheen on the lifted curling strip of the new page
+              if (isNew) {
+                col = mix(col, vec3(1.0), 0.15 * vLift);
+              }
 
               float dist = abs(vUv.x - seam);
-              col *= 1.0 - 0.25 * exp(-dist / 0.05) * lw; // soft shade toward the edge
-              float rim = (1.0 - smoothstep(0.0, 0.022, dist)) * lw; // grey rim along the edge
-              vec3 rimCol = mix(vec3(0.28, 0.29, 0.33), vec3(0.50, 0.52, 0.60), uDark);
+
+              // Soft physical drop shadow cast by the curling new page onto the stationary old page underneath
+              if (!isNew) {
+                float shadow = 0.28 * exp(-dist / 0.05) * wn;
+                col *= 1.0 - shadow;
+              } else {
+                float edgeShade = 0.15 * exp(-dist / 0.04) * wn;
+                col *= 1.0 - edgeShade;
+              }
+
+              // Crisp fine edge highlight along the seam
+              float rim = (1.0 - smoothstep(0.0, 0.022, dist)) * wn;
+              vec3 rimCol = vec3(0.28, 0.29, 0.33);
               col = mix(col, rimCol, 0.6 * rim);
 
-              // Smoothly blend between centered card SDF rounded corners and full-bleed coverage
+              // Card mode SDF rounded corners vs full-bleed coverage
               if (uCardMode > 0.01) {
                 vec2 p = (vUv - 0.5) * vec2(4.0, 3.0);
                 vec2 q = abs(p) - vec2(2.0, 1.5) + 0.09;
@@ -389,7 +384,6 @@ export default function PageCurlTransition({
           if (disposed) return
           loadedTextures = tex
           setLoading(false)
-          setCount(tex.length)
           updateTextureCrops()
 
           let lastTime = performance.now()
@@ -410,9 +404,7 @@ export default function PageCurlTransition({
             mat.uniforms.uLift.value += (currentCfg.lift - mat.uniforms.uLift.value) * lerpSpeed
             mat.uniforms.uBlur.value += (currentCfg.blur - mat.uniforms.uBlur.value) * lerpSpeed
             mat.uniforms.uSqueeze.value += (currentCfg.squeeze - mat.uniforms.uSqueeze.value) * lerpSpeed
-            mat.uniforms.uWOld.value += (currentCfg.wOld - mat.uniforms.uWOld.value) * lerpSpeed
             mat.uniforms.uWNew.value += (currentCfg.wNew - mat.uniforms.uWNew.value) * lerpSpeed
-            mat.uniforms.uDark.value = isDarkRef.current ? 1.0 : 0.0
 
             // Smoothly lerp card mode shader uniform (1.0 for card, 0.0 for full)
             const targetCardMode = currentMode === 'card' ? 1.0 : 0.0
@@ -439,8 +431,9 @@ export default function PageCurlTransition({
             mat.uniforms.cA.value = A.userData?.crop || new THREE.Vector4(0, 0, 1, 1)
             mat.uniforms.cB.value = B.userData?.crop || new THREE.Vector4(0, 0, 1, 1)
             mat.uniforms.seam.value = -0.1 + 1.2 * e
-            mat.uniforms.wo.value = ss(0, 0.2, tr) * (1 - ss(0.5, 0.65, tr))
-            mat.uniforms.wn.value = ss(0.1, 0.35, tr) * (1 - ss(0.9, 1, tr))
+
+            // wn: rises smoothly as new page enters from left, stays lifted, and flattens/closes cleanly onto the surface at the end (tr -> 1.0)
+            mat.uniforms.wn.value = ss(0.06, 0.28, tr) * (1 - ss(0.85, 1.0, tr))
 
             renderer.render(scene, camera)
             animId = requestAnimationFrame(loop)
@@ -473,14 +466,12 @@ export default function PageCurlTransition({
     setSourceKey('custom')
   }
 
-  const [minimized, setMinimized] = useState(false)
-
   return (
     <div
       ref={containerRef}
       className={`relative w-full h-full min-h-screen overflow-hidden select-none transition-colors duration-500 ${
         sizeMode === 'card'
-          ? 'bg-[radial-gradient(ellipse_at_50%_40%,#f6f6f6,#dcdcde)] dark:bg-[radial-gradient(ellipse_at_50%_40%,#2b2b30,#101013)]'
+          ? 'bg-[radial-gradient(ellipse_at_50%_40%,#26262b,#0f0f12)]'
           : 'bg-black'
       } ${className}`}
     >
@@ -491,14 +482,17 @@ export default function PageCurlTransition({
       <div className="fixed top-5 left-5 z-30">
         <Link
           href="/"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-zinc-200/60 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 text-zinc-800 dark:text-zinc-200 backdrop-blur-xl text-xs font-medium shadow-lg hover:bg-white dark:hover:bg-zinc-900 transition-all cursor-pointer select-none"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-white/15 bg-black/60 text-white/90 backdrop-blur-xl text-xs font-medium shadow-lg hover:bg-black/85 hover:text-white transition-all cursor-pointer select-none"
         >
-          <span>←</span>
+          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
           <span>Components</span>
         </Link>
       </div>
 
-      {/* Subtle backdrop vignette in full cover mode for depth and readability */}
+      {/* Subtle backdrop vignette in full cover mode for depth and contrast */}
       {sizeMode === 'full' && (
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none z-[1]" />
       )}
@@ -532,137 +526,98 @@ export default function PageCurlTransition({
       {/* Floating Bottom Control Bar */}
       {showControls && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-30 transition-all duration-300 max-w-[94vw]">
-          {minimized ? (
-            <button
-              type="button"
-              onClick={() => setMinimized(false)}
-              className="px-3.5 py-1.5 rounded-full border border-white/20 dark:border-zinc-800 bg-black/70 dark:bg-zinc-900/90 text-white backdrop-blur-xl text-xs font-medium shadow-2xl hover:bg-black/90 transition-all cursor-pointer flex items-center gap-2"
-            >
-              <span>⚙️ Controls</span>
-              <span className="text-[10px] uppercase tracking-wider text-emerald-400 font-bold">
-                {sizeMode === 'full' ? 'Full Cover' : 'Center Card'} · {variantKey}
-              </span>
-            </button>
-          ) : (
-            <div className="flex flex-wrap items-center justify-center gap-2 p-2 rounded-2xl md:rounded-full border border-white/20 dark:border-zinc-800/90 bg-white/85 dark:bg-zinc-950/85 text-zinc-900 dark:text-zinc-100 shadow-2xl backdrop-blur-2xl text-xs font-sans">
-              {/* 1. SIZE MODE SELECTOR: Full Cover | Center Card */}
-              <div className="flex items-center bg-zinc-200/70 dark:bg-zinc-800/80 p-0.5 rounded-full">
-                <button
-                  type="button"
-                  onClick={() => setSizeMode('full')}
-                  title="Full-bleed background covering 100% of the screen"
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                    sizeMode === 'full'
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                  }`}
-                >
-                  Full Cover
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSizeMode('card')}
-                  title="Original centered card in the middle of the page"
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                    sizeMode === 'card'
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                  }`}
-                >
-                  Center Card
-                </button>
-              </div>
-
-              <span className="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-700 mx-0.5" />
-
-              {/* 2. VARIANT SELECTOR: Slow | Drape | Fast */}
-              <div className="flex items-center bg-zinc-200/70 dark:bg-zinc-800/80 p-0.5 rounded-full">
-                {(['slow', 'drape', 'fast'] as AnimationVariantKey[]).map((key) => {
-                  const isActive = variantKey === key
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setVariantKey(key)}
-                      title={VARIANTS[key].description}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                        isActive
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                          : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                      }`}
-                    >
-                      {VARIANTS[key].label}
-                    </button>
-                  )
-                })}
-              </div>
-
-              <span className="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-700 mx-0.5" />
-
-              {/* 3. IMAGE COLLECTION SELECTOR: Unsplash | Local | Upload */}
-              <div className="flex items-center bg-zinc-200/70 dark:bg-zinc-800/80 p-0.5 rounded-full">
-                <button
-                  type="button"
-                  onClick={() => setSourceKey('unsplash')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                    sourceKey === 'unsplash'
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                  }`}
-                >
-                  Unsplash
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSourceKey('local')}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                    sourceKey === 'local'
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                  }`}
-                >
-                  Local WebP
-                </button>
-                <label
-                  title="Upload your own custom images"
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
-                    sourceKey === 'custom'
-                      ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-sm'
-                      : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
-                  }`}
-                >
-                  Upload
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
-                </label>
-              </div>
-
-              {/* Image Count Badge */}
-              <span className="text-zinc-400 dark:text-zinc-500 text-[11px] px-1 select-none whitespace-nowrap">
-                {count} {count === 1 ? 'image' : 'images'}
-              </span>
-
-              <span className="hidden sm:inline w-px h-3.5 bg-zinc-300 dark:bg-zinc-700 mx-0.5" />
-
-              {/* Theme Toggle Button */}
+          <div className="flex flex-wrap items-center justify-center gap-2 p-2 rounded-2xl md:rounded-full border border-white/20 bg-zinc-950/90 text-zinc-100 shadow-2xl backdrop-blur-2xl text-xs font-sans">
+            {/* 1. SIZE MODE SELECTOR: Full Cover | Center Card */}
+            <div className="flex items-center bg-zinc-800/80 p-0.5 rounded-full">
               <button
                 type="button"
-                onClick={() => setTheme(isDark ? 'light' : 'dark')}
-                className="px-2.5 py-1 rounded-full text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition cursor-pointer select-none font-medium text-xs whitespace-nowrap"
+                onClick={() => setSizeMode('full')}
+                title="Full-bleed background covering 100% of the screen"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  sizeMode === 'full'
+                    ? 'bg-white text-zinc-950 shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
               >
-                {mounted ? (isDark ? '☀️ Light' : '🌙 Dark') : 'Theme'}
+                Full Cover
               </button>
-
-              {/* Minimize bar */}
               <button
                 type="button"
-                onClick={() => setMinimized(true)}
-                title="Minimize control bar"
-                className="p-1 rounded-full text-zinc-400 hover:text-zinc-900 dark:hover:text-white transition cursor-pointer text-xs"
+                onClick={() => setSizeMode('card')}
+                title="Original centered card in the middle of the page"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  sizeMode === 'card'
+                    ? 'bg-white text-zinc-950 shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
               >
-                ✕
+                Center Card
               </button>
             </div>
-          )}
+
+            <span className="hidden sm:inline w-px h-3.5 bg-zinc-700 mx-0.5" />
+
+            {/* 2. VARIANT SELECTOR: Slow | Drape | Fast */}
+            <div className="flex items-center bg-zinc-800/80 p-0.5 rounded-full">
+              {(['slow', 'drape', 'fast'] as AnimationVariantKey[]).map((key) => {
+                const isActive = variantKey === key
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setVariantKey(key)}
+                    title={VARIANTS[key].description}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                      isActive
+                        ? 'bg-white text-zinc-950 shadow-sm'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {VARIANTS[key].label}
+                  </button>
+                )
+              })}
+            </div>
+
+            <span className="hidden sm:inline w-px h-3.5 bg-zinc-700 mx-0.5" />
+
+            {/* 3. IMAGE COLLECTION SELECTOR: Unsplash | Local | Upload */}
+            <div className="flex items-center bg-zinc-800/80 p-0.5 rounded-full">
+              <button
+                type="button"
+                onClick={() => setSourceKey('unsplash')}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  sourceKey === 'unsplash'
+                    ? 'bg-white text-zinc-950 shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Unsplash
+              </button>
+              <button
+                type="button"
+                onClick={() => setSourceKey('local')}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  sourceKey === 'local'
+                    ? 'bg-white text-zinc-950 shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Local WebP
+              </button>
+              <label
+                title="Upload your own custom images"
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer ${
+                  sourceKey === 'custom'
+                    ? 'bg-white text-zinc-950 shadow-sm'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Upload
+                <input type="file" accept="image/*" multiple className="hidden" onChange={onFiles} />
+              </label>
+            </div>
+          </div>
         </div>
       )}
     </div>
