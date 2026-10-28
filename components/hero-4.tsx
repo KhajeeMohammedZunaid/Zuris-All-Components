@@ -139,9 +139,9 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           animation: marquee-ltr 24s linear infinite;
           will-change: transform;
           transform: translate3d(0, 0, 0);
+          -webkit-transform: translate3d(0, 0, 0);
           backface-visibility: hidden;
           -webkit-backface-visibility: hidden;
-          perspective: 1000px;
         }
       `}</style>
 
@@ -473,19 +473,23 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
-            className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] isolate [contain:paint] transform-gpu"
+            className="relative w-full overflow-hidden isolate transform-gpu"
+            style={{ contain: "paint" }}
           >
-            {/* Edge Blur Overlays */}
-            <div className="absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
-            <div className="absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
+            {/* Edge Fade Overlays: High-performance gradient edges replacing expensive mask-image for zero-lag 120fps */}
+            <div className="absolute inset-y-0 left-0 w-10 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
+            <div className="absolute inset-y-0 right-0 w-10 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
 
             {/* Continuous 2-track marquee with uniform gap across all logos and wrap-around */}
-            <div className="flex w-max select-none overflow-hidden py-1 animate-marquee-ltr transform-gpu will-change-transform">
+            <div
+              className="flex w-max select-none overflow-hidden py-1 animate-marquee-ltr transform-gpu will-change-transform opacity-80"
+              style={{ contain: "layout style paint" }}
+            >
               <div className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14">
                 {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
                   <div
                     key={`track1-${name}-${idx}`}
-                    className="flex items-center justify-center shrink-0 opacity-80"
+                    className="flex items-center justify-center shrink-0"
                   >
                     <Component className={logoClass} />
                   </div>
@@ -499,7 +503,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
                 {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
                   <div
                     key={`track2-${name}-${idx}`}
-                    className="flex items-center justify-center shrink-0 opacity-80"
+                    className="flex items-center justify-center shrink-0"
                   >
                     <Component className={logoClass} />
                   </div>
