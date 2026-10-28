@@ -60,6 +60,7 @@ export function Sections3Accordion({
 }: Sections3AccordionProps) {
   const [activeIndex, setActiveIndex] = React.useState<number>(-1);
   const [hasOpened, setHasOpened] = React.useState<boolean>(false);
+  const itemRefs = React.useRef<(HTMLDivElement | null)[]>([]);
 
   const triggerInitialOpen = React.useCallback(() => {
     if (!hasOpened) {
@@ -79,6 +80,19 @@ export function Sections3Accordion({
   const handleSelect = (index: number) => {
     setActiveIndex(index);
     onItemChange?.(index);
+
+    // On mobile devices, smoothly align the opened accordion item into comfortable view
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      setTimeout(() => {
+        const el = itemRefs.current[index];
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top < 65 || rect.bottom > window.innerHeight) {
+            el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }
+        }
+      }, 100);
+    }
   };
 
   return (
@@ -113,6 +127,9 @@ export function Sections3Accordion({
         return (
           <motion.div
             key={item.num || index}
+            ref={(node) => {
+              itemRefs.current[index] = node;
+            }}
             role="tab"
             tabIndex={0}
             aria-selected={isActive}
@@ -136,12 +153,59 @@ export function Sections3Accordion({
               },
             }}
             className={cn(
-              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-[width,height,flex-grow,background-color] duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 will-change-[width,flex-grow] [transform:translateZ(0)]",
+              "group relative flex flex-col items-center border-b md:border-b-0 md:border-r border-[#040404]/10 last:border-0 overflow-hidden transition-[width,height,flex-grow,background-color] duration-500 md:duration-[1100ms] ease-[cubic-bezier(0.16,1,0.3,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 will-change-[width,height,flex-grow] [transform:translateZ(0)]",
               isActive
-                ? "cursor-default w-full md:flex-grow h-[500px] md:h-full bg-white select-auto"
-                : "cursor-pointer w-full md:w-[80px] lg:w-[100px] xl:w-[120px] h-[70px] sm:h-[80px] md:h-full bg-[#fafafa] hover:bg-[#f4f4f4]"
+                ? "cursor-default w-full md:flex-grow h-[410px] xs:h-[430px] sm:h-[450px] md:h-full bg-white select-auto"
+                : "cursor-pointer w-full md:w-[80px] lg:w-[100px] xl:w-[120px] h-[64px] sm:h-[70px] md:h-full bg-[#fafafa] hover:bg-[#f4f4f4]"
             )}
           >
+            {/* =========================================================================
+                MOBILE VIEW (< md): Single Header Bar (Zero Title Mixing) + Smooth Revealing Content
+                ========================================================================= */}
+            <div className="md:hidden flex flex-col w-full h-full overflow-hidden">
+              {/* Mobile Single Header: Always at top of card, never mixes or duplicates */}
+              <div className="flex items-center justify-between w-full h-[64px] sm:h-[70px] px-5 sm:px-6 shrink-0 select-none z-20 cursor-pointer">
+                <span className="text-sm font-bold tracking-[2px] text-[#040404]">
+                  {item.num}
+                </span>
+                <span className="text-sm font-['Inter',sans-serif] font-semibold tracking-[-0.04em] uppercase text-[#040404]">
+                  {item.title}
+                </span>
+              </div>
+
+              {/* Mobile Expandable Content (Desc + Image): Smoothly reveals below header */}
+              <div
+                className={cn(
+                  "flex flex-col w-full px-5 sm:px-6 pb-5 flex-1 overflow-hidden transition-all duration-300",
+                  isActive
+                    ? "opacity-100 delay-150 pointer-events-auto"
+                    : "opacity-0 pointer-events-none"
+                )}
+              >
+                {/* Service Heading */}
+                <div className="mb-3 w-full">
+                  <h3 className="text-[14px] xs:text-[15px] sm:text-[16px] text-[#040404] font-['Inter',sans-serif] font-[500] tracking-[-0.045em] [word-spacing:normal] leading-[1.38]">
+                    {item.desc}
+                  </h3>
+                </div>
+
+                {/* Image */}
+                <div className="w-full h-[220px] xs:h-[235px] sm:h-[250px] overflow-hidden relative mt-auto border border-black/5 [transform:translateZ(0)] [contain:paint]">
+                  <Image
+                    src={item.img}
+                    alt={item.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 640px"
+                    priority={index === 0}
+                    className="absolute inset-0 w-full h-full object-cover [transform:translateZ(0)] [backface-visibility:hidden]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* =========================================================================
+                DESKTOP VIEW (>= md): Cinematic Horizontal Stretch (Unchanged)
+                ========================================================================= */}
             {/* Collapsed State Content (Desktop) - Smooth delayed entrance on close */}
             <div
               className={cn(
@@ -158,7 +222,7 @@ export function Sections3Accordion({
 
               {/* Vertical Title: Smooth CSS writing-mode without text clipping */}
               <div
-                className="absolute bottom-10 left-1/2 -translate-x-1/2 uppercase font-bold tracking-[1.5px] text-[13px] lg:text-[15px] whitespace-nowrap text-[#040404]"
+                className="absolute bottom-10 left-1/2 -translate-x-1/2 uppercase font-['Inter',sans-serif] font-semibold tracking-[-0.04em] text-[13px] lg:text-[15px] whitespace-nowrap text-[#040404]"
                 style={{
                   writingMode: "vertical-rl",
                   transform: "rotate(180deg)",
@@ -168,10 +232,10 @@ export function Sections3Accordion({
               </div>
             </div>
 
-            {/* Active State Content - Fixed min-width prevents text squishing while closing */}
+            {/* Active State Content (Desktop) - Fixed min-width prevents text squishing while closing */}
             <div
               className={cn(
-                "absolute inset-y-0 left-0 w-full min-w-full md:min-w-[600px] lg:min-w-[800px] h-full flex flex-col cursor-default transition-opacity duration-700 delay-200",
+                "hidden md:flex absolute inset-y-0 left-0 w-full min-w-full md:min-w-[600px] lg:min-w-[800px] h-full flex-col cursor-default transition-opacity duration-700 delay-200",
                 isActive ? "opacity-100" : "opacity-0 pointer-events-none"
               )}
             >
@@ -180,16 +244,6 @@ export function Sections3Accordion({
                 <span className="text-sm md:text-base font-bold tracking-[2px] hidden md:block relative -top-2 lg:-top-3.5 mb-6 md:mb-9 text-[#040404]">
                   {item.num}
                 </span>
-
-                {/* Mobile Header: Number and Title */}
-                <div className="md:hidden flex justify-between w-full mb-4 items-center relative -top-1">
-                  <span className="text-sm font-bold tracking-[2px] text-[#040404]">
-                    {item.num}
-                  </span>
-                  <span className="text-sm font-bold tracking-[1.5px] uppercase text-[#040404]">
-                    {item.title}
-                  </span>
-                </div>
 
                 {/* Service Heading: H3, 500 weight, Inter font, -4.5% tracking, normal word spacing */}
                 <div className="mb-6 md:mb-10 w-full md:max-w-xl">
@@ -210,21 +264,6 @@ export function Sections3Accordion({
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Mobile Collapsed State */}
-            <div
-              className={cn(
-                "md:hidden absolute inset-0 flex items-center justify-between w-full h-full px-6 transition-opacity duration-500",
-                isActive ? "opacity-0 pointer-events-none" : "opacity-100"
-              )}
-            >
-              <span className="text-sm font-bold tracking-[2px] text-[#040404]">
-                {item.num}
-              </span>
-              <span className="text-sm font-bold uppercase tracking-[1.5px] text-[#040404]">
-                {item.title}
-              </span>
             </div>
           </motion.div>
         );

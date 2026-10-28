@@ -215,8 +215,37 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
     const scheme = STUX_COLOR_SCHEMES[colorScheme] ?? STUX_COLOR_SCHEMES.yellow;
     const currentPattern = STUX_SVG_PATTERNS[fillPattern] ?? STUX_SVG_PATTERNS.cross;
 
+    const [isTapped, setIsTapped] = React.useState(false);
+    const innerRef = React.useRef<HTMLButtonElement | null>(null);
+
+    React.useImperativeHandle(ref, () => innerRef.current as HTMLButtonElement);
+
+    // Auto-reset when tapping outside the button on mobile / tablets
+    React.useEffect(() => {
+      if (!isTapped) return;
+
+      const handlePointerDownOutside = (e: MouseEvent | TouchEvent | PointerEvent) => {
+        if (innerRef.current && !innerRef.current.contains(e.target as Node)) {
+          setIsTapped(false);
+        }
+      };
+
+      document.addEventListener("pointerdown", handlePointerDownOutside);
+      return () => {
+        document.removeEventListener("pointerdown", handlePointerDownOutside);
+      };
+    }, [isTapped]);
+
+    const isActionActive = isOpen || isTapped;
+
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      setIsTapped((prev) => !prev);
       onClick?.(e);
+    };
+
+    const handleMouseLeave = () => {
+      // On desktop, mouse leave clears isTapped so it follows native hover
+      setIsTapped(false);
     };
 
     return (
@@ -242,11 +271,13 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
             transform: translate(calc(-1 * var(--arrow-dist)), var(--arrow-dist));
           }
           .stux-btn-${id}:hover .stux-arrow-main,
+          .stux-btn-${id}[data-tapped="true"] .stux-arrow-main,
           .stux-btn-${id}:focus-visible .stux-arrow-main,
           .stux-btn-${id}[aria-expanded="true"] .stux-arrow-main {
             transform: translate(var(--arrow-dist), calc(-1 * var(--arrow-dist)));
           }
           .stux-btn-${id}:hover .stux-arrow-clone,
+          .stux-btn-${id}[data-tapped="true"] .stux-arrow-clone,
           .stux-btn-${id}:focus-visible .stux-arrow-clone,
           .stux-btn-${id}[aria-expanded="true"] .stux-arrow-clone {
             transform: translate(0, 0);
@@ -254,11 +285,13 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         `}</style>
 
         <motion.button
-          ref={ref}
+          ref={innerRef}
           type="button"
           id={id}
           onClick={handleClick}
+          onMouseLeave={handleMouseLeave}
           aria-expanded={isOpen}
+          data-tapped={isActionActive ? "true" : undefined}
           initial={false}
           animate={{
             height: cfg.height,
@@ -295,8 +328,9 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                   className={cn(
                     "absolute top-0 bottom-0 left-0 h-full w-[220%] pointer-events-none will-change-transform",
                     "transition-transform duration-[850ms] ease-[0.22,1,0.36,1]",
-                    "translate-x-[-58%] group-hover:translate-x-0 group-focus-visible:translate-x-0",
-                    isOpen && "!translate-x-0"
+                    isActionActive
+                      ? "translate-x-0"
+                      : "-translate-x-[58%] group-hover:translate-x-0 group-focus-visible:translate-x-0"
                   )}
                   style={{ fill: customAccent ?? scheme.accentHex }}
                 >
@@ -315,7 +349,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 transition={SPRING_TRANSITION}
                 className={cn(
                   "relative z-10 m-0 w-full font-['Inter',sans-serif] font-medium tracking-[0.02em] uppercase flex items-center justify-center transition-colors duration-[700ms] select-none whitespace-nowrap leading-none",
-                  isOpen
+                  isActionActive
                     ? scheme.textColorOnHover.replace("group-hover:", "")
                     : cn("text-white", scheme.textColorOnHover)
                 )}
@@ -328,17 +362,16 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                VARIANT 1: SPLIT ARROW (Original Dual-Arrow Pass Physics)
                ========================================================================= */
             <>
-              {/* Responsive sliding panel */}
-              <motion.div
-                initial={false}
-                animate={{
-                  width: isOpen ? "100%" : cfg.endcapWidth,
-                }}
-                transition={SPRING_TRANSITION}
+              {/* Responsive sliding panel: slides from right endcap to 100% width */}
+              <div
                 className={cn(
-                  "absolute top-0 right-0 bottom-0 transition-[width] duration-[600ms] ease-[0.22,1,0.36,1] z-0 group-hover:!w-full",
+                  "absolute top-0 right-0 bottom-0 transition-[width] duration-[600ms] ease-[0.22,1,0.36,1] z-0 pointer-events-none",
+                  isActionActive ? "!w-full" : "group-hover:!w-full",
                   scheme.accentBg
                 )}
+                style={{
+                  width: isActionActive ? "100%" : `${cfg.endcapWidth}px`,
+                }}
               />
 
               {/* Text Container */}
@@ -352,7 +385,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 transition={SPRING_TRANSITION}
                 className={cn(
                   "relative z-10 m-0 font-['Inter',sans-serif] font-normal tracking-normal flex items-center justify-center transition-colors duration-[600ms] select-none whitespace-nowrap leading-none",
-                  isOpen
+                  isActionActive
                     ? scheme.textColorOnHover.replace("group-hover:", "")
                     : cn("text-white", scheme.textColorOnHover)
                 )}
@@ -369,7 +402,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
                 transition={SPRING_TRANSITION}
                 className={cn(
                   "relative z-10 flex items-center justify-center transition-colors duration-[600ms] border-l-[3px] shrink-0 overflow-hidden h-full",
-                  isOpen
+                  isActionActive
                     ? "border-black/15 dark:border-black/25"
                     : "border-transparent group-hover:border-black/15 dark:group-hover:border-black/25"
                 )}
