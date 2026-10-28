@@ -35,12 +35,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: false,
   },
 
-  // 2. ATHARVA (Top-left on mobile, comfortably spaced from notch and left bezel)
+  // 2. ATHARVA (Top-left on mobile: below Vishesh, mirroring Eemon)
   {
     id: "atharva",
     name: "Atharva",
     src: "/n1.png",
-    positionClass: "top-[8.5%] xs:top-[9%] sm:top-[7%] md:top-[8%] lg:top-[10%] left-[6%] xs:left-[7%] sm:left-[8%] md:left-[12%] lg:left-[16%] xl:left-[17%] z-[15]",
+    positionClass: "top-[14%] xs:top-[14.5%] sm:top-[7%] md:top-[8%] lg:top-[10%] left-[10%] xs:left-[12%] sm:left-[8%] md:left-[12%] lg:left-[16%] xl:left-[17%] z-[15]",
     sizeClass: "w-[70px] xs:w-[76px] sm:w-[86px] md:w-[112px] lg:w-[130px] xl:w-[140px]",
     aspectRatio: "1/1",
     blur: "none",
@@ -49,12 +49,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 3. VISHESH (Top center-left on mobile, gracefully stepped down)
+  // 3. VISHESH (Top-center on mobile: at top edge, mirroring June at bottom edge)
   {
     id: "vishesh",
     name: "Vishesh",
     src: "/n2.png",
-    positionClass: "top-[13%] xs:top-[14%] sm:top-[7%] md:top-[3%] lg:top-[4%] left-[34%] xs:left-[36%] sm:left-[36%] md:left-[35%] lg:left-[36%] z-[20]",
+    positionClass: "top-[6%] xs:top-[6.5%] sm:top-[7%] md:top-[3%] lg:top-[4%] left-[42%] xs:left-[44%] sm:left-[36%] md:left-[35%] lg:left-[36%] z-[20]",
     sizeClass: "w-[76px] xs:w-[82px] sm:w-[94px] md:w-[116px] lg:w-[134px] xl:w-[145px]",
     aspectRatio: "1/1",
     blur: "none",
@@ -63,13 +63,13 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 4. RUCHIT (Top right on mobile, gracefully stepped down)
+  // 4. RUCHIT (Top-right on mobile: below Vishesh, mirroring Sameen)
   {
     id: "ruchit",
     name: "Ruchit",
     src: "/n3.png",
-    positionClass: "top-[17%] xs:top-[18%] sm:top-[11%] md:top-[4%] lg:top-[5%] right-[6%] xs:right-[8%] sm:right-[10%] md:right-[16%] lg:right-[22%] xl:right-[24%] z-[20]",
-    sizeClass: "w-[74px] xs:w-[80px] sm:w-[92px] md:w-[114px] lg:w-[132px] xl:w-[145px]",
+    positionClass: "top-[16%] xs:top-[16.5%] sm:top-[11%] md:top-[4%] lg:top-[5%] right-[6%] xs:right-[7%] sm:right-[10%] md:right-[16%] lg:right-[22%] xl:right-[24%] z-[20]",
+    sizeClass: "w-[72px] xs:w-[78px] sm:w-[92px] md:w-[114px] lg:w-[132px] xl:w-[145px]",
     aspectRatio: "1/1",
     blur: "none",
     opacity: 1,
@@ -118,12 +118,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: false,
   },
 
-  // 8. EEMON (Bottom-left foreground on mobile, moved to the right a little)
+  // 8. EEMON (Bottom-left foreground on mobile, mirroring Atharva)
   {
     id: "eemon",
     name: "Eemon",
     src: "/acc-4.webp",
-    positionClass: "bottom-[14%] xs:bottom-[15%] sm:bottom-[10%] md:bottom-[8%] lg:bottom-[9%] left-[12%] xs:left-[14%] sm:left-[12%] md:left-[12%] lg:left-[16%] xl:left-[18%] z-[22]",
+    positionClass: "bottom-[14%] xs:bottom-[14.5%] sm:bottom-[10%] md:bottom-[8%] lg:bottom-[9%] left-[10%] xs:left-[12%] sm:left-[12%] md:left-[12%] lg:left-[16%] xl:left-[18%] z-[22]",
     sizeClass: "w-[70px] xs:w-[76px] sm:w-[88px] md:w-[106px] lg:w-[122px] xl:w-[132px]",
     aspectRatio: "3/4",
     blur: "none",
@@ -132,12 +132,12 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 9. JUNE (Bottom-center/right foreground on mobile, moved to the right a little)
+  // 9. JUNE (Bottom-center foreground on mobile at bottom edge, mirroring Vishesh at top edge)
   {
     id: "june",
     name: "June",
     src: "/acc-5.webp",
-    positionClass: "bottom-[8%] xs:bottom-[9%] sm:bottom-[6%] md:bottom-[3%] lg:bottom-[3%] left-[44%] xs:left-[46%] sm:left-[40%] md:left-[37%] lg:left-[41%] xl:left-[42%] z-[20]",
+    positionClass: "bottom-[6%] xs:bottom-[6.5%] sm:bottom-[6%] md:bottom-[3%] lg:bottom-[3%] left-[42%] xs:left-[44%] sm:left-[40%] md:left-[37%] lg:left-[41%] xl:left-[42%] z-[20]",
     sizeClass: "w-[76px] xs:w-[82px] sm:w-[94px] md:w-[116px] lg:w-[132px] xl:w-[145px]",
     aspectRatio: "1/1",
     blur: "none",
@@ -146,13 +146,13 @@ const CARDS: FloatingCard[] = [
     showOnMobile: true,
   },
 
-  // 10. SAMEEN (Bottom-right accent card on mobile, precisely positioned)
+  // 10. SAMEEN (Bottom-right accent card on mobile, mirroring Ruchit)
   {
     id: "sameen",
     name: "Sameen",
     src: "/alone-upscaled.png",
-    positionClass: "bottom-[18%] xs:bottom-[19%] sm:bottom-[13%] md:bottom-[7%] lg:bottom-[8%] right-[4%] xs:right-[5%] sm:right-[8%] md:right-[12%] lg:right-[16%] xl:right-[18%] z-[22]",
-    sizeClass: "w-[68px] xs:w-[74px] sm:w-[86px] md:w-[112px] lg:w-[130px] xl:w-[142px]",
+    positionClass: "bottom-[16%] xs:bottom-[16.5%] sm:bottom-[13%] md:bottom-[7%] lg:bottom-[8%] right-[6%] xs:right-[7%] sm:right-[8%] md:right-[12%] lg:right-[16%] xl:right-[18%] z-[22]",
+    sizeClass: "w-[72px] xs:w-[78px] sm:w-[86px] md:w-[112px] lg:w-[130px] xl:w-[142px]",
     aspectRatio: "1/1",
     blur: "none",
     opacity: 1,
