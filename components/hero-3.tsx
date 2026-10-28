@@ -49,11 +49,11 @@ function Hero3GrowthMetricCard() {
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] bg-[#09110f] dark:bg-[#050b0a] rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] p-6 sm:p-7 lg:p-8 flex flex-col justify-between select-none relative overflow-hidden"
+      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] bg-[#09110f] dark:bg-[#050b0a] rounded-[22px] sm:rounded-[28px] lg:rounded-[32px] p-6 sm:p-7 lg:p-8 flex flex-col justify-between select-none relative overflow-hidden transform-gpu will-change-[transform,opacity]"
     >
       {/* Subtle Ambient Emerald & Rose Depth inside the card */}
-      <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 bg-[#49dfa4]/[0.08] rounded-full blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -left-20 w-56 h-56 bg-[#f9a8d4]/[0.06] rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute -top-20 -right-20 w-56 h-56 bg-[#49dfa4]/[0.08] rounded-full blur-3xl transform-gpu" />
+      <div className="pointer-events-none absolute -bottom-20 -left-20 w-56 h-56 bg-[#f9a8d4]/[0.06] rounded-full blur-3xl transform-gpu" />
 
       {/* TOP SECTION: Dot Matrix (Clean, no chip) */}
       <div className="flex flex-col gap-2 z-10">
@@ -234,11 +234,12 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
       whileInView={{ opacity: 1, scale: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] relative overflow-hidden flex items-center justify-center"
+      className="w-full h-full min-h-[340px] sm:min-h-[400px] lg:min-h-[440px] relative overflow-hidden flex items-center justify-center transform-gpu will-change-[transform,opacity]"
     >
       <img
         src="/hero-3-image left.avif"
         alt="Zuris Platform Dashboard"
+        decoding="async"
         className="w-full h-full object-cover object-center block"
       />
     </motion.div>
@@ -261,6 +262,10 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
         .animate-marquee-ltr {
           animation: marquee-ltr 22s linear infinite;
           will-change: transform;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          perspective: 1000px;
         }
         .marquee-track:hover .animate-marquee-ltr {
           animation-play-state: paused;
@@ -427,7 +432,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
           ========================================================================= */}
       <section className="relative z-10 w-full pt-10 sm:pt-14 lg:pt-16 pb-12 sm:pb-16 lg:pb-20 overflow-hidden">
         {/* Soft, borderless ambient atmospheric glow placed far behind text */}
-        <div className="pointer-events-none absolute left-1/2 top-[240px] -translate-x-1/2 -translate-y-1/2 w-[520px] sm:w-[640px] h-[340px] bg-emerald-500/[0.04] dark:bg-emerald-400/[0.03] rounded-full blur-3xl -z-10 select-none" />
+        <div className="pointer-events-none absolute left-1/2 top-[240px] -translate-x-1/2 -translate-y-1/2 w-[520px] sm:w-[640px] h-[340px] bg-emerald-500/[0.04] dark:bg-emerald-400/[0.03] rounded-full blur-3xl -z-10 select-none transform-gpu [contain:strict]" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
           {/* Top Pill Badge */}
@@ -451,7 +456,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 sm:mt-7 max-w-3xl font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] leading-[1.09] sm:leading-[1.06] tracking-[-0.045em] [word-spacing:normal] text-[#053f31] dark:text-[#6ee7b7] transition-colors"
+            className="mt-6 sm:mt-7 max-w-3xl font-['Plus_Jakarta_Sans',sans-serif] font-[500] text-3xl sm:text-4xl md:text-5xl lg:text-[54px] leading-[1.09] sm:leading-[1.06] tracking-[-0.045em] [word-spacing:normal] text-[#053f31] dark:text-[#6ee7b7] transition-colors transform-gpu will-change-[transform,opacity]"
           >
             Manage money with <br className="hidden sm:inline" />
             confidence everyday
@@ -462,7 +467,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
             initial={{ opacity: 0, y: 8, filter: "blur(4px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             transition={{ duration: 0.5, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
+            className="mt-6 sm:mt-7 flex flex-wrap items-center justify-center gap-3 sm:gap-4 transform-gpu will-change-[transform,opacity,filter]"
           >
             <Button
               nativeButton={false}
@@ -497,10 +502,10 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
               ========================================================================= */}
           <div className="w-full mt-8 sm:mt-10 lg:mt-12">
             {/* Mobile & Tablet Infinite Marquee with consistent gaps */}
-            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-2 sm:py-2.5">
+            <div className="lg:hidden relative w-full overflow-hidden marquee-track [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)] py-2 sm:py-2.5 isolate [contain:paint] transform-gpu">
               <div className="flex w-max items-center">
                 {/* Track 1 */}
-                <div className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13">
+                <div className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13 transform-gpu will-change-transform">
                   {brandLogos.map((logo) => {
                     const LogoComp = logo.Component;
                     return (
@@ -516,7 +521,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
 
                 {/* Track 2 */}
                 <div
-                  className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13"
+                  className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13 transform-gpu will-change-transform"
                   aria-hidden="true"
                 >
                   {brandLogos.map((logo) => {
@@ -571,7 +576,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-30px" }}
           transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-12"
+          className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-10 lg:mt-12 transform-gpu will-change-[transform,opacity]"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6 items-stretch">
             {/* Left Card: Growth & Telemetry Metric Card (5 cols on desktop, portrait ratio) */}

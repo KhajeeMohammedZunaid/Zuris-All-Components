@@ -23,8 +23,11 @@ import {
 export function HeroGradientBackground({ className }: { className?: string }) {
   return (
     <div
-      className={cn("absolute inset-0 w-full h-full pointer-events-none select-none", className)}
+      className={cn("absolute inset-0 w-full h-full pointer-events-none select-none transform-gpu [contain:strict]", className)}
       style={{
+        transform: "translate3d(0, 0, 0)",
+        backfaceVisibility: "hidden",
+        WebkitBackfaceVisibility: "hidden",
         background: `
           radial-gradient(
             90% 45% at 50% 8%, 
@@ -135,6 +138,10 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
         .animate-marquee-ltr {
           animation: marquee-ltr 24s linear infinite;
           will-change: transform;
+          transform: translate3d(0, 0, 0);
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          perspective: 1000px;
         }
       `}</style>
 
@@ -146,7 +153,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-50 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 flex items-center justify-between shrink-0"
+        className="relative z-50 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pt-3.5 sm:pt-5 flex items-center justify-between shrink-0 transform-gpu will-change-[transform,opacity]"
       >
         {/* Brand: Zuris White Version Logo */}
         <div className="flex items-center justify-start min-w-[100px] sm:min-w-[150px]">
@@ -300,7 +307,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.12 }}
-          className="mb-2.5 sm:mb-3.5 mx-auto inline-flex"
+          className="mb-2.5 sm:mb-3.5 mx-auto inline-flex transform-gpu will-change-[opacity]"
         >
           <BorderBeam
             size="sm"
@@ -335,7 +342,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             {["Connect", "any", "cloud."].map((word, i) => (
               <motion.span
                 key={i}
-                className="inline-block mr-[0.24em]"
+                className="inline-block mr-[0.24em] transform-gpu will-change-[transform,opacity,filter]"
                 initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
                 animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                 transition={{
@@ -352,7 +359,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             {["Automate", "everything."].map((word, i) => (
               <motion.span
                 key={i}
-                className="inline-block mr-[0.24em]"
+                className="inline-block mr-[0.24em] transform-gpu will-change-[transform,opacity,filter]"
                 initial={{ y: 16, opacity: 0, filter: "blur(4px)" }}
                 animate={{ y: 0, opacity: 1, filter: "blur(0px)" }}
                 transition={{
@@ -372,7 +379,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.55, delay: 0.52, ease: [0.16, 1, 0.3, 1] }}
-          className="text-white/85 text-xs sm:text-[13.5px] md:text-[14px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.45] max-w-sm sm:max-w-md mb-4 sm:mb-5 text-center mx-auto"
+          className="text-white/85 text-xs sm:text-[13.5px] md:text-[14px] font-['Inter',sans-serif] font-normal tracking-[-0.045em] leading-[1.45] max-w-sm sm:max-w-md mb-4 sm:mb-5 text-center mx-auto transform-gpu will-change-[transform,opacity]"
         >
           Connect all your tools and automate workflows in real time — zero engineering overhead.
         </motion.p>
@@ -383,7 +390,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
           initial={{ opacity: 0, y: 18, scale: 0.98 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.55, delay: 0.64, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl focus-within:ring-2 focus-within:ring-[#1864f7]/30 focus-within:border-blue-400"
+          className="w-full max-w-sm sm:max-w-md md:max-w-lg bg-white rounded-xl sm:rounded-2xl p-3 sm:p-3.5 flex flex-col justify-between min-h-[72px] sm:min-h-[80px] text-left mx-auto shadow-xl focus-within:ring-2 focus-within:ring-[#1864f7]/30 focus-within:border-blue-400 transform-gpu will-change-[transform,opacity]"
         >
           <input
             type="text"
@@ -466,14 +473,14 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.8, ease: "easeOut" }}
-            className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)]"
+            className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] [-webkit-mask-image:linear-gradient(to_right,transparent,black_10%,black_90%,transparent)] isolate [contain:paint] transform-gpu"
           >
             {/* Edge Blur Overlays */}
             <div className="absolute inset-y-0 left-0 w-8 sm:w-16 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
             <div className="absolute inset-y-0 right-0 w-8 sm:w-16 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
 
             {/* Continuous 2-track marquee with uniform gap across all logos and wrap-around */}
-            <div className="flex w-max select-none overflow-hidden py-1 animate-marquee-ltr">
+            <div className="flex w-max select-none overflow-hidden py-1 animate-marquee-ltr transform-gpu will-change-transform">
               <div className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14">
                 {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
                   <div
