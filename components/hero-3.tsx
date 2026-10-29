@@ -239,7 +239,9 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
       <img
         src="/hero-3-image left.avif"
         alt="Zuris Platform Dashboard"
+        loading="eager"
         decoding="async"
+        fetchPriority="high"
         className="w-full h-full object-cover object-center block"
       />
     </motion.div>

@@ -122,7 +122,7 @@ function FeatureShowcaseSection({
                 src="/451shots_so.png"
                 alt="Invoice chasing and real-time tracker application"
                 className="w-full h-full object-cover object-left-top block select-none pointer-events-none"
-                loading="eager"
+                loading="lazy"
                 decoding="async"
               />
             </div>

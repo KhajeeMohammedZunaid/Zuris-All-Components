@@ -42,6 +42,9 @@ export function Hero() {
           src="/alone-upscaled.png"
           alt=""
           className="w-full h-full object-cover object-bottom artwork-fade-mask"
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
         />
       </div>
 

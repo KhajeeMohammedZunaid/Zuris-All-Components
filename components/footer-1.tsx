@@ -100,7 +100,7 @@ export function Footer1() {
           src="/f-bg1.png"
           alt="Scenic landscape background"
           fill
-          priority
+          loading="lazy"
           sizes="100vw"
           style={{
             objectFit: "cover",

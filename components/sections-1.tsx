@@ -256,6 +256,8 @@ export function Sections1({ className, showThemeBar = false }: Sections1Props) {
                       className="avatar-img w-full h-full object-cover object-center scale-[1.28] block border-none m-0 bg-transparent"
                       src="/n1.png"
                       alt="Engineer 1"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </span>
                   <span
@@ -266,6 +268,8 @@ export function Sections1({ className, showThemeBar = false }: Sections1Props) {
                       className="avatar-img w-full h-full object-cover object-center scale-[1.28] block border-none m-0 bg-transparent"
                       src="/n3.png"
                       alt="Engineer 2"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </span>
                   <span
@@ -276,6 +280,8 @@ export function Sections1({ className, showThemeBar = false }: Sections1Props) {
                       className="avatar-img w-full h-full object-cover object-center scale-[1.28] block border-none m-0 bg-transparent"
                       src="/n2.png"
                       alt="Engineer 3"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </span>
                   <span
@@ -286,6 +292,8 @@ export function Sections1({ className, showThemeBar = false }: Sections1Props) {
                       className="avatar-img w-full h-full object-cover object-center scale-[1.28] block border-none m-0 bg-transparent"
                       src="/n4.png"
                       alt="Engineer 4"
+                      loading="lazy"
+                      decoding="async"
                     />
                   </span>
                 </div>

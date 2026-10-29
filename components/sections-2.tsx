@@ -98,7 +98,6 @@ export function UniversalFeatureCard({
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 420px"
             quality={80}
-            priority={delay === 0}
             className="w-full h-full object-cover object-center select-none pointer-events-none [transform:translateZ(0)]"
           />
           <div
@@ -288,6 +287,8 @@ export function Sections2({
                         <img
                           src={av.src}
                           alt={av.alt}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover object-center"
                         />
                       </motion.span>

@@ -152,6 +152,8 @@ export function Hero2({ onGetStarted, onViewDemo, onLogin }: Hero2Props) {
               alt="Zuris CMS Dashboard"
               className="w-full h-auto block rounded-none select-none"
               loading="eager"
+              decoding="async"
+              fetchPriority="high"
             />
           </motion.div>
         </div>

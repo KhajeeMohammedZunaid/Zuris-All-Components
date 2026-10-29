@@ -102,6 +102,7 @@ export function ArcCards({
       if (typeof window !== "undefined") {
         const img = new Image();
         img.src = card.imageSrc;
+        img.decode?.().catch(() => {});
       }
     });
   }, [cards]);
@@ -354,7 +355,7 @@ function ArcCardItem({
               alt={card.title}
               className="w-full h-full object-cover object-center select-none pointer-events-none"
               loading="eager"
-              decoding="sync"
+              decoding="async"
               draggable={false}
             />
           </div>

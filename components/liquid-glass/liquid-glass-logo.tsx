@@ -210,6 +210,7 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
               <img
                 src={activeTuning.logo}
                 alt=""
+                decoding="async"
                 style={{
                   width: activeTuning.logoSize * activeTuning.logoScale * activeTuning.finalLogoScale,
                   height: activeTuning.logoSize * activeTuning.logoScale * activeTuning.finalLogoScale,
@@ -220,7 +221,7 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
               />
             ) : (
               <>
-                {activeMarkSrc && <img src={activeMarkSrc} alt="" />}
+                {activeMarkSrc && <img src={activeMarkSrc} alt="" decoding="async" />}
                 {activeTuning.text}
               </>
             )}

@@ -432,7 +432,7 @@ export function SingleCardCarousel({
             ref={emblaRef}
           >
             <div className="flex h-full w-full">
-              {slides.map((slide) => (
+              {slides.map((slide, idx) => (
                 <div
                   key={`single-slide-${slide.id}`}
                   className="flex-[0_0_100%] min-w-0 h-full relative"
@@ -441,7 +441,7 @@ export function SingleCardCarousel({
                     src={slide.image}
                     alt={slide.title}
                     className="w-full h-full object-cover select-none pointer-events-none [transform:translateZ(0)] [backface-visibility:hidden]"
-                    loading="lazy"
+                    loading={idx === 0 ? "eager" : "lazy"}
                     decoding="async"
                   />
                 </div>
