@@ -5,9 +5,30 @@ import { BorderBeam } from "border-beam";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
+export type GlowColorVariant =
+  | "colorful"
+  | "ocean"
+  | "sunset"
+  | "forest"
+  | "candy"
+  | "ice"
+  | "gold"
+  | "mono";
+
+export type GlowIntensity = "subtle" | "balanced" | "vibrant";
+export type GlowTrigger = "interaction" | "focus" | "always";
+export type GlowSpeed = "slow" | "normal" | "fast";
+
 export interface GlowInputProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   containerClassName?: string;
+  glowColor?: GlowColorVariant;
+  glowIntensity?: GlowIntensity;
+  glowTrigger?: GlowTrigger;
+  glowSpeed?: GlowSpeed | number;
+  borderRadius?: number;
+  minHeight?: string | number;
+  showSendButton?: boolean;
   onSend?: (value: string) => void;
 }
 
@@ -16,6 +37,13 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
     {
       className,
       containerClassName,
+      glowColor = "colorful",
+      glowIntensity = "balanced",
+      glowTrigger = "interaction",
+      glowSpeed = "normal",
+      borderRadius = 16,
+      minHeight,
+      showSendButton = true,
       onSend,
       onKeyDown,
       onChange,
@@ -95,26 +123,76 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
       onBlur?.(e);
     };
 
-    const isInteracting = isFocused || isHovered;
+    // Calculate active trigger state
+    const isActive = React.useMemo(() => {
+      if (glowTrigger === "always") return true;
+      if (glowTrigger === "focus") return isFocused;
+      return isFocused || isHovered;
+    }, [glowTrigger, isFocused, isHovered]);
+
+    // Calculate duration in seconds from glowSpeed
+    const duration = React.useMemo(() => {
+      if (typeof glowSpeed === "number") return glowSpeed;
+      if (glowSpeed === "slow") return 8;
+      if (glowSpeed === "fast") return 2.8;
+      return 5;
+    }, [glowSpeed]);
+
+    // Calibrate glow parameters based on intensity and active theme
+    const { brightness, glowSize, saturation, innerOpacity, bloomOpacity, strokeOpacity } =
+      React.useMemo(() => {
+        if (glowIntensity === "subtle") {
+          return {
+            brightness: isDark ? 1.15 : 1.0,
+            glowSize: isDark ? 1.15 : 1.0,
+            saturation: isDark ? 1.4 : 1.6,
+            innerOpacity: isDark ? "1.4" : "1.8",
+            bloomOpacity: isDark ? "1.3" : "1.6",
+            strokeOpacity: isDark ? "1.3" : "1.9",
+          };
+        }
+        if (glowIntensity === "vibrant") {
+          return {
+            brightness: isDark ? 1.35 : 1.15,
+            glowSize: isDark ? 1.5 : 1.35,
+            saturation: isDark ? 1.8 : 2.2,
+            innerOpacity: isDark ? "2.2" : "2.8",
+            bloomOpacity: isDark ? "2.0" : "2.5",
+            strokeOpacity: isDark ? "2.0" : "3.0",
+          };
+        }
+        // Balanced (default)
+        return {
+          brightness: isDark ? 1.25 : 1.1,
+          glowSize: isDark ? 1.3 : 1.2,
+          saturation: isDark ? 1.6 : 1.8,
+          innerOpacity: isDark ? "1.8" : "2.2",
+          bloomOpacity: isDark ? "1.6" : "2.0",
+          strokeOpacity: isDark ? "1.6" : "2.4",
+        };
+      }, [glowIntensity, isDark]);
+
+    const hueRange = glowColor === "colorful" ? 360 : 45;
 
     return (
       <BorderBeam
-        borderRadius={16}
+        borderRadius={borderRadius}
         size="md"
-        colorVariant="colorful"
+        colorVariant={glowColor}
         theme={isDark ? "dark" : "light"}
-        active={isInteracting}
-        brightness={isDark ? 1.25 : 1.1}
-        glowSize={isDark ? 1.3 : 1.2}
-        saturation={isDark ? 1.6 : 1.8}
-        hueRange={360}
+        active={isActive}
+        duration={duration}
+        brightness={brightness}
+        glowSize={glowSize}
+        saturation={saturation}
+        hueRange={hueRange}
         style={
           {
-            "--beam-stroke-opacity": isDark ? "1.6" : "2.4",
-            "--beam-inner-opacity": isDark ? "1.8" : "2.2",
-            "--beam-bloom-opacity": isDark ? "1.6" : "2.0",
-            "--beam-glow-brightness": isDark ? "1.25" : "1.1",
-            "--beam-glow-saturate": isDark ? "1.6" : "1.8",
+            "--beam-stroke-opacity": strokeOpacity,
+            "--beam-inner-opacity": innerOpacity,
+            "--beam-bloom-opacity": bloomOpacity,
+            "--beam-glow-brightness": String(brightness),
+            "--beam-glow-saturate": String(saturation),
           } as React.CSSProperties
         }
         className={cn(
@@ -126,6 +204,7 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
           onClick={handleContainerClick}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          style={minHeight ? { minHeight } : undefined}
           className={cn(
             "w-full min-h-[140px] sm:min-h-[160px] flex flex-col justify-between p-4 sm:p-5 rounded-2xl cursor-text select-none",
             "bg-white dark:bg-zinc-900 border border-zinc-300/90 dark:border-zinc-800 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors"
@@ -152,33 +231,39 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
           </div>
 
           {/* Bottom Actions Row */}
-          <div className="flex items-center justify-end pt-2">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (typeof currentValue === "string" && currentValue.trim() && onSend) {
-                  onSend(currentValue);
-                }
-              }}
-              className={cn(
-                "p-2 sm:p-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0",
-                typeof currentValue === "string" && currentValue.trim().length > 0
-                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:opacity-90 shadow-sm"
-                  : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200/80 dark:border-transparent"
-              )}
-              aria-label="Send"
-            >
-              <svg
-                className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-2 fill-none stroke-current"
-                viewBox="0 0 24 24"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+          {showSendButton && (
+            <div className="flex items-center justify-end pt-2">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (
+                    typeof currentValue === "string" &&
+                    currentValue.trim() &&
+                    onSend
+                  ) {
+                    onSend(currentValue);
+                  }
+                }}
+                className={cn(
+                  "p-2 sm:p-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0",
+                  typeof currentValue === "string" && currentValue.trim().length > 0
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:opacity-90 shadow-sm"
+                    : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200/80 dark:border-transparent"
+                )}
+                aria-label="Send"
               >
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
-          </div>
+                <svg
+                  className="w-4 h-4 sm:w-4.5 sm:h-4.5 stroke-2 fill-none stroke-current"
+                  viewBox="0 0 24 24"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
       </BorderBeam>
     );
