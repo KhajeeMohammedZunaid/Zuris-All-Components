@@ -94,6 +94,15 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
         colorVariant="colorful"
         theme="auto"
         active={isInteracting}
+        brightness={1.9}
+        glowSize={1.35}
+        saturation={1.3}
+        style={
+          {
+            "--beam-inner-opacity": "1.4",
+            "--beam-bloom-opacity": "1.3",
+          } as React.CSSProperties
+        }
         className={cn(
           "w-full max-w-xl mx-auto rounded-2xl overflow-hidden transition-all duration-300",
           containerClassName
