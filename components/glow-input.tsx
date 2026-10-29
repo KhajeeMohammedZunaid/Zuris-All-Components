@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { BorderBeam } from "border-beam";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
 export interface GlowInputProps
@@ -29,6 +30,15 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
     );
     const [isFocused, setIsFocused] = React.useState(false);
     const [isHovered, setIsHovered] = React.useState(false);
+
+    const { resolvedTheme } = useTheme();
+    const [mounted, setMounted] = React.useState(false);
+
+    React.useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    const isDark = mounted ? resolvedTheme === "dark" : false;
 
     const isControlled = props.value !== undefined;
     const currentValue = isControlled ? props.value : uncontrolledValue;
@@ -92,15 +102,30 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
         borderRadius={16}
         size="md"
         colorVariant="colorful"
-        theme="auto"
+        theme={isDark ? "dark" : "light"}
         active={isInteracting}
-        brightness={1.9}
-        glowSize={1.35}
-        saturation={1.3}
+        brightness={isDark ? 2.0 : 1.05}
+        glowSize={isDark ? 1.4 : 1.1}
+        saturation={isDark ? 1.3 : 2.2}
+        css={`
+          [data-beam="{id}"]::after,
+          [data-beam="{id}"] [data-beam-bloom] {
+            padding: 1.8px !important;
+          }
+          [data-beam="{id}"]::before {
+            -webkit-mask-image: linear-gradient(white, transparent 32px, transparent calc(100% - 32px), white),
+                                linear-gradient(to right, white, transparent 32px, transparent calc(100% - 32px), white) !important;
+            mask-image: linear-gradient(white, transparent 32px, transparent calc(100% - 32px), white),
+                        linear-gradient(to right, white, transparent 32px, transparent calc(100% - 32px), white) !important;
+          }
+        `}
         style={
           {
-            "--beam-inner-opacity": "1.4",
-            "--beam-bloom-opacity": "1.3",
+            "--beam-stroke-opacity": isDark ? "1.8" : "3.0",
+            "--beam-inner-opacity": isDark ? "2.0" : "2.6",
+            "--beam-bloom-opacity": isDark ? "1.8" : "2.4",
+            "--beam-glow-brightness": isDark ? "2.0" : "1.05",
+            "--beam-glow-saturate": isDark ? "1.3" : "2.2",
           } as React.CSSProperties
         }
         className={cn(
@@ -114,7 +139,7 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
           onMouseLeave={() => setIsHovered(false)}
           className={cn(
             "w-full min-h-[140px] sm:min-h-[160px] flex flex-col justify-between p-4 sm:p-5 rounded-2xl cursor-text select-none",
-            "bg-white dark:bg-zinc-900 border border-zinc-200/80 dark:border-zinc-800 transition-colors"
+            "bg-white dark:bg-zinc-900 border border-zinc-300/90 dark:border-zinc-800 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors"
           )}
         >
           {/* Main Textarea Area */}
@@ -150,8 +175,8 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
               className={cn(
                 "p-2 sm:p-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0",
                 typeof currentValue === "string" && currentValue.trim().length > 0
-                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:opacity-90"
-                  : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:opacity-90 shadow-sm"
+                  : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200/80 dark:border-transparent"
               )}
               aria-label="Send"
             >
