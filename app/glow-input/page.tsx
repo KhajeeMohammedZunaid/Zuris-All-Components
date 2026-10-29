@@ -57,29 +57,24 @@ const COLOR_OPTIONS: { id: GlowColorVariant; label: string; dot: string }[] = [
     label: "Gold",
     dot: "linear-gradient(135deg, #f59e0b, #eab308, #d97706)",
   },
-  {
-    id: "mono",
-    label: "Mono",
-    dot: "linear-gradient(135deg, #9ca3af, #6b7280, #374151)",
-  },
 ];
 
 const INTENSITY_OPTIONS: { id: GlowIntensity; label: string; desc: string }[] = [
   { id: "subtle", label: "Subtle", desc: "Gentle soft halo" },
-  { id: "balanced", label: "Balanced", desc: "Default calibrated glow" },
+  { id: "balanced", label: "Balanced", desc: "Calibrated glow" },
   { id: "vibrant", label: "Vibrant", desc: "Deep rich contrast" },
 ];
 
 const TRIGGER_OPTIONS: { id: GlowTrigger; label: string; desc: string }[] = [
   { id: "interaction", label: "Interact", desc: "Hover or click" },
   { id: "focus", label: "Focus Only", desc: "Active typing only" },
-  { id: "always", label: "Always On", desc: "Continuous beam" },
+  { id: "always", label: "Always On", desc: "Continuous perimeter" },
 ];
 
 const SPEED_OPTIONS: { id: GlowSpeed; label: string; desc: string }[] = [
   { id: "slow", label: "Relaxed", desc: "8s slow loop" },
   { id: "normal", label: "Normal", desc: "5s balanced cadence" },
-  { id: "fast", label: "Rapid", desc: "2.8s quick velocity" },
+  { id: "fast", label: "Rapid", desc: "2.8s dynamic velocity" },
 ];
 
 export default function GlowInputPage() {
@@ -104,13 +99,13 @@ export default function GlowInputPage() {
   };
 
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-between px-4 py-12 sm:py-16 md:py-20 bg-zinc-100/90 dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors font-sans">
-      {/* Top Bar with Minimal Theme Toggle */}
+    <main className="min-h-screen w-full flex flex-col items-center justify-between px-4 py-12 sm:py-16 md:py-20 bg-zinc-100 dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors font-sans">
+      {/* Top Bar with High-Contrast Theme Toggle */}
       <header className="w-full max-w-xl flex items-center justify-end">
         <button
           type="button"
           onClick={toggleTheme}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-normal rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-300/80 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-normal rounded-full bg-white dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-700 text-zinc-950 dark:text-zinc-50 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
         >
           {mounted ? (isDark ? "🌙 Dark" : "☀ Light") : "Theme"}
         </button>
@@ -132,15 +127,15 @@ export default function GlowInputPage() {
         </div>
       </section>
 
-      {/* Flat Tabs Controls with Smooth Height Resizing & No Hover Animations */}
+      {/* Flat Tabs Controls - High Contrast, Zero Mutedness, Smooth Height Resizing */}
       <footer className="w-full max-w-xl mt-6 sm:mt-10">
         <motion.div
           layout
           transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-300/80 dark:border-zinc-800 p-3 sm:p-4 flex flex-col gap-3 transition-colors shadow-none"
+          className="w-full rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-700 p-3 sm:p-4 flex flex-col gap-3 transition-colors shadow-none"
         >
           {/* Main Tab Category Pill Bar */}
-          <div className="inline-flex w-full items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800/80 gap-1">
+          <div className="inline-flex w-full items-center p-1 rounded-xl bg-zinc-200/90 dark:bg-zinc-950 border border-zinc-350 dark:border-zinc-800 gap-1">
             {TABS.map((tab) => {
               const active = activeTab === tab.id;
               return (
@@ -152,7 +147,7 @@ export default function GlowInputPage() {
                     "relative flex-1 py-1.5 px-2 rounded-lg text-xs font-normal transition-colors cursor-pointer text-center select-none",
                     active
                       ? "text-zinc-950 dark:text-white"
-                      : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+                      : "text-zinc-900 hover:text-black dark:text-zinc-100 dark:hover:text-white"
                   )}
                 >
                   {active && (
@@ -175,7 +170,7 @@ export default function GlowInputPage() {
             className="flex items-center justify-center overflow-hidden"
           >
             <AnimatePresence mode="wait" initial={false}>
-              {/* Palette / Colors Tab */}
+              {/* Palette / Colors Tab (Mono variant completely removed) */}
               {activeTab === "color" && (
                 <motion.div
                   key="tab-color"
@@ -195,8 +190,8 @@ export default function GlowInputPage() {
                         className={cn(
                           "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-normal cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
-                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-transparent"
+                            : "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 border-zinc-400 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                         )}
                       >
                         <span
@@ -230,8 +225,8 @@ export default function GlowInputPage() {
                         className={cn(
                           "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
-                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-transparent"
+                            : "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 border-zinc-400 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                         )}
                       >
                         <span className="text-xs font-normal">{item.label}</span>
@@ -239,8 +234,8 @@ export default function GlowInputPage() {
                           className={cn(
                             "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-700"
-                              : "text-zinc-600 dark:text-zinc-400"
+                              ? "text-zinc-200 dark:text-zinc-800"
+                              : "text-zinc-800 dark:text-zinc-200"
                           )}
                         >
                           {item.desc}
@@ -271,8 +266,8 @@ export default function GlowInputPage() {
                         className={cn(
                           "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
-                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-transparent"
+                            : "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 border-zinc-400 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                         )}
                       >
                         <span className="text-xs font-normal">{item.label}</span>
@@ -280,8 +275,8 @@ export default function GlowInputPage() {
                           className={cn(
                             "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-700"
-                              : "text-zinc-600 dark:text-zinc-400"
+                              ? "text-zinc-200 dark:text-zinc-800"
+                              : "text-zinc-800 dark:text-zinc-200"
                           )}
                         >
                           {item.desc}
@@ -312,8 +307,8 @@ export default function GlowInputPage() {
                         className={cn(
                           "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
-                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                            ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950 border-transparent"
+                            : "bg-white dark:bg-zinc-900 text-zinc-950 dark:text-zinc-50 border-zinc-400 dark:border-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-800"
                         )}
                       >
                         <span className="text-xs font-normal">{item.label}</span>
@@ -321,8 +316,8 @@ export default function GlowInputPage() {
                           className={cn(
                             "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-700"
-                              : "text-zinc-600 dark:text-zinc-400"
+                              ? "text-zinc-200 dark:text-zinc-800"
+                              : "text-zinc-800 dark:text-zinc-200"
                           )}
                         >
                           {item.desc}

@@ -225,7 +225,7 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
           style={minHeight ? { minHeight } : undefined}
           className={cn(
             "w-full min-h-[140px] sm:min-h-[160px] flex flex-col justify-between p-4 sm:p-5 rounded-2xl cursor-text select-none",
-            "bg-white dark:bg-zinc-900 border shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none"
+            "bg-white dark:bg-zinc-900 border border-zinc-400 dark:border-zinc-700 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none"
           )}
         >
           {/* Main Textarea Area */}
@@ -240,8 +240,8 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
               rows={3}
               className={cn(
                 "w-full flex-1 min-h-[80px] bg-transparent resize-none outline-none border-none p-0 cursor-text select-text",
-                "text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-relaxed font-normal",
-                "placeholder:text-zinc-600 dark:placeholder:text-zinc-400 font-sans",
+                "text-zinc-950 dark:text-zinc-50 text-sm sm:text-base leading-relaxed font-normal",
+                "placeholder:text-zinc-700 dark:placeholder:text-zinc-300 font-sans",
                 className
               )}
               {...props}
@@ -262,8 +262,8 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
                 className={cn(
                   "p-2 sm:p-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0",
                   hasValue
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950"
-                    : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-300/80 dark:border-zinc-700/60"
+                    ? "bg-zinc-950 text-white dark:bg-white dark:text-zinc-950"
+                    : "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100 hover:text-black dark:hover:text-white border border-zinc-400 dark:border-zinc-600"
                 )}
                 aria-label="Send"
               >
