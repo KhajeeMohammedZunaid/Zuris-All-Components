@@ -107,18 +107,6 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
         brightness={isDark ? 2.0 : 1.05}
         glowSize={isDark ? 1.4 : 1.1}
         saturation={isDark ? 1.3 : 2.2}
-        css={`
-          [data-beam="{id}"]::after,
-          [data-beam="{id}"] [data-beam-bloom] {
-            padding: 1.8px !important;
-          }
-          [data-beam="{id}"]::before {
-            -webkit-mask-image: linear-gradient(white, transparent 32px, transparent calc(100% - 32px), white),
-                                linear-gradient(to right, white, transparent 32px, transparent calc(100% - 32px), white) !important;
-            mask-image: linear-gradient(white, transparent 32px, transparent calc(100% - 32px), white),
-                        linear-gradient(to right, white, transparent 32px, transparent calc(100% - 32px), white) !important;
-          }
-        `}
         style={
           {
             "--beam-stroke-opacity": isDark ? "1.8" : "3.0",
