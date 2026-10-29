@@ -14,6 +14,13 @@ import { cn } from "@/lib/utils";
 
 type ControlTab = "color" | "intensity" | "trigger" | "speed";
 
+const TABS: { id: ControlTab; label: string }[] = [
+  { id: "color", label: "Palette" },
+  { id: "intensity", label: "Glow" },
+  { id: "trigger", label: "Trigger" },
+  { id: "speed", label: "Speed" },
+];
+
 const COLOR_OPTIONS: { id: GlowColorVariant; label: string; dot: string }[] = [
   {
     id: "colorful",
@@ -59,7 +66,7 @@ const COLOR_OPTIONS: { id: GlowColorVariant; label: string; dot: string }[] = [
 
 const INTENSITY_OPTIONS: { id: GlowIntensity; label: string; desc: string }[] = [
   { id: "subtle", label: "Subtle", desc: "Gentle soft halo" },
-  { id: "balanced", label: "Balanced", desc: "Standard calibrated glow" },
+  { id: "balanced", label: "Balanced", desc: "Default calibrated glow" },
   { id: "vibrant", label: "Vibrant", desc: "Deep rich contrast" },
 ];
 
@@ -96,28 +103,21 @@ export default function GlowInputPage() {
     setTheme(isDark ? "light" : "dark");
   };
 
-  const tabs: { id: ControlTab; label: string }[] = [
-    { id: "color", label: "Palette" },
-    { id: "intensity", label: "Glow" },
-    { id: "trigger", label: "Trigger" },
-    { id: "speed", label: "Speed" },
-  ];
-
   return (
-    <main className="min-h-screen w-full flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 bg-zinc-100/90 dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors">
-      {/* Top Bar with Theme Toggle */}
-      <div className="fixed top-5 right-5 z-50">
+    <main className="min-h-screen w-full flex flex-col items-center justify-between px-4 py-12 sm:py-16 md:py-20 bg-zinc-100/90 dark:bg-[#09090b] text-zinc-950 dark:text-zinc-50 transition-colors font-sans">
+      {/* Top Bar with Minimal Theme Toggle */}
+      <header className="w-full max-w-xl flex items-center justify-end">
         <button
           type="button"
           onClick={toggleTheme}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer shadow-sm"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-normal rounded-full bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-300/80 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200 hover:text-zinc-950 dark:hover:text-white transition-colors cursor-pointer"
         >
           {mounted ? (isDark ? "🌙 Dark" : "☀ Light") : "Theme"}
         </button>
-      </div>
+      </header>
 
-      <div className="w-full max-w-xl flex flex-col items-center gap-6 sm:gap-8">
-        {/* Glow Input Component */}
+      {/* Main Showcase Stage */}
+      <section className="w-full max-w-xl my-auto py-8 sm:py-12 flex flex-col items-center justify-center">
         <div className="w-full">
           <GlowInput
             glowColor={glowColor}
@@ -130,12 +130,18 @@ export default function GlowInputPage() {
             }}
           />
         </div>
+      </section>
 
-        {/* Clean Minimalist Customization Tabs Underneath */}
-        <div className="w-full rounded-2xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-zinc-200/90 dark:border-zinc-800/90 p-3 sm:p-4 shadow-sm flex flex-col gap-3.5 transition-colors">
+      {/* Flat Tabs Controls with Smooth Height Resizing & No Hover Animations */}
+      <footer className="w-full max-w-xl mt-6 sm:mt-10">
+        <motion.div
+          layout
+          transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full rounded-2xl bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border border-zinc-300/80 dark:border-zinc-800 p-3 sm:p-4 flex flex-col gap-3 transition-colors shadow-none"
+        >
           {/* Main Tab Category Pill Bar */}
-          <div className="inline-flex w-full items-center p-1 rounded-xl bg-zinc-100/90 dark:bg-zinc-950/70 border border-zinc-200/60 dark:border-zinc-800/60 gap-1">
-            {tabs.map((tab) => {
+          <div className="inline-flex w-full items-center p-1 rounded-xl bg-zinc-100 dark:bg-zinc-950/80 border border-zinc-200 dark:border-zinc-800/80 gap-1">
+            {TABS.map((tab) => {
               const active = activeTab === tab.id;
               return (
                 <button
@@ -143,17 +149,17 @@ export default function GlowInputPage() {
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "relative flex-1 py-1.5 px-2 rounded-lg text-xs font-medium transition-colors cursor-pointer text-center select-none",
+                    "relative flex-1 py-1.5 px-2 rounded-lg text-xs font-normal transition-colors cursor-pointer text-center select-none",
                     active
-                      ? "text-zinc-950 dark:text-white font-semibold"
-                      : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                      ? "text-zinc-950 dark:text-white"
+                      : "text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
                   )}
                 >
                   {active && (
                     <motion.div
                       layoutId="active-tab-pill"
-                      className="absolute inset-0 rounded-lg bg-white dark:bg-zinc-800 shadow-sm"
-                      transition={{ type: "spring", stiffness: 440, damping: 32 }}
+                      className="absolute inset-0 rounded-lg bg-white dark:bg-zinc-800"
+                      transition={{ type: "spring", stiffness: 450, damping: 32 }}
                     />
                   )}
                   <span className="relative z-10">{tab.label}</span>
@@ -162,18 +168,22 @@ export default function GlowInputPage() {
             })}
           </div>
 
-          {/* Sub-Options for the Active Tab */}
-          <div className="min-h-[46px] flex items-center justify-center">
-            <AnimatePresence mode="wait">
+          {/* Sub-Options Container with Smooth Layout Resizing */}
+          <motion.div
+            layout
+            transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+            className="flex items-center justify-center overflow-hidden"
+          >
+            <AnimatePresence mode="wait" initial={false}>
               {/* Palette / Colors Tab */}
               {activeTab === "color" && (
                 <motion.div
                   key="tab-color"
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -3 }}
-                  transition={{ duration: 0.15 }}
-                  className="flex flex-wrap items-center justify-center gap-1.5 w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="flex flex-wrap items-center justify-center gap-1.5 w-full py-1"
                 >
                   {COLOR_OPTIONS.map((c) => {
                     const active = glowColor === c.id;
@@ -183,10 +193,10 @@ export default function GlowInputPage() {
                         type="button"
                         onClick={() => setGlowColor(c.id)}
                         className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium cursor-pointer transition-colors border",
+                          "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-normal cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent shadow-xs"
-                            : "bg-transparent text-zinc-600 dark:text-zinc-400 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
+                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         )}
                       >
                         <span
@@ -204,11 +214,11 @@ export default function GlowInputPage() {
               {activeTab === "intensity" && (
                 <motion.div
                   key="tab-intensity"
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -3 }}
-                  transition={{ duration: 0.15 }}
-                  className="grid grid-cols-3 gap-2 w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="grid grid-cols-3 gap-2 w-full py-1"
                 >
                   {INTENSITY_OPTIONS.map((item) => {
                     const active = glowIntensity === item.id;
@@ -218,19 +228,19 @@ export default function GlowInputPage() {
                         type="button"
                         onClick={() => setGlowIntensity(item.id)}
                         className={cn(
-                          "flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-center cursor-pointer transition-all border",
+                          "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent shadow-xs"
-                            : "bg-transparent text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
+                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         )}
                       >
-                        <span className="text-xs font-semibold">{item.label}</span>
+                        <span className="text-xs font-normal">{item.label}</span>
                         <span
                           className={cn(
-                            "text-[10px] mt-0.5",
+                            "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-600"
-                              : "text-zinc-400 dark:text-zinc-500"
+                              ? "text-zinc-300 dark:text-zinc-700"
+                              : "text-zinc-600 dark:text-zinc-400"
                           )}
                         >
                           {item.desc}
@@ -245,11 +255,11 @@ export default function GlowInputPage() {
               {activeTab === "trigger" && (
                 <motion.div
                   key="tab-trigger"
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -3 }}
-                  transition={{ duration: 0.15 }}
-                  className="grid grid-cols-3 gap-2 w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="grid grid-cols-3 gap-2 w-full py-1"
                 >
                   {TRIGGER_OPTIONS.map((item) => {
                     const active = glowTrigger === item.id;
@@ -259,19 +269,19 @@ export default function GlowInputPage() {
                         type="button"
                         onClick={() => setGlowTrigger(item.id)}
                         className={cn(
-                          "flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-center cursor-pointer transition-all border",
+                          "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent shadow-xs"
-                            : "bg-transparent text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
+                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         )}
                       >
-                        <span className="text-xs font-semibold">{item.label}</span>
+                        <span className="text-xs font-normal">{item.label}</span>
                         <span
                           className={cn(
-                            "text-[10px] mt-0.5",
+                            "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-600"
-                              : "text-zinc-400 dark:text-zinc-500"
+                              ? "text-zinc-300 dark:text-zinc-700"
+                              : "text-zinc-600 dark:text-zinc-400"
                           )}
                         >
                           {item.desc}
@@ -286,11 +296,11 @@ export default function GlowInputPage() {
               {activeTab === "speed" && (
                 <motion.div
                   key="tab-speed"
-                  initial={{ opacity: 0, y: 3 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -3 }}
-                  transition={{ duration: 0.15 }}
-                  className="grid grid-cols-3 gap-2 w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.12 }}
+                  className="grid grid-cols-3 gap-2 w-full py-1"
                 >
                   {SPEED_OPTIONS.map((item) => {
                     const active = glowSpeed === item.id;
@@ -300,19 +310,19 @@ export default function GlowInputPage() {
                         type="button"
                         onClick={() => setGlowSpeed(item.id)}
                         className={cn(
-                          "flex flex-col items-center justify-center py-1.5 px-2 rounded-xl text-center cursor-pointer transition-all border",
+                          "flex flex-col items-center justify-center py-2 px-2 rounded-xl text-center cursor-pointer transition-colors border",
                           active
-                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent shadow-xs"
-                            : "bg-transparent text-zinc-700 dark:text-zinc-300 border-zinc-200/80 dark:border-zinc-800/80 hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+                            ? "bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 border-transparent"
+                            : "bg-transparent text-zinc-800 dark:text-zinc-200 border-zinc-300/80 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800"
                         )}
                       >
-                        <span className="text-xs font-semibold">{item.label}</span>
+                        <span className="text-xs font-normal">{item.label}</span>
                         <span
                           className={cn(
-                            "text-[10px] mt-0.5",
+                            "text-[10px] font-normal mt-0.5",
                             active
-                              ? "text-zinc-300 dark:text-zinc-600"
-                              : "text-zinc-400 dark:text-zinc-500"
+                              ? "text-zinc-300 dark:text-zinc-700"
+                              : "text-zinc-600 dark:text-zinc-400"
                           )}
                         >
                           {item.desc}
@@ -323,9 +333,9 @@ export default function GlowInputPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </footer>
     </main>
   );
 }

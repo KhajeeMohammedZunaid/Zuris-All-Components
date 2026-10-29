@@ -3,6 +3,7 @@
 import * as React from "react";
 import { BorderBeam } from "border-beam";
 import { useTheme } from "next-themes";
+import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export type GlowColorVariant =
@@ -12,8 +13,7 @@ export type GlowColorVariant =
   | "forest"
   | "candy"
   | "ice"
-  | "gold"
-  | "mono";
+  | "gold";
 
 export type GlowIntensity = "subtle" | "balanced" | "vibrant";
 export type GlowTrigger = "interaction" | "focus" | "always";
@@ -139,40 +139,48 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
     }, [glowSpeed]);
 
     // Calibrate glow parameters based on intensity and active theme
-    const { brightness, glowSize, saturation, innerOpacity, bloomOpacity, strokeOpacity } =
-      React.useMemo(() => {
-        if (glowIntensity === "subtle") {
-          return {
-            brightness: isDark ? 1.15 : 1.0,
-            glowSize: isDark ? 1.15 : 1.0,
-            saturation: isDark ? 1.4 : 1.6,
-            innerOpacity: isDark ? "1.4" : "1.8",
-            bloomOpacity: isDark ? "1.3" : "1.6",
-            strokeOpacity: isDark ? "1.3" : "1.9",
-          };
-        }
-        if (glowIntensity === "vibrant") {
-          return {
-            brightness: isDark ? 1.35 : 1.15,
-            glowSize: isDark ? 1.5 : 1.35,
-            saturation: isDark ? 1.8 : 2.2,
-            innerOpacity: isDark ? "2.2" : "2.8",
-            bloomOpacity: isDark ? "2.0" : "2.5",
-            strokeOpacity: isDark ? "2.0" : "3.0",
-          };
-        }
-        // Balanced (default)
+    const {
+      brightness,
+      glowSize,
+      saturation,
+      innerOpacity,
+      bloomOpacity,
+      strokeOpacity,
+    } = React.useMemo(() => {
+      if (glowIntensity === "subtle") {
         return {
-          brightness: isDark ? 1.25 : 1.1,
-          glowSize: isDark ? 1.3 : 1.2,
-          saturation: isDark ? 1.6 : 1.8,
-          innerOpacity: isDark ? "1.8" : "2.2",
-          bloomOpacity: isDark ? "1.6" : "2.0",
-          strokeOpacity: isDark ? "1.6" : "2.4",
+          brightness: isDark ? 1.15 : 1.0,
+          glowSize: isDark ? 1.15 : 1.0,
+          saturation: isDark ? 1.4 : 1.6,
+          innerOpacity: isDark ? "1.4" : "1.8",
+          bloomOpacity: isDark ? "1.3" : "1.6",
+          strokeOpacity: isDark ? "1.3" : "1.9",
         };
-      }, [glowIntensity, isDark]);
+      }
+      if (glowIntensity === "vibrant") {
+        return {
+          brightness: isDark ? 1.35 : 1.15,
+          glowSize: isDark ? 1.5 : 1.35,
+          saturation: isDark ? 1.8 : 2.2,
+          innerOpacity: isDark ? "2.2" : "2.8",
+          bloomOpacity: isDark ? "2.0" : "2.5",
+          strokeOpacity: isDark ? "2.0" : "3.0",
+        };
+      }
+      // Balanced (default)
+      return {
+        brightness: isDark ? 1.25 : 1.1,
+        glowSize: isDark ? 1.3 : 1.2,
+        saturation: isDark ? 1.6 : 1.8,
+        innerOpacity: isDark ? "1.8" : "2.2",
+        bloomOpacity: isDark ? "1.6" : "2.0",
+        strokeOpacity: isDark ? "1.6" : "2.4",
+      };
+    }, [glowIntensity, isDark]);
 
     const hueRange = glowColor === "colorful" ? 360 : 45;
+    const hasValue =
+      typeof currentValue === "string" && currentValue.trim().length > 0;
 
     return (
       <BorderBeam
@@ -200,14 +208,24 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
           containerClassName
         )}
       >
-        <div
+        <motion.div
           onClick={handleContainerClick}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
+          animate={{
+            borderColor: isFocused
+              ? isDark
+                ? "rgba(113, 113, 122, 0.6)"
+                : "rgba(161, 161, 170, 0.9)"
+              : isDark
+              ? "rgba(39, 39, 42, 1)"
+              : "rgba(212, 212, 216, 0.9)",
+          }}
+          transition={{ duration: 0.2 }}
           style={minHeight ? { minHeight } : undefined}
           className={cn(
             "w-full min-h-[140px] sm:min-h-[160px] flex flex-col justify-between p-4 sm:p-5 rounded-2xl cursor-text select-none",
-            "bg-white dark:bg-zinc-900 border border-zinc-300/90 dark:border-zinc-800 shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none transition-colors"
+            "bg-white dark:bg-zinc-900 border shadow-[0_2px_12px_rgba(0,0,0,0.06)] dark:shadow-none"
           )}
         >
           {/* Main Textarea Area */}
@@ -222,8 +240,8 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
               rows={3}
               className={cn(
                 "w-full flex-1 min-h-[80px] bg-transparent resize-none outline-none border-none p-0 cursor-text select-text",
-                "text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-relaxed",
-                "placeholder:text-zinc-400 dark:placeholder:text-zinc-500 font-sans",
+                "text-zinc-900 dark:text-zinc-100 text-sm sm:text-base leading-relaxed font-normal",
+                "placeholder:text-zinc-600 dark:placeholder:text-zinc-400 font-sans",
                 className
               )}
               {...props}
@@ -237,19 +255,15 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (
-                    typeof currentValue === "string" &&
-                    currentValue.trim() &&
-                    onSend
-                  ) {
+                  if (hasValue && onSend) {
                     onSend(currentValue);
                   }
                 }}
                 className={cn(
                   "p-2 sm:p-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center shrink-0",
-                  typeof currentValue === "string" && currentValue.trim().length > 0
-                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 hover:opacity-90 shadow-sm"
-                    : "bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 border border-zinc-200/80 dark:border-transparent"
+                  hasValue
+                    ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-950"
+                    : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-300/80 dark:border-zinc-700/60"
                 )}
                 aria-label="Send"
               >
@@ -264,7 +278,7 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       </BorderBeam>
     );
   }
