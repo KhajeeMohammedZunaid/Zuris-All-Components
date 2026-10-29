@@ -104,16 +104,17 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
         colorVariant="colorful"
         theme={isDark ? "dark" : "light"}
         active={isInteracting}
-        brightness={isDark ? 2.0 : 1.05}
-        glowSize={isDark ? 1.4 : 1.1}
-        saturation={isDark ? 1.3 : 2.2}
+        brightness={isDark ? 1.25 : 1.1}
+        glowSize={isDark ? 1.3 : 1.2}
+        saturation={isDark ? 1.6 : 1.8}
+        hueRange={360}
         style={
           {
-            "--beam-stroke-opacity": isDark ? "1.8" : "3.0",
-            "--beam-inner-opacity": isDark ? "2.0" : "2.6",
-            "--beam-bloom-opacity": isDark ? "1.8" : "2.4",
-            "--beam-glow-brightness": isDark ? "2.0" : "1.05",
-            "--beam-glow-saturate": isDark ? "1.3" : "2.2",
+            "--beam-stroke-opacity": isDark ? "1.6" : "2.4",
+            "--beam-inner-opacity": isDark ? "1.8" : "2.2",
+            "--beam-bloom-opacity": isDark ? "1.6" : "2.0",
+            "--beam-glow-brightness": isDark ? "1.25" : "1.1",
+            "--beam-glow-saturate": isDark ? "1.6" : "1.8",
           } as React.CSSProperties
         }
         className={cn(
