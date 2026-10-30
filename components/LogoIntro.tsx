@@ -2,9 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, animate, useMotionValue, useTransform, useMotionTemplate, type MotionValue } from "motion/react";
-import { Inter } from "next/font/google";
-
-const inter = Inter({ subsets: ["latin"], weight: ["400"] });
+import { useElementSurface, type ElementName } from "@/components/buttons/liquid-button";
 
 /* ───────────── logo geometry ───────────── */
 const OUTER =
@@ -13,10 +11,19 @@ const INNER = "M147 47H212C224 47 233 56 233 68C233 75 229 82 223 88L164 146V80L
 const OUTER_PTS: [number, number][] = [[0,0],[212,0],[280,67],[245,131],[230,146],[292,208],[226,208],[164,146],[101,208],[0,208],[0,129],[81,47],[0,47]];
 const INNER_PTS: [number, number][] = [[147,47],[212,47],[233,68],[223,88],[164,80],[82,162],[34,162]];
 
-const DURATION = 10;
+const DURATION = 10.5;
 const GAP = 24;
 const MARK_W = 292 * 0.64;
 const NODE = 5;
+
+/* ───────────── 5 Iconic Liquid Button Presets ───────────── */
+const SHOWCASE_ELEMENTS: ElementName[] = [
+  "lava",
+  "stone",
+  "ocean",
+  "emerald",
+  "aurora",
+];
 
 /* ───────────── easing + keyframes ───────────── */
 const io  = (x: number) => (x < 0.5 ? 4 * x ** 3 : 1 - (-2 * x + 2) ** 3 / 2); // smooth in-out
@@ -51,28 +58,100 @@ const NODES = [
 ];
 
 /* ───────────── scene pieces ───────────── */
-function Node({ t, x, y, f }: { t: T; x: number; y: number; f: number }) {
-  const opacity = useTransform(t, (v) => clamp((io(clamp((v - 0.5) / 1.8)) - f) * 25) * kf(v, [2.3, 2.9], [1, 0]));
-  return <motion.rect x={x - NODE / 2} y={y - NODE / 2} width={NODE} height={NODE} fill="#fff" style={{ opacity }} />;
+function Node({ t, x, y, f, color }: { t: T; x: number; y: number; f: number; color: string }) {
+  const opacity = useTransform(t, (v) => clamp((io(clamp((v - 0.5) / 1.8)) - f) * 25) * kf(v, [2.2, 2.9], [1, 0]));
+  return <motion.rect x={x - NODE / 2} y={y - NODE / 2} width={NODE} height={NODE} fill={color} style={{ opacity }} />;
 }
 
-function Blob({ t, color, x, y, dx, dy, speed, i, times, values }: {
-  t: T; color: string; x: number; y: number; dx: number; dy: number; speed: number; i: number; times: number[]; values: number[];
-}) {
-  const tx = useTransform(t, (v) => x + Math.sin(v * speed + i) * dx);
-  const ty = useTransform(t, (v) => y + Math.cos(v * speed + i) * dy);
-  const opacity = useK(t, times, values);
+/**
+ * Live WebGL Liquid Shader Showcase:
+ * - Exactly 5 iconic presets: Lava, Stone, Ocean, Emerald, Aurora
+ * - Each preset stays for at least 0.7s (0.75s slot)
+ * - Seamless WebGL cross-dissolves between presets
+ */
+function LiquidShaderShowcase({ t }: { t: T }) {
+  const canvasRefA = useRef<HTMLCanvasElement>(null);
+  const canvasRefB = useRef<HTMLCanvasElement>(null);
+
+  const [elemA, setElemA] = useState<ElementName>("lava");
+  const [elemB, setElemB] = useState<ElementName>("stone");
+  const [opacityA, setOpacityA] = useState(1);
+  const [opacityB, setOpacityB] = useState(0);
+
+  const { boost: boostA, ready: readyA } = useElementSurface(canvasRefA, elemA, undefined, false);
+  const { boost: boostB, ready: readyB } = useElementSurface(canvasRefB, elemB, undefined, false);
+
+  useEffect(() => {
+    boostA(3.2);
+    boostB(3.2);
+  }, [boostA, boostB]);
+
+  useEffect(() => {
+    const SLOT_DURATION = 0.75; // >= 0.7s per preset
+    const START_T = 5.0;
+    const TOTAL_PRESETS = SHOWCASE_ELEMENTS.length; // 5
+
+    return t.on("change", (v) => {
+      if (v < START_T) {
+        setElemA(SHOWCASE_ELEMENTS[0]);
+        setOpacityA(1);
+        setOpacityB(0);
+        return;
+      }
+
+      const elapsed = v - START_T;
+      const slotIndex = Math.min(TOTAL_PRESETS - 1, Math.max(0, Math.floor(elapsed / SLOT_DURATION)));
+      const slotProgress = Math.min(1, Math.max(0, (elapsed - slotIndex * SLOT_DURATION) / SLOT_DURATION));
+
+      // Each preset stays solid for the first 72% (~0.54s), then cross-fades in the remaining 28% (~0.21s)
+      const isLast = slotIndex === TOTAL_PRESETS - 1;
+      const crossFadeProgress = isLast ? 0 : clamp((slotProgress - 0.72) / 0.28);
+
+      const nextIndex = Math.min(TOTAL_PRESETS - 1, slotIndex + 1);
+
+      if (slotIndex % 2 === 0) {
+        // Even index: Canvas A is active, Canvas B prepares/fades next
+        setElemA(SHOWCASE_ELEMENTS[slotIndex]);
+        setElemB(SHOWCASE_ELEMENTS[nextIndex]);
+        setOpacityA(1 - crossFadeProgress);
+        setOpacityB(crossFadeProgress);
+      } else {
+        // Odd index: Canvas B is active, Canvas A prepares/fades next
+        setElemB(SHOWCASE_ELEMENTS[slotIndex]);
+        setElemA(SHOWCASE_ELEMENTS[nextIndex]);
+        setOpacityB(1 - crossFadeProgress);
+        setOpacityA(crossFadeProgress);
+      }
+    });
+  }, [t]);
+
   return (
-    <motion.div style={{ x: tx, y: ty, opacity, background: color, position: "absolute", width: 820, height: 820, borderRadius: "50%", filter: "blur(90px)" }} />
+    <div className="absolute inset-0 w-full h-full overflow-hidden">
+      <canvas
+        ref={canvasRefA}
+        className="absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-100"
+        style={{ opacity: readyA ? opacityA : 0 }}
+      />
+      <canvas
+        ref={canvasRefB}
+        className="absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-100"
+        style={{ opacity: readyB ? opacityB : 0 }}
+      />
+      {/* Cinematic subtle edge vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+    </div>
   );
 }
 
 /* ───────────── main ─────────────
-   0.5–2.3  outline draws, nodes pop            3.3–4.4  black circle expands, mark inverts
-   2.3–3.1  mark fills, nodes + outline fade    4.3–5.5  mark settles left, "zuris" reveals
-   5.3–8.4  gradient moment                     8.2–10   black, soft glow, hold             */
+   0.5–2.2  outline draws in ink black on light canvas, nodes pop
+   2.2–3.0  mark fills with solid ink black
+   3.1–4.2  cinematic theme transition: stage dissolves to dark, mark illuminates to white
+   4.3–5.5  mark settles left, "Zuris" unfolds beside it (exact h4 Inter typography)
+   5.0–8.75 exactly 5 liquid button presets (Lava, Stone, Ocean, Emerald, Aurora) stay >= 0.7s each
+   8.65–10.5 deep black, soft radial ambient light, hold                                      */
 export default function LogoIntro() {
-  const t = useMotionValue(0);              // master clock 0 → 10s
+  const t = useMotionValue(0);              // master clock 0 → 10.5s
   const [run, setRun] = useState(0);        // click to replay
   const [fit, setFit] = useState(1);
   const [wordLeft, setWordLeft] = useState(612);
@@ -94,7 +173,7 @@ export default function LogoIntro() {
   /* measure real text width (after Inter loads) so mark + name are optically centred */
   useLayoutEffect(() => {
     const measure = () => {
-      const w = wordRef.current?.offsetWidth ?? 270;
+      const w = wordRef.current?.offsetWidth ?? 280;
       const total = MARK_W + GAP + w;
       shift.set(total / 2 - MARK_W / 2);
       setWordLeft(640 - total / 2 + MARK_W + GAP);
@@ -104,18 +183,15 @@ export default function LogoIntro() {
   }, [shift]);
 
   /* 1 · outline draw */
-  const drawn   = useTransform(t, (v) => io(clamp((v - 0.5) / 1.8)));
-  const strokeOp = useK(t, [0.5, 0.55, 2.4, 3.1], [0, 1, 1, 0]);
+  const drawn = useTransform(t, (v) => io(clamp((v - 0.5) / 1.8)));
+  const strokeOp = useK(t, [0.5, 0.55, 2.4, 3.0], [0, 1, 1, 0]);
 
-  /* 2 · fill */
-  const fillOp = useK(t, [2.3, 3.1], [0, 1]);
+  /* 2 · theme transition (light -> dark) & mark crossfade */
+  const darkFillOp = useK(t, [2.2, 2.9, 3.1, 4.1], [0, 1, 1, 0]);
+  const whiteFillOp = useK(t, [3.1, 4.1], [0, 1]);
+  const darkStageOp = useK(t, [3.1, 4.2], [0, 1], out);
 
-  /* 3 · circle (mark uses difference blend until the circle covers the stage) */
-  const circleR = useK(t, [3.3, 4.4], [0, 800]);
-  const circleClip = useMotionTemplate`circle(${circleR}px at 640px 360px)`;
-  const blend = useTransform(t, (v) => (v < 4.5 ? "difference" : "normal"));
-
-  /* 4 · lockup */
+  /* 3 · lockup slide & wordmark reveal */
   const markX = useTransform(t, (v) => -shift.get() * kf(v, [4.3, 5.5], [0, 1], out));
   const markS = useK(t, [4.3, 5.5], [1.2, 0.64], out);
   const wp = useK(t, [4.55, 5.6], [0, 1], out);
@@ -125,63 +201,152 @@ export default function LogoIntro() {
   const wBlur = useTransform(wp, (w) => 8 * (1 - w));
   const wFilter = useMotionTemplate`blur(${wBlur}px)`;
 
-  /* 5 · gradient moment */
-  const blobsOp = useK(t, [5.2, 5.9, 7.7, 8.4], [0, 1, 1, 0]);
+  /* 4 · 5 liquid elemental presets showcase (0.75s each: 5.0s -> 8.75s) */
+  const liquidShowcaseOp = useK(t, [4.9, 5.2, 8.65, 8.95], [0, 1, 1, 0]);
 
-  /* 6 · glow + hold */
-  const glowOp = useK(t, [8.2, 9.0, 10], [0, 1, 0.7]);
+  /* 5 · soft end glow + hold */
+  const glowOp = useK(t, [8.65, 9.3, 10.5], [0, 1, 0.7]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "#000", overflow: "hidden", cursor: "pointer" }} onClick={() => setRun((r) => r + 1)}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "#000000",
+        overflow: "hidden",
+        cursor: "pointer",
+      }}
+      onClick={() => setRun((r) => r + 1)}
+    >
       <div
-        className={inter.className}
+        className="font-sans"
         style={{
-          position: "absolute", left: "50%", top: "50%", width: 1280, height: 720, marginLeft: -640, marginTop: -360,
-          overflow: "hidden", background: "#fff", isolation: "isolate", transform: `scale(${fit})`,
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: 1280,
+          height: 720,
+          marginLeft: -640,
+          marginTop: -360,
+          overflow: "hidden",
+          background: "#ffffff",
+          isolation: "isolate",
+          transform: `scale(${fit})`,
+          fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* black circle that wipes white → black */}
-        <motion.div style={{ position: "absolute", inset: 0, background: "#000", clipPath: circleClip }} />
-
-        {/* gradient moment */}
-        <motion.div style={{ position: "absolute", inset: 0, background: "#e9cfe3", overflow: "hidden", opacity: blobsOp }}>
-          <Blob t={t} i={0} color="#ff7a1a" x={-100} y={-200} dx={140} dy={90}  speed={0.7} times={[5.3, 7.0]}      values={[1, 0]} />
-          <Blob t={t} i={1} color="#ff5c8a" x={100}  y={100}  dx={120} dy={120} speed={0.8} times={[5.3, 6.2, 7.4]} values={[0.9, 1, 0]} />
-          <Blob t={t} i={2} color="#e0102a" x={600}  y={300}  dx={100} dy={100} speed={0.6} times={[5.6, 6.5, 7.5]} values={[0, 1, 0]} />
-          <Blob t={t} i={3} color="#2a2aff" x={300}  y={-300} dx={160} dy={60}  speed={0.7} times={[6.4, 7.2]}      values={[0, 1]} />
-          <Blob t={t} i={4} color="#6fe3ff" x={200}  y={300}  dx={160} dy={80}  speed={0.9} times={[6.4, 7.2]}      values={[0, 1]} />
-          <Blob t={t} i={5} color="#e8ff3a" x={-150} y={150}  dx={120} dy={80}  speed={1.0} times={[6.6, 7.2]}      values={[0, 1]} />
-        </motion.div>
-
-        {/* soft end glow */}
+        {/* Theme transition: Smooth feathered obsidian wash from light to dark (3.1s -> 4.2s) */}
         <motion.div
           style={{
-            position: "absolute", left: 290, top: 160, width: 700, height: 400, opacity: glowOp,
-            background: "radial-gradient(closest-side, rgba(255,255,255,.12), rgba(255,255,255,0))",
+            position: "absolute",
+            inset: 0,
+            background: "#000000",
+            opacity: darkStageOp,
+          }}
+        />
+
+        {/* 5 Iconic WebGL Liquid Button Presets Showcase (5.0s -> 8.75s, >= 0.7s each) */}
+        <motion.div
+          style={{
+            position: "absolute",
+            inset: 0,
+            overflow: "hidden",
+            opacity: liquidShowcaseOp,
+          }}
+        >
+          <LiquidShaderShowcase t={t} />
+        </motion.div>
+
+        {/* Soft end glow */}
+        <motion.div
+          style={{
+            position: "absolute",
+            left: 290,
+            top: 160,
+            width: 700,
+            height: 400,
+            opacity: glowOp,
+            background: "radial-gradient(closest-side, rgba(255,255,255,.14), rgba(255,255,255,0))",
           }}
         />
 
         {/* logo mark */}
-        <motion.div style={{ position: "absolute", left: 494, top: 256, width: 292, height: 208, x: markX, scale: markS, mixBlendMode: blend }}>
+        <motion.div
+          style={{
+            position: "absolute",
+            left: 494,
+            top: 256,
+            width: 292,
+            height: 208,
+            x: markX,
+            scale: markS,
+          }}
+        >
           <svg width={292} height={208} viewBox="0 0 292 208" fill="none" style={{ overflow: "visible" }}>
-            <motion.path d={OUTER} stroke="#fff" strokeWidth={1.8} strokeLinejoin="round" style={{ pathLength: drawn, opacity: strokeOp }} />
-            <motion.path d={INNER} stroke="#fff" strokeWidth={1.8} strokeLinejoin="round" style={{ pathLength: drawn, opacity: strokeOp }} />
-            <motion.path d={OUTER + INNER} fill="#fff" fillRule="evenodd" clipRule="evenodd" style={{ opacity: fillOp }} />
-            {NODES.map(({ p, f }, i) => <Node key={i} t={t} x={p[0]} y={p[1]} f={f} />)}
+            {/* Outline stroke in ink black on light canvas */}
+            <motion.path
+              d={OUTER}
+              stroke="#09090b"
+              strokeWidth={1.8}
+              strokeLinejoin="round"
+              style={{ pathLength: drawn, opacity: strokeOp }}
+            />
+            <motion.path
+              d={INNER}
+              stroke="#09090b"
+              strokeWidth={1.8}
+              strokeLinejoin="round"
+              style={{ pathLength: drawn, opacity: strokeOp }}
+            />
+
+            {/* Dark fill on light stage */}
+            <motion.path
+              d={OUTER + INNER}
+              fill="#09090b"
+              fillRule="evenodd"
+              clipRule="evenodd"
+              style={{ opacity: darkFillOp }}
+            />
+
+            {/* Radiant white fill on dark stage and liquid backgrounds */}
+            <motion.path
+              d={OUTER + INNER}
+              fill="#ffffff"
+              fillRule="evenodd"
+              clipRule="evenodd"
+              style={{ opacity: whiteFillOp }}
+            />
+
+            {NODES.map(({ p, f }, i) => (
+              <Node key={i} t={t} x={p[0]} y={p[1]} f={f} color="#09090b" />
+            ))}
           </svg>
         </motion.div>
 
-        {/* name: h3, Inter 400, letter-spacing -4.5% */}
-        <motion.h3
+        {/* name: h4, Inter 400, letter-spacing -4.5% matching ZurisLogoAnimation typography */}
+        <motion.h4
           ref={wordRef}
+          className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-white leading-none select-none whitespace-nowrap m-0"
           style={{
-            position: "absolute", top: 290, left: wordLeft, margin: 0, height: 140, width: "max-content", whiteSpace: "nowrap",
-            fontSize: 112, lineHeight: "140px", fontWeight: 400, letterSpacing: "-0.045em", color: "#fff",
-            opacity: wp, clipPath: wClipPath, x: wX, filter: wFilter,
+            position: "absolute",
+            top: 290,
+            left: wordLeft,
+            height: 140,
+            width: "max-content",
+            fontSize: 112,
+            lineHeight: "140px",
+            fontFamily: "'Inter', sans-serif",
+            fontWeight: 400,
+            letterSpacing: "-0.045em",
+            color: "#ffffff",
+            opacity: wp,
+            clipPath: wClipPath,
+            x: wX,
+            filter: wFilter,
           }}
         >
-          zuris
-        </motion.h3>
+          Zuris
+        </motion.h4>
       </div>
     </div>
   );
