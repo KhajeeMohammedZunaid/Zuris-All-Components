@@ -47,12 +47,12 @@ const INNER_PTS: [number, number][] = [
   [34, 162],
 ];
 
-const DURATION = 9.8;
+const DURATION = 10.0;
 const GAP = 24;
 const MARK_W = 292 * 0.64;
 const NODE = 5;
 
-/* ───────────── 5 Shader Sequence Themes (from zuris-sequence-animation) ───────────── */
+/* ───────────── 5 Shader Sequence Themes (matching zuris-sequence-animation) ───────────── */
 const FIVE_THEMES: ElementName[] = [
   "ocean",
   "emerald",
@@ -132,25 +132,31 @@ function Node({
 /**
  * App Icon with WebGL Liquid Shader Sequence:
  * - Emerges when transitioning to dark stage
- * - Cycles through 5 theme variations (ocean -> emerald -> solar -> lava -> amethyst)
- * - Moves aside to the left and dissolves away with blur when revealing brand lockup
+ * - Cycles through 5 theme variations at exact natural fluid speed
+ * - Dissolves away cleanly as the logo moves to its position (5.5s -> 6.25s) with zero lingering
  */
-function SequenceAppIcon({ t }: { t: T }) {
+function SequenceAppIcon({
+  t,
+  shift,
+}: {
+  t: T;
+  shift: MotionValue<number>;
+}) {
   const [themeIndex, setThemeIndex] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Synchronize theme cycling with the animation clock (400ms each from 3.6s to 5.6s)
+  // Synchronize theme cycling with the animation clock (exact 400ms speed matching zuris-sequence-animation)
   useEffect(() => {
     return t.on("change", (v) => {
-      if (v < 3.6) {
+      if (v < 3.5) {
         setThemeIndex(0);
-      } else if (v < 4.0) {
+      } else if (v < 3.9) {
         setThemeIndex(0); // ocean
-      } else if (v < 4.4) {
+      } else if (v < 4.3) {
         setThemeIndex(1); // emerald
-      } else if (v < 4.8) {
+      } else if (v < 4.7) {
         setThemeIndex(2); // solar
-      } else if (v < 5.2) {
+      } else if (v < 5.1) {
         setThemeIndex(3); // lava
       } else {
         setThemeIndex(4); // amethyst
@@ -160,40 +166,38 @@ function SequenceAppIcon({ t }: { t: T }) {
 
   const currentTheme = FIVE_THEMES[themeIndex] ?? "ocean";
   const palette = elementPalettes[currentTheme] ?? elementPalettes.ocean;
-  const { ready, boost } = useElementSurface(
+  // Natural standard speed matching zuris-sequence-animation and zuris-app-icon (boost=1)
+  const { ready } = useElementSurface(
     canvasRef,
     currentTheme,
     undefined,
     false
   );
 
-  useEffect(() => {
-    boost(2.6);
-  }, [boost, themeIndex]);
-
-  // Entrance at 3.0s -> 3.6s; steady hold 3.6s -> 5.6s; shifts left & dissolves 5.6s -> 6.7s
-  const op = useTransform(t, (v) => {
-    if (v < 3.0) return 0;
-    if (v < 3.6) return kf(v, [3.0, 3.6], [0, 1], out);
-    if (v <= 5.6) return 1;
-    return kf(v, [5.6, 6.5], [1, 0], io);
+  // Glides alongside logo towards destination
+  const x = useTransform([t, shift], ([v, s]: [number, number]) => {
+    if (v <= 5.5) return 0;
+    return -s * kf(v, [5.5, 6.4], [0, 1], out);
   });
 
   const scale = useTransform(t, (v) => {
-    if (v < 3.0) return 0.85;
-    if (v < 3.6) return kf(v, [3.0, 3.6], [0.85, 1.0], out);
-    if (v <= 5.6) return 1.0;
-    return kf(v, [5.6, 6.7], [1.0, 0.85], out);
+    if (v < 3.0) return 0.88;
+    if (v < 3.5) return kf(v, [3.0, 3.5], [0.88, 1.0], out);
+    if (v <= 5.5) return 1.0;
+    return kf(v, [5.5, 6.3], [1.0, 0.82], out);
   });
 
-  const x = useTransform(t, (v) => {
-    if (v <= 5.6) return 0;
-    return kf(v, [5.6, 6.7], [0, -220], out);
+  // Dissolves away cleanly as the logo travels there (gone by 6.25s, so it never sits lingering)
+  const op = useTransform(t, (v) => {
+    if (v < 3.0) return 0;
+    if (v < 3.5) return kf(v, [3.0, 3.5], [0, 1], out);
+    if (v <= 5.5) return 1;
+    return kf(v, [5.5, 6.25], [1, 0], io);
   });
 
   const blur = useTransform(t, (v) => {
-    if (v <= 5.6) return 0;
-    return kf(v, [5.6, 6.6], [0, 8], io);
+    if (v <= 5.5) return 0;
+    return kf(v, [5.5, 6.25], [0, 6], io);
   });
   const filter = useMotionTemplate`blur(${blur}px)`;
 
@@ -201,8 +205,8 @@ function SequenceAppIcon({ t }: { t: T }) {
     <motion.div
       style={{
         position: "absolute",
-        left: 640 - 150, // 490
-        top: 360 - 150,  // 210
+        left: 640 - 150, // 490 (centered behind logo)
+        top: 360 - 150,  // 210 (centered behind logo)
         width: 300,
         height: 300,
         borderRadius: 66,
@@ -232,12 +236,13 @@ function SequenceAppIcon({ t }: { t: T }) {
 /* ───────────── main ─────────────
    0.5–2.2  outline draws in ink black on light canvas, nodes pop
    2.2–2.9  mark fills with solid ink black
-   3.0–3.6  cinematic theme transition: stage turns dark, app icon squircle emerges
-   3.6–5.6  app icon shader sequence cycles 5 theme variations (ocean -> emerald -> solar -> lava -> amethyst)
-   5.6–6.8  app icon shifts left and dissolves; logo settles into lockup position; "Zuris" emerges
-   6.8–9.8  deep black, soft radial ambient light, hold                                      */
+   3.0–3.5  cinematic theme transition: stage turns dark, app icon squircle emerges
+   3.5–5.5  app icon shader sequence cycles 5 theme variations at natural fluid speed
+   5.5–6.4  logo glides to lockup position while app icon squircle dissolves away seamlessly
+   6.4–7.4  brand text "Zuris" unfolds beside the settled logo
+   7.4–10.0 deep black, soft radial ambient light, hold                                      */
 export default function LogoIntro() {
-  const t = useMotionValue(0); // master clock 0 → 9.8s
+  const t = useMotionValue(0); // master clock 0 → 10.0s
   const [run, setRun] = useState(0); // click to replay
   const [fit, setFit] = useState(1);
   const [wordLeft, setWordLeft] = useState(612);
@@ -274,25 +279,26 @@ export default function LogoIntro() {
   const strokeOp = useK(t, [0.5, 0.55, 2.4, 3.0], [0, 1, 1, 0]);
 
   /* 2 · theme transition (light -> dark) & mark crossfade */
-  const darkFillOp = useK(t, [2.2, 2.9, 3.0, 3.6], [0, 1, 1, 0]);
-  const whiteFillOp = useK(t, [3.0, 3.6], [0, 1]);
-  const darkStageOp = useK(t, [3.0, 3.6], [0, 1], out);
+  const darkFillOp = useK(t, [2.2, 2.9, 3.0, 3.5], [0, 1, 1, 0]);
+  const whiteFillOp = useK(t, [3.0, 3.5], [0, 1]);
+  const darkStageOp = useK(t, [3.0, 3.5], [0, 1], out);
 
-  /* 3 · lockup slide & wordmark reveal (starts at 5.6s after shader sequence) */
-  const markX = useTransform(t, (v) =>
-    v <= 5.6 ? 0 : -shift.get() * kf(v, [5.6, 6.8], [0, 1], out)
+  /* 3 · logo mark slide to lockup position (5.5s -> 6.4s) */
+  const markX = useTransform([t, shift], ([v, s]: [number, number]) =>
+    v <= 5.5 ? 0 : -s * kf(v, [5.5, 6.4], [0, 1], out)
   );
-  const markS = useK(t, [5.6, 6.8], [0.82, 0.64], out);
+  const markS = useK(t, [5.5, 6.4], [0.82, 0.64], out);
 
-  const wp = useK(t, [5.85, 6.9], [0, 1], out);
+  /* 4 · wordmark reveal (emerges right as logo lands: 6.4s -> 7.4s) */
+  const wp = useK(t, [6.4, 7.4], [0, 1], out);
   const wClip = useTransform(wp, (w) => 100 - 100 * w);
   const wClipPath = useMotionTemplate`inset(0 ${wClip}% 0 0)`;
   const wX = useTransform(wp, (w) => -40 * (1 - w));
   const wBlur = useTransform(wp, (w) => 8 * (1 - w));
   const wFilter = useMotionTemplate`blur(${wBlur}px)`;
 
-  /* 4 · soft end glow + hold */
-  const glowOp = useK(t, [6.8, 7.8, 9.8], [0, 1, 0.7]);
+  /* 5 · soft end glow + hold */
+  const glowOp = useK(t, [7.2, 8.2, 10.0], [0, 1, 0.7]);
 
   return (
     <div
@@ -322,7 +328,7 @@ export default function LogoIntro() {
           fontFamily: "'Inter', sans-serif",
         }}
       >
-        {/* Stage Theme Transition: Light to dark obsidian (3.0s -> 3.6s) */}
+        {/* Stage Theme Transition: Light to dark obsidian (3.0s -> 3.5s) */}
         <motion.div
           style={{
             position: "absolute",
@@ -332,8 +338,8 @@ export default function LogoIntro() {
           }}
         />
 
-        {/* Zuris App Icon with WebGL Liquid Shader Sequence (3.0s -> 6.7s) */}
-        <SequenceAppIcon t={t} />
+        {/* Zuris App Icon: Dissolves away cleanly as logo travels to lockup */}
+        <SequenceAppIcon t={t} shift={shift} />
 
         {/* Soft end glow */}
         <motion.div
@@ -349,7 +355,7 @@ export default function LogoIntro() {
           }}
         />
 
-        {/* Logo Mark: Sits dead center inside the App Icon, then smoothly slides to lockup */}
+        {/* Logo Mark: Sits centered inside App Icon, glides to lockup while icon dissolves */}
         <motion.div
           style={{
             position: "absolute",
