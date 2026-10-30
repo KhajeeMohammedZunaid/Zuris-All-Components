@@ -48,9 +48,9 @@ const INNER_PTS: [number, number][] = [
 ];
 
 const DURATION = 10.0;
-const GAP = 24;
-const MARK_W = 292 * 0.64;
-const NODE = 5;
+const GAP = 20;
+const MARK_W = 292 * 0.54;
+const NODE = 4.2;
 
 /* ───────────── 5 Shader Sequence Themes (matching zuris-sequence-animation) ───────────── */
 const FIVE_THEMES: ElementName[] = [
@@ -132,6 +132,7 @@ function Node({
 /**
  * App Icon with WebGL Liquid Shader Sequence:
  * - Emerges when transitioning to dark stage
+ * - Proportional compact squircle (250 × 250px, radius: 55px)
  * - Cycles through 5 theme variations at energetic, fast fluid speed (boost=3.2)
  * - Dissolves away cleanly as the logo moves to its position (5.5s -> 6.25s) with zero lingering
  */
@@ -210,11 +211,11 @@ function SequenceAppIcon({
     <motion.div
       style={{
         position: "absolute",
-        left: 640 - 150, // 490 (centered behind logo)
-        top: 360 - 150,  // 210 (centered behind logo)
-        width: 300,
-        height: 300,
-        borderRadius: 66,
+        left: 640 - 125, // 515 (centered behind logo)
+        top: 360 - 125,  // 235 (centered behind logo)
+        width: 250,
+        height: 250,
+        borderRadius: 55,
         overflow: "hidden",
         x,
         scale,
@@ -222,7 +223,7 @@ function SequenceAppIcon({
         filter,
         backgroundImage: elementGradient(palette.colors),
         boxShadow:
-          "0 28px 64px -12px rgba(0,0,0,0.6), inset 0 0 0 1.5px rgba(255,255,255,0.18)",
+          "0 24px 54px -10px rgba(0,0,0,0.6), inset 0 0 0 1.5px rgba(255,255,255,0.18)",
       }}
       className="pointer-events-none select-none z-[5] will-change-transform flex items-center justify-center [contain:paint]"
     >
@@ -270,7 +271,7 @@ export default function LogoIntro() {
   /* measure real text width (after Inter loads) so mark + name are optically centred */
   useLayoutEffect(() => {
     const measure = () => {
-      const w = wordRef.current?.offsetWidth ?? 280;
+      const w = wordRef.current?.offsetWidth ?? 235;
       const total = MARK_W + GAP + w;
       shift.set(total / 2 - MARK_W / 2);
       setWordLeft(640 - total / 2 + MARK_W + GAP);
@@ -292,13 +293,13 @@ export default function LogoIntro() {
   const markX = useTransform(t, (v) =>
     v <= 5.5 ? 0 : -shift.get() * kf(v, [5.5, 6.4], [0, 1], out)
   );
-  const markS = useK(t, [5.5, 6.4], [0.82, 0.64], out);
+  const markS = useK(t, [5.5, 6.4], [0.70, 0.54], out);
 
   /* 4 · wordmark reveal (emerges right as logo lands: 6.4s -> 7.4s) */
   const wp = useK(t, [6.4, 7.4], [0, 1], out);
   const wClip = useTransform(wp, (w) => 100 - 100 * w);
   const wClipPath = useMotionTemplate`inset(0 ${wClip}% 0 0)`;
-  const wX = useTransform(wp, (w) => -40 * (1 - w));
+  const wX = useTransform(wp, (w) => -32 * (1 - w));
   const wBlur = useTransform(wp, (w) => 8 * (1 - w));
   const wFilter = useMotionTemplate`blur(${wBlur}px)`;
 
@@ -350,10 +351,10 @@ export default function LogoIntro() {
         <motion.div
           style={{
             position: "absolute",
-            left: 290,
-            top: 160,
-            width: 700,
-            height: 400,
+            left: 340,
+            top: 185,
+            width: 600,
+            height: 350,
             opacity: glowOp,
             background:
               "radial-gradient(closest-side, rgba(255,255,255,.14), rgba(255,255,255,0))",
@@ -384,14 +385,14 @@ export default function LogoIntro() {
             <motion.path
               d={OUTER}
               stroke="#09090b"
-              strokeWidth={1.8}
+              strokeWidth={1.6}
               strokeLinejoin="round"
               style={{ pathLength: drawn, opacity: strokeOp }}
             />
             <motion.path
               d={INNER}
               stroke="#09090b"
-              strokeWidth={1.8}
+              strokeWidth={1.6}
               strokeLinejoin="round"
               style={{ pathLength: drawn, opacity: strokeOp }}
             />
@@ -426,12 +427,12 @@ export default function LogoIntro() {
           className="font-['Inter',sans-serif] font-normal tracking-[-0.045em] text-white leading-none select-none whitespace-nowrap m-0"
           style={{
             position: "absolute",
-            top: 290,
+            top: 301,
             left: wordLeft,
-            height: 140,
+            height: 118,
             width: "max-content",
-            fontSize: 112,
-            lineHeight: "140px",
+            fontSize: 94,
+            lineHeight: "118px",
             fontFamily: "'Inter', sans-serif",
             fontWeight: 400,
             letterSpacing: "-0.045em",
