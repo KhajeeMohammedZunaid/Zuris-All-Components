@@ -143,7 +143,7 @@ function SequenceAppIcon({
   shift: MotionValue<number>;
 }) {
   const [themeIndex, setThemeIndex] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Synchronize theme cycling with the animation clock (exact 400ms speed matching zuris-sequence-animation)
   useEffect(() => {
@@ -175,9 +175,9 @@ function SequenceAppIcon({
   );
 
   // Glides alongside logo towards destination
-  const x = useTransform([t, shift], ([v, s]: [number, number]) => {
+  const x = useTransform(t, (v) => {
     if (v <= 5.5) return 0;
-    return -s * kf(v, [5.5, 6.4], [0, 1], out);
+    return -shift.get() * kf(v, [5.5, 6.4], [0, 1], out);
   });
 
   const scale = useTransform(t, (v) => {
@@ -284,8 +284,8 @@ export default function LogoIntro() {
   const darkStageOp = useK(t, [3.0, 3.5], [0, 1], out);
 
   /* 3 · logo mark slide to lockup position (5.5s -> 6.4s) */
-  const markX = useTransform([t, shift], ([v, s]: [number, number]) =>
-    v <= 5.5 ? 0 : -s * kf(v, [5.5, 6.4], [0, 1], out)
+  const markX = useTransform(t, (v) =>
+    v <= 5.5 ? 0 : -shift.get() * kf(v, [5.5, 6.4], [0, 1], out)
   );
   const markS = useK(t, [5.5, 6.4], [0.82, 0.64], out);
 
