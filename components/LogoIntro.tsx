@@ -132,7 +132,7 @@ function Node({
 /**
  * App Icon with WebGL Liquid Shader Sequence:
  * - Emerges when transitioning to dark stage
- * - Cycles through 5 theme variations at exact natural fluid speed
+ * - Cycles through 5 theme variations at energetic, fast fluid speed (boost=3.2)
  * - Dissolves away cleanly as the logo moves to its position (5.5s -> 6.25s) with zero lingering
  */
 function SequenceAppIcon({
@@ -166,13 +166,18 @@ function SequenceAppIcon({
 
   const currentTheme = FIVE_THEMES[themeIndex] ?? "ocean";
   const palette = elementPalettes[currentTheme] ?? elementPalettes.ocean;
-  // Natural standard speed matching zuris-sequence-animation and zuris-app-icon (boost=1)
-  const { ready } = useElementSurface(
+
+  // WebGL fluid surface with boosted speed for fast, lively fluid motion
+  const { ready, boost } = useElementSurface(
     canvasRef,
     currentTheme,
     undefined,
     false
   );
+
+  useEffect(() => {
+    boost(3.2);
+  }, [boost, themeIndex]);
 
   // Glides alongside logo towards destination
   const x = useTransform(t, (v) => {
@@ -237,7 +242,7 @@ function SequenceAppIcon({
    0.5–2.2  outline draws in ink black on light canvas, nodes pop
    2.2–2.9  mark fills with solid ink black
    3.0–3.5  cinematic theme transition: stage turns dark, app icon squircle emerges
-   3.5–5.5  app icon shader sequence cycles 5 theme variations at natural fluid speed
+   3.5–5.5  app icon shader sequence cycles 5 theme variations at fast fluid speed
    5.5–6.4  logo glides to lockup position while app icon squircle dissolves away seamlessly
    6.4–7.4  brand text "Zuris" unfolds beside the settled logo
    7.4–10.0 deep black, soft radial ambient light, hold                                      */
@@ -247,7 +252,7 @@ export default function LogoIntro() {
   const [fit, setFit] = useState(1);
   const [wordLeft, setWordLeft] = useState(612);
   const shift = useMotionValue(0); // how far the mark slides left when the name appears
-  const wordRef = useRef<HTMLHeadingElement>(null);
+  const wordRef = useRef<HTMLHeadingElement | null>(null);
 
   useEffect(() => {
     t.set(0);
