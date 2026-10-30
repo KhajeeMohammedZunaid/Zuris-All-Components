@@ -2,7 +2,6 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { motion, animate, useMotionValue, useTransform, useMotionTemplate, type MotionValue } from "motion/react";
-import { useElementSurface, type ElementName } from "@/components/buttons/liquid-button";
 
 /* ───────────── logo geometry ───────────── */
 const OUTER =
@@ -16,13 +15,13 @@ const GAP = 24;
 const MARK_W = 292 * 0.64;
 const NODE = 5;
 
-/* ───────────── 5 Iconic Liquid Button Presets ───────────── */
-const SHOWCASE_ELEMENTS: ElementName[] = [
-  "lava",
-  "stone",
-  "ocean",
-  "emerald",
-  "aurora",
+/* ───────────── 5 Iconic WebP Backdrop Images ───────────── */
+const ACC_IMAGES = [
+  "/acc-1.webp",
+  "/acc-2.webp",
+  "/acc-3.webp",
+  "/acc-4.webp",
+  "/acc-5.webp",
 ];
 
 /* ───────────── easing + keyframes ───────────── */
@@ -64,81 +63,49 @@ function Node({ t, x, y, f, color }: { t: T; x: number; y: number; f: number; co
 }
 
 /**
- * Live WebGL Liquid Shader Showcase:
- * - Exactly 5 iconic presets: Lava, Stone, Ocean, Emerald, Aurora
- * - Each preset stays for at least 0.7s (0.75s slot)
- * - Seamless WebGL cross-dissolves between presets
+ * 5 Iconic Images Showcase (acc-1.webp -> acc-5.webp):
+ * - Each image stays visible for >= 0.7s (calibrated 0.8s - 1.0s slots)
+ * - Seamless stacked cross-fades with hardware-accelerated transforms
+ * - Layered with edge vignette & contrast overlay so white brand lockup stays razor-sharp
  */
-function LiquidShaderShowcase({ t }: { t: T }) {
-  const canvasRefA = useRef<HTMLCanvasElement>(null);
-  const canvasRefB = useRef<HTMLCanvasElement>(null);
+function AccImageShowcase({ t }: { t: T }) {
+  // Layer cross-fade timings: each layer smoothly reveals over the previous
+  const op1 = useK(t, [5.55, 5.8], [0, 1], io); // acc-2 appears over acc-1
+  const op2 = useK(t, [6.35, 6.6], [0, 1], io); // acc-3 appears over acc-2
+  const op3 = useK(t, [7.15, 7.4], [0, 1], io); // acc-4 appears over acc-3
+  const op4 = useK(t, [7.95, 8.2], [0, 1], io); // acc-5 appears over acc-4
 
-  const [elemA, setElemA] = useState<ElementName>("lava");
-  const [elemB, setElemB] = useState<ElementName>("stone");
-  const [opacityA, setOpacityA] = useState(1);
-  const [opacityB, setOpacityB] = useState(0);
-
-  const { boost: boostA, ready: readyA } = useElementSurface(canvasRefA, elemA, undefined, false);
-  const { boost: boostB, ready: readyB } = useElementSurface(canvasRefB, elemB, undefined, false);
-
-  useEffect(() => {
-    boostA(3.2);
-    boostB(3.2);
-  }, [boostA, boostB]);
-
-  useEffect(() => {
-    const SLOT_DURATION = 0.75; // >= 0.7s per preset
-    const START_T = 5.0;
-    const TOTAL_PRESETS = SHOWCASE_ELEMENTS.length; // 5
-
-    return t.on("change", (v) => {
-      if (v < START_T) {
-        setElemA(SHOWCASE_ELEMENTS[0]);
-        setOpacityA(1);
-        setOpacityB(0);
-        return;
-      }
-
-      const elapsed = v - START_T;
-      const slotIndex = Math.min(TOTAL_PRESETS - 1, Math.max(0, Math.floor(elapsed / SLOT_DURATION)));
-      const slotProgress = Math.min(1, Math.max(0, (elapsed - slotIndex * SLOT_DURATION) / SLOT_DURATION));
-
-      // Each preset stays solid for the first 72% (~0.54s), then cross-fades in the remaining 28% (~0.21s)
-      const isLast = slotIndex === TOTAL_PRESETS - 1;
-      const crossFadeProgress = isLast ? 0 : clamp((slotProgress - 0.72) / 0.28);
-
-      const nextIndex = Math.min(TOTAL_PRESETS - 1, slotIndex + 1);
-
-      if (slotIndex % 2 === 0) {
-        // Even index: Canvas A is active, Canvas B prepares/fades next
-        setElemA(SHOWCASE_ELEMENTS[slotIndex]);
-        setElemB(SHOWCASE_ELEMENTS[nextIndex]);
-        setOpacityA(1 - crossFadeProgress);
-        setOpacityB(crossFadeProgress);
-      } else {
-        // Odd index: Canvas B is active, Canvas A prepares/fades next
-        setElemB(SHOWCASE_ELEMENTS[slotIndex]);
-        setElemA(SHOWCASE_ELEMENTS[nextIndex]);
-        setOpacityB(1 - crossFadeProgress);
-        setOpacityA(crossFadeProgress);
-      }
-    });
-  }, [t]);
+  const opacities = [
+    undefined, // acc-1 stays solid underneath
+    op1,
+    op2,
+    op3,
+    op4,
+  ];
 
   return (
-    <div className="absolute inset-0 w-full h-full overflow-hidden">
-      <canvas
-        ref={canvasRefA}
-        className="absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-100"
-        style={{ opacity: readyA ? opacityA : 0 }}
-      />
-      <canvas
-        ref={canvasRefB}
-        className="absolute inset-0 w-full h-full pointer-events-none transition-opacity duration-100"
-        style={{ opacity: readyB ? opacityB : 0 }}
-      />
-      {/* Cinematic subtle edge vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(0,0,0,0.6)_100%)] pointer-events-none" />
+    <div className="absolute inset-0 w-full h-full overflow-hidden bg-black [contain:paint]">
+      {ACC_IMAGES.map((src, i) => (
+        <motion.div
+          key={src}
+          className="absolute inset-0 w-full h-full [transform:translateZ(0)]"
+          style={{
+            opacity: opacities[i],
+          }}
+        >
+          <img
+            src={src}
+            alt={`Visual backdrop ${i + 1}`}
+            className="w-full h-full object-cover object-center select-none pointer-events-none block [transform:translateZ(0)]"
+            loading="eager"
+            decoding="async"
+          />
+        </motion.div>
+      ))}
+
+      {/* Cinematic subtle edge vignette & contrast scrim */}
+      <div className="absolute inset-0 bg-black/35 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_35%,rgba(0,0,0,0.65)_100%)] pointer-events-none" />
     </div>
   );
 }
@@ -148,8 +115,8 @@ function LiquidShaderShowcase({ t }: { t: T }) {
    2.2–3.0  mark fills with solid ink black
    3.1–4.2  cinematic theme transition: stage dissolves to dark, mark illuminates to white
    4.3–5.5  mark settles left, "Zuris" unfolds beside it (exact h4 Inter typography)
-   5.0–8.75 exactly 5 liquid button presets (Lava, Stone, Ocean, Emerald, Aurora) stay >= 0.7s each
-   8.65–10.5 deep black, soft radial ambient light, hold                                      */
+   5.0–8.95 exactly 5 images (acc-1.webp -> acc-5.webp) stay >= 0.7s each with smooth dissolves
+   8.95–10.5 deep black, soft radial ambient light, hold                                      */
 export default function LogoIntro() {
   const t = useMotionValue(0);              // master clock 0 → 10.5s
   const [run, setRun] = useState(0);        // click to replay
@@ -168,6 +135,16 @@ export default function LogoIntro() {
     const f = () => setFit(Math.min(innerWidth / 1280, innerHeight / 720));
     f(); addEventListener("resize", f);
     return () => removeEventListener("resize", f);
+  }, []);
+
+  // Preload and decode all 5 acc images into memory so playback never stutters
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    ACC_IMAGES.forEach((src) => {
+      const img = new Image();
+      img.src = src;
+      img.decode?.().catch(() => {});
+    });
   }, []);
 
   /* measure real text width (after Inter loads) so mark + name are optically centred */
@@ -201,11 +178,11 @@ export default function LogoIntro() {
   const wBlur = useTransform(wp, (w) => 8 * (1 - w));
   const wFilter = useMotionTemplate`blur(${wBlur}px)`;
 
-  /* 4 · 5 liquid elemental presets showcase (0.75s each: 5.0s -> 8.75s) */
-  const liquidShowcaseOp = useK(t, [4.9, 5.2, 8.65, 8.95], [0, 1, 1, 0]);
+  /* 4 · 5 images backdrop showcase (acc-1.webp -> acc-5.webp: 5.0s -> 8.95s) */
+  const imageShowcaseOp = useK(t, [4.9, 5.2, 8.95, 9.4], [0, 1, 1, 0]);
 
   /* 5 · soft end glow + hold */
-  const glowOp = useK(t, [8.65, 9.3, 10.5], [0, 1, 0.7]);
+  const glowOp = useK(t, [8.95, 9.6, 10.5], [0, 1, 0.7]);
 
   return (
     <div
@@ -245,16 +222,16 @@ export default function LogoIntro() {
           }}
         />
 
-        {/* 5 Iconic WebGL Liquid Button Presets Showcase (5.0s -> 8.75s, >= 0.7s each) */}
+        {/* 5 Images Showcase: acc-1.webp -> acc-5.webp (5.0s -> 8.95s, >= 0.7s each) */}
         <motion.div
           style={{
             position: "absolute",
             inset: 0,
             overflow: "hidden",
-            opacity: liquidShowcaseOp,
+            opacity: imageShowcaseOp,
           }}
         >
-          <LiquidShaderShowcase t={t} />
+          <AccImageShowcase t={t} />
         </motion.div>
 
         {/* Soft end glow */}
@@ -308,7 +285,7 @@ export default function LogoIntro() {
               style={{ opacity: darkFillOp }}
             />
 
-            {/* Radiant white fill on dark stage and liquid backgrounds */}
+            {/* Radiant white fill on dark stage and image backgrounds */}
             <motion.path
               d={OUTER + INNER}
               fill="#ffffff"
