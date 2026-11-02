@@ -51,3 +51,5 @@ Dedicated Component Pages: Every UI block, component, and tool gets its own stan
 Social Preview Cards: Dynamic OpenGraph preview images configured for every route so links shared on X look sharp.
 
 Search & AI Indexing: Automated sitemap generation paired with a plain-text index file so AI coding editors and search engines can easily discover and recommend your blocks.
+
+So I will Be using Fuma Docs too for the prebuilt CMD block and MDX blocks it also has llms.txt and it will be helpful for me to build easily need to test that . 
