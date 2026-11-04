@@ -8,6 +8,158 @@ export interface Sections1Props {
   showThemeBar?: boolean;
 }
 
+const SECTIONS_1_STYLES = `
+  .sections-1-root {
+    --bg: #fafafa;
+    --card-bg: #ececee;
+    --card-bg-subtle: #f4f4f6;
+    --text-main: #09090b;
+    --text-muted: #27272a;
+    --text-light: #52525b;
+    --border-main: #09090b;
+    --border-subtle: rgba(0, 0, 0, 0.1);
+    --corner-btn-bg: #09090b;
+    --corner-btn-text: #fafafa;
+    --pill-white-bg: #ffffff;
+    --pill-white-text: #09090b;
+    --pill-contrast-bg: #09090b;
+    --pill-contrast-text: #fafafa;
+    --pill-highlight-bg: #09090b;
+    --pill-highlight-text: #fafafa;
+    --client-card-bg: #ffffff;
+    --client-card-text: #09090b;
+  }
+
+  :is(.dark .sections-1-root),
+  :is([data-theme="dark"] .sections-1-root),
+  .sections-1-root:is(.dark, [data-theme="dark"]) {
+    --bg: #09090b;
+    --card-bg: #18181b;
+    --card-bg-subtle: #141416;
+    --text-main: #fafafa;
+    --text-muted: #e4e4e7;
+    --text-light: #a1a1aa;
+    --border-main: #fafafa;
+    --border-subtle: rgba(255, 255, 255, 0.12);
+    --corner-btn-bg: #fafafa;
+    --corner-btn-text: #09090b;
+    --pill-white-bg: #27272a;
+    --pill-white-text: #fafafa;
+    --pill-contrast-bg: #000000;
+    --pill-contrast-text: #fafafa;
+    --pill-highlight-bg: #fafafa;
+    --pill-highlight-text: #09090b;
+    --client-card-bg: #18181b;
+    --client-card-text: #fafafa;
+  }
+
+  @keyframes rotateMarquee {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .sections-1-root .animate-marquee {
+    animation: rotateMarquee 24s linear infinite;
+  }
+
+  @keyframes textFloatMount {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0px);
+    }
+  }
+
+  .sections-1-root .anim-word,
+  .sections-1-root .anim-sentence {
+    opacity: 0;
+    transform: translateY(14px);
+    animation: textFloatMount 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--delay, 0s);
+    will-change: transform, opacity;
+  }
+
+  .sections-1-root .anim-word {
+    display: inline-block;
+  }
+
+  .sections-1-root .corner-arrow-btn {
+    overflow: hidden !important;
+    position: absolute;
+    cursor: pointer;
+  }
+
+  .sections-1-root .corner-arrow-btn .arrow-wrapper {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  .sections-1-root .corner-arrow-btn .arrow-main,
+  .sections-1-root .corner-arrow-btn .arrow-clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  .sections-1-root .corner-arrow-btn .arrow-main {
+    transform: translate(0, 0);
+  }
+
+  .sections-1-root .corner-arrow-btn .arrow-clone {
+    transform: translate(-34px, 34px);
+  }
+
+  .sections-1-root .corner-arrow-btn:hover .arrow-main,
+  .sections-1-root .corner-arrow-btn:focus-visible .arrow-main {
+    transform: translate(34px, -34px);
+  }
+
+  .sections-1-root .corner-arrow-btn:hover .arrow-clone,
+  .sections-1-root .corner-arrow-btn:focus-visible .arrow-clone {
+    transform: translate(0, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sections-1-root .anim-word,
+    .sections-1-root .anim-sentence {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+
+    .sections-1-root .corner-arrow-btn .arrow-main,
+    .sections-1-root .corner-arrow-btn .arrow-clone {
+      transition: none !important;
+    }
+  }
+
+  @media (max-width: 580px) {
+    .sections-1-root .circular-stamp-wrapper {
+      left: 0 !important;
+      right: auto !important;
+      top: 8px !important;
+      transform: translate(0, 0) !important;
+    }
+  }
+`;
+
 export function Sections1({ className, showThemeBar = false }: Sections1Props) {
   const [animKey, setAnimKey] = React.useState(0);
 
@@ -22,157 +174,7 @@ export function Sections1({ className, showThemeBar = false }: Sections1Props) {
         className
       )}
     >
-      <style>{`
-        .sections-1-root {
-          --bg: #fafafa;
-          --card-bg: #ececee;
-          --card-bg-subtle: #f4f4f6;
-          --text-main: #09090b;
-          --text-muted: #27272a;
-          --text-light: #52525b;
-          --border-main: #09090b;
-          --border-subtle: rgba(0, 0, 0, 0.1);
-          --corner-btn-bg: #09090b;
-          --corner-btn-text: #fafafa;
-          --pill-white-bg: #ffffff;
-          --pill-white-text: #09090b;
-          --pill-contrast-bg: #09090b;
-          --pill-contrast-text: #fafafa;
-          --pill-highlight-bg: #09090b;
-          --pill-highlight-text: #fafafa;
-          --client-card-bg: #ffffff;
-          --client-card-text: #09090b;
-        }
-
-        :is(.dark .sections-1-root),
-        :is([data-theme="dark"] .sections-1-root),
-        .sections-1-root:is(.dark, [data-theme="dark"]) {
-          --bg: #09090b;
-          --card-bg: #18181b;
-          --card-bg-subtle: #141416;
-          --text-main: #fafafa;
-          --text-muted: #e4e4e7;
-          --text-light: #a1a1aa;
-          --border-main: #fafafa;
-          --border-subtle: rgba(255, 255, 255, 0.12);
-          --corner-btn-bg: #fafafa;
-          --corner-btn-text: #09090b;
-          --pill-white-bg: #27272a;
-          --pill-white-text: #fafafa;
-          --pill-contrast-bg: #000000;
-          --pill-contrast-text: #fafafa;
-          --pill-highlight-bg: #fafafa;
-          --pill-highlight-text: #09090b;
-          --client-card-bg: #18181b;
-          --client-card-text: #fafafa;
-        }
-
-        @keyframes rotateMarquee {
-          from {
-            transform: rotate(0deg);
-          }
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        .sections-1-root .animate-marquee {
-          animation: rotateMarquee 24s linear infinite;
-        }
-
-        @keyframes textFloatMount {
-          0% {
-            opacity: 0;
-            transform: translateY(14px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0px);
-          }
-        }
-
-        .sections-1-root .anim-word,
-        .sections-1-root .anim-sentence {
-          opacity: 0;
-          transform: translateY(14px);
-          animation: textFloatMount 1.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-          animation-delay: var(--delay, 0s);
-          will-change: transform, opacity;
-        }
-
-        .sections-1-root .anim-word {
-          display: inline-block;
-        }
-
-        .sections-1-root .corner-arrow-btn {
-          overflow: hidden !important;
-          position: absolute;
-          cursor: pointer;
-        }
-
-        .sections-1-root .corner-arrow-btn .arrow-wrapper {
-          position: relative;
-          width: 18px;
-          height: 18px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          pointer-events: none;
-        }
-
-        .sections-1-root .corner-arrow-btn .arrow-main,
-        .sections-1-root .corner-arrow-btn .arrow-clone {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-          will-change: transform;
-        }
-
-        .sections-1-root .corner-arrow-btn .arrow-main {
-          transform: translate(0, 0);
-        }
-
-        .sections-1-root .corner-arrow-btn .arrow-clone {
-          transform: translate(-34px, 34px);
-        }
-
-        .sections-1-root .corner-arrow-btn:hover .arrow-main,
-        .sections-1-root .corner-arrow-btn:focus-visible .arrow-main {
-          transform: translate(34px, -34px);
-        }
-
-        .sections-1-root .corner-arrow-btn:hover .arrow-clone,
-        .sections-1-root .corner-arrow-btn:focus-visible .arrow-clone {
-          transform: translate(0, 0);
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .sections-1-root .anim-word,
-          .sections-1-root .anim-sentence {
-            opacity: 1 !important;
-            transform: none !important;
-            animation: none !important;
-          }
-
-          .sections-1-root .corner-arrow-btn .arrow-main,
-          .sections-1-root .corner-arrow-btn .arrow-clone {
-            transition: none !important;
-          }
-        }
-
-        @media (max-width: 580px) {
-          .sections-1-root .circular-stamp-wrapper {
-            left: 0 !important;
-            right: auto !important;
-            top: 8px !important;
-            transform: translate(0, 0) !important;
-          }
-        }
-      `}</style>
+      <style>{SECTIONS_1_STYLES}</style>
 
       <div
         key={animKey}
