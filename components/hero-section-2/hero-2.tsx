@@ -4,20 +4,28 @@ import * as React from "react";
 import { motion } from "motion/react";
 import { NavbarHero2 } from "./navbar";
 import { Button } from "@/components/ui/button";
-import {
-  OpenAI,
-  Anthropic,
-  Replicate,
-  GitHub,
-  Vercel,
-  Grok,
-} from "@/components/logos/all-logos";
+import { OpenAI } from "@/components/logos/openai";
+import { Anthropic } from "@/components/logos/anthropic";
+import { Replicate } from "@/components/logos/relicate";
+import { GitHub } from "@/components/logos/github";
+import { Vercel } from "@/components/logos/vercel";
+import { Grok } from "@/components/logos/grok";
 
 interface Hero2Props {
   onGetStarted?: () => void;
   onViewDemo?: () => void;
   onLogin?: () => void;
 }
+
+const logoContainerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.08,
+    },
+  },
+};
 
 const logoItemVariants = {
   hidden: { opacity: 0, y: 8, filter: "blur(4px)" },
@@ -164,15 +172,7 @@ export function Hero2({ onGetStarted, onViewDemo, onLogin }: Hero2Props) {
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
-            variants={{
-              hidden: { opacity: 0 },
-              show: {
-                opacity: 1,
-                transition: {
-                  staggerChildren: 0.08,
-                },
-              },
-            }}
+            variants={logoContainerVariants}
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-zinc-200 dark:divide-zinc-800 items-stretch"
           >
             {/* OpenAI */}
