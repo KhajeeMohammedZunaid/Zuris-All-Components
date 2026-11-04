@@ -123,20 +123,23 @@ export const GlowInput = React.forwardRef<HTMLTextAreaElement, GlowInputProps>(
       onBlur?.(e);
     };
 
-    // Calculate active trigger state
-    const isActive = React.useMemo(() => {
-      if (glowTrigger === "always") return true;
-      if (glowTrigger === "focus") return isFocused;
-      return isFocused || isHovered;
-    }, [glowTrigger, isFocused, isHovered]);
+    // Calculate active trigger state directly (avoid overhead of useMemo on primitives)
+    const isActive =
+      glowTrigger === "always"
+        ? true
+        : glowTrigger === "focus"
+        ? isFocused
+        : isFocused || isHovered;
 
     // Calculate duration in seconds from glowSpeed
-    const duration = React.useMemo(() => {
-      if (typeof glowSpeed === "number") return glowSpeed;
-      if (glowSpeed === "slow") return 8;
-      if (glowSpeed === "fast") return 2.8;
-      return 5;
-    }, [glowSpeed]);
+    const duration =
+      typeof glowSpeed === "number"
+        ? glowSpeed
+        : glowSpeed === "slow"
+        ? 8
+        : glowSpeed === "fast"
+        ? 2.8
+        : 5;
 
     // Calibrate glow parameters based on intensity and active theme
     const {
