@@ -9,6 +9,25 @@ export interface ZurisLogoAnimationProps {
   size?: "sm" | "md" | "lg";
 }
 
+// Calibrated dimensions for sm, md, lg hoisted outside render
+const SIZE_CONFIG = {
+  sm: {
+    svg: "h-7 sm:h-8",
+    text: "text-2xl sm:text-[26px]",
+    gap: "pl-2.5 sm:pl-3",
+  },
+  md: {
+    svg: "h-9 sm:h-11",
+    text: "text-3xl sm:text-4xl",
+    gap: "pl-3 sm:pl-3.5",
+  },
+  lg: {
+    svg: "h-12 sm:h-14",
+    text: "text-4xl sm:text-5xl",
+    gap: "pl-4 sm:pl-4.5",
+  },
+} as const;
+
 /**
  * Micro-interactive Zuris Logo & Side-Revealing Text Animation
  * - Logo enters first with an organic spring pop & micro-tilt
@@ -27,24 +46,7 @@ export function ZurisLogoAnimation({
     setReplayKey((k) => k + 1);
   };
 
-  // Calibrated dimensions for sm, md, lg
-  const sizeConfig = {
-    sm: {
-      svg: "h-7 sm:h-8",
-      text: "text-2xl sm:text-[26px]",
-      gap: "pl-2.5 sm:pl-3",
-    },
-    md: {
-      svg: "h-9 sm:h-11",
-      text: "text-3xl sm:text-4xl",
-      gap: "pl-3 sm:pl-3.5",
-    },
-    lg: {
-      svg: "h-12 sm:h-14",
-      text: "text-4xl sm:text-5xl",
-      gap: "pl-4 sm:pl-4.5",
-    },
-  }[size];
+  const sizeConfig = SIZE_CONFIG[size];
 
   return (
     <div
