@@ -55,6 +55,8 @@ export const defaultFaqItems: FaqItem[] = [
   },
 ];
 
+const DEFAULT_ACCORDION_VALUE = ["faq-1"];
+
 export function Faqs1({
   className,
   headlineFirstLine = "Do you",
@@ -91,7 +93,7 @@ export function Faqs1({
           <div className="lg:col-span-7 xl:col-span-8 flex flex-col w-full">
             <Accordion
               multiple
-              defaultValue={["faq-1"]}
+              defaultValue={DEFAULT_ACCORDION_VALUE}
               className="w-full border-none rounded-none shadow-none divide-none bg-transparent"
             >
               {items.map((item) => (
