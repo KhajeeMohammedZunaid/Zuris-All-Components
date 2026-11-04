@@ -4,6 +4,7 @@ import React, {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
   type CSSProperties,
@@ -83,14 +84,13 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
     const themePalette = liquidGlassLogoThemes[overrides.theme === 'light' ? 'light' : 'dark'];
 
     // Over background images, disable the solid opaque plate so lens optics are clear
-    const activeTuning = normalizeLiquidGlassLogo({
+    const activeTuning = useMemo(() => normalizeLiquidGlassLogo({
       ...liquidGlassLogoDefaults,
       ...themePalette,
       ...overrides,
       ...(backgroundImage ? { tile: false } : {}),
-    });
+    }), [themePalette, overrides, backgroundImage]);
 
-    const tuningSignature = JSON.stringify(activeTuning);
     const latestTuningRef = useRef(activeTuning);
     latestTuningRef.current = activeTuning;
 
@@ -134,7 +134,7 @@ export const LiquidGlassLogo = forwardRef<LiquidGlassLogoHandle, LiquidGlassLogo
     // Push updated tuning props to active WebGL engine
     useEffect(() => {
       engineRef.current?.update(latestTuningRef.current);
-    }, [tuningSignature]);
+    }, [activeTuning]);
 
     const activeMarkSrc = activeTuning.mark === 'logo' ? activeTuning.logo : activeTuning.mark;
     const computedLabel = ariaLabel ?? (activeTuning.ending === 'logo' ? 'Logo' : activeTuning.text);
