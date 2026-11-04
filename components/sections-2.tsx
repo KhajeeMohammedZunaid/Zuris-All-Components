@@ -4,18 +4,22 @@ import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
-import {
-  ClaudeAI,
-  OpenAI,
-  Shopify,
-  Stripe,
-  Google,
-  Datadog,
-} from "@/components/logo-only/all-logos";
+import { ClaudeAI } from "@/components/logo-only/claude";
+import { OpenAI } from "@/components/logo-only/openai";
+import { Shopify } from "@/components/logo-only/shopify";
+import { Stripe } from "@/components/logo-only/stripe";
+import { Google } from "@/components/logo-only/google";
+import { Datadog } from "@/components/logo-only/datadog";
 
 export interface Sections2Props {
   className?: string;
 }
+
+const ASSIGNEES = [
+  { src: "/n1.png", alt: "Assignee 1", delay: 0.3 },
+  { src: "/n2.png", alt: "Assignee 2", delay: 0.38 },
+  { src: "/n3.png", alt: "Assignee 3", delay: 0.46 },
+];
 
 /**
  * Nested radius formula:
@@ -189,24 +193,28 @@ export function Sections2({
               >
                 {/* Header with slow continuous rotating sun icon */}
                 <div className="flex items-center gap-1.5">
-                  <motion.svg
+                  <motion.div
                     animate={{ rotate: 360 }}
                     transition={{ duration: 28, repeat: Infinity, ease: "linear" }}
-                    className="w-4 h-4 text-amber-500 fill-none stroke-current stroke-2 will-change-transform"
-                    viewBox="0 0 24 24"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                    className="w-4 h-4 flex items-center justify-center will-change-transform"
                   >
-                    <circle cx="12" cy="12" r="5" />
-                    <line x1="12" y1="1" x2="12" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="23" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                    <line x1="1" y1="12" x2="3" y2="12" />
-                    <line x1="21" y1="12" x2="23" y2="12" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                  </motion.svg>
+                    <svg
+                      className="w-4 h-4 text-amber-500 fill-none stroke-current stroke-2"
+                      viewBox="0 0 24 24"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="5" />
+                      <line x1="12" y1="1" x2="12" y2="3" />
+                      <line x1="12" y1="21" x2="12" y2="23" />
+                      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                      <line x1="1" y1="12" x2="3" y2="12" />
+                      <line x1="21" y1="12" x2="23" y2="12" />
+                      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </svg>
+                  </motion.div>
                   <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
                     To-do
                   </span>
@@ -252,16 +260,20 @@ export function Sections2({
                 {/* Minimal Secondary Content Row with micro-reveal check */}
                 <div className="flex items-center justify-between py-1 px-0.5 border-t border-zinc-100/90 dark:border-zinc-800/60 text-[11px]">
                   <span className="flex items-center gap-1.5 text-zinc-600 dark:text-zinc-300">
-                    <motion.svg
+                    <motion.div
                       initial={{ scale: 0.75, opacity: 0 }}
                       whileInView={{ scale: 1, opacity: 1 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.35, delay: 0.4 }}
-                      className="w-3 h-3 text-emerald-500 fill-none stroke-current stroke-2"
-                      viewBox="0 0 24 24"
+                      className="w-3 h-3 inline-flex items-center justify-center"
                     >
-                      <polyline points="20 6 9 17 4 12" />
-                    </motion.svg>
+                      <svg
+                        className="w-3 h-3 text-emerald-500 fill-none stroke-current stroke-2"
+                        viewBox="0 0 24 24"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    </motion.div>
                     Tokens synced with Figma
                   </span>
                   <span className="text-[10px] text-zinc-400 font-medium">Done</span>
@@ -270,11 +282,7 @@ export function Sections2({
                 {/* Task Footer with staggered overlapping avatar entrance */}
                 <div className="flex items-center justify-between pt-1 border-t border-zinc-100 dark:border-zinc-800/80">
                   <div className="flex items-center -space-x-1.5">
-                    {[
-                      { src: "/n1.png", alt: "Assignee 1", delay: 0.3 },
-                      { src: "/n2.png", alt: "Assignee 2", delay: 0.38 },
-                      { src: "/n3.png", alt: "Assignee 3", delay: 0.46 },
-                    ].map((av, idx) => (
+                    {ASSIGNEES.map((av, idx) => (
                       <motion.span
                         key={idx}
                         initial={{ opacity: 0, x: -5 }}
