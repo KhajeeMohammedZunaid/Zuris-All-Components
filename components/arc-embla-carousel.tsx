@@ -136,7 +136,7 @@ export function ArcCarousel({
       }
     };
     check();
-    window.addEventListener("resize", check);
+    window.addEventListener("resize", check, { passive: true });
     return () => window.removeEventListener("resize", check);
   }, []);
 
