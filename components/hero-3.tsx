@@ -7,41 +7,113 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZurisBlackV1 } from "@/components/ui/zuris-black-v1";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
-import {
-  Anthropic,
-  Grok,
-  OpenAI,
-  Replicate,
-  GitHub,
-  Vercel,
-} from "@/components/logos/all-logos";
+import { Anthropic } from "@/components/logos/anthropic";
+import { Grok } from "@/components/logos/grok";
+import { OpenAI } from "@/components/logos/openai";
+import { Replicate } from "@/components/logos/relicate";
+import { GitHub } from "@/components/logos/github";
+import { Vercel } from "@/components/logos/vercel";
+
+// ---------------------------------------------------------------------------
+// STATIC CONSTANTS & TELEMETRY DEFINITIONS (Hoisted for zero render overhead)
+// ---------------------------------------------------------------------------
+const DOT_MATRIX = [
+  [true, true, true, true, true, false, false],
+  [true, true, true, false, false, false, false],
+  [false, false, false, false, false],
+];
+
+const EQUALIZER_BARS = [
+  { height: "h-3 sm:h-3.5", active: false },
+  { height: "h-2 sm:h-2.5", active: false },
+  { height: "h-4 sm:h-4.5", active: false },
+  { height: "h-3 sm:h-3.5", active: false },
+  { height: "h-6 sm:h-7", active: true },
+  { height: "h-8 sm:h-9", active: true },
+  { height: "h-8 sm:h-9", active: true },
+  { height: "h-4 sm:h-4.5", active: false },
+  { height: "h-2.5 sm:h-3", active: false },
+  { height: "h-4 sm:h-4.5", active: false },
+  { height: "h-3.5 sm:h-4", active: false },
+  { height: "h-2.5 sm:h-3", active: false },
+];
+
+const NAV_LINKS = [
+  { label: "Features", href: "#features" },
+  { label: "Products", href: "#products" },
+  { label: "Solutions", href: "#solutions" },
+  { label: "Resources", href: "#resources" },
+];
+
+const BRAND_LOGOS = [
+  {
+    name: "OpenAI",
+    Component: OpenAI,
+    logoClass: "h-5.5 sm:h-6 lg:h-6.5",
+    opacityClass: "opacity-85",
+  },
+  {
+    name: "Anthropic",
+    Component: Anthropic,
+    logoClass: "h-4 sm:h-4.5 lg:h-5",
+    opacityClass: "opacity-85",
+  },
+  {
+    name: "Replicate",
+    Component: Replicate,
+    logoClass: "h-5 sm:h-5.5 lg:h-6",
+    opacityClass: "opacity-85",
+  },
+  {
+    name: "GitHub",
+    Component: GitHub,
+    logoClass: "h-4.5 sm:h-5 lg:h-5.5",
+    opacityClass: "opacity-85",
+  },
+  {
+    name: "Vercel",
+    Component: Vercel,
+    logoClass: "h-4 sm:h-4.5 lg:h-5",
+    opacityClass: "opacity-85",
+  },
+  {
+    name: "Grok",
+    Component: Grok,
+    logoClass: "h-6 sm:h-6.5 lg:h-7",
+    opacityClass: "opacity-85",
+  },
+];
+
+const HERO3_STYLES = `
+  @keyframes marquee-ltr {
+    0% {
+      transform: translate3d(-100%, 0, 0);
+    }
+    100% {
+      transform: translate3d(0%, 0, 0);
+    }
+  }
+  .animate-marquee-ltr {
+    animation: marquee-ltr 22s linear infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  .marquee-track:hover .animate-marquee-ltr {
+    animation-play-state: paused;
+  }
+  html.dark .hero3-brand-logo,
+  .dark .hero3-brand-logo {
+    filter: invert(1) brightness(1.2) !important;
+  }
+`;
 
 // ---------------------------------------------------------------------------
 // GROWTH & METRIC TELEMETRY CARD (Matches reference image, no live-engine chip)
 // ---------------------------------------------------------------------------
 function Hero3GrowthMetricCard() {
-  // Dot matrix: 3 rows (5 active green, 3 active green, all inactive)
-  const dotMatrix = [
-    [true, true, true, true, true, false, false],
-    [true, true, true, false, false, false, false],
-    [false, false, false, false, false],
-  ];
-
-  // Equalizer waveform bars: 12 bars with 3 center pink peak bars
-  const equalizerBars = [
-    { height: "h-3 sm:h-3.5", active: false },
-    { height: "h-2 sm:h-2.5", active: false },
-    { height: "h-4 sm:h-4.5", active: false },
-    { height: "h-3 sm:h-3.5", active: false },
-    { height: "h-6 sm:h-7", active: true },
-    { height: "h-8 sm:h-9", active: true },
-    { height: "h-8 sm:h-9", active: true },
-    { height: "h-4 sm:h-4.5", active: false },
-    { height: "h-2.5 sm:h-3", active: false },
-    { height: "h-4 sm:h-4.5", active: false },
-    { height: "h-3.5 sm:h-4", active: false },
-    { height: "h-2.5 sm:h-3", active: false },
-  ];
 
   return (
     <motion.div
@@ -57,7 +129,7 @@ function Hero3GrowthMetricCard() {
 
       {/* TOP SECTION: Dot Matrix (Clean, no chip) */}
       <div className="flex flex-col gap-2 z-10">
-        {dotMatrix.map((row, rIdx) => (
+        {DOT_MATRIX.map((row, rIdx) => (
           <div key={`row-${rIdx}`} className="flex items-center gap-2 sm:gap-2.5">
             {row.map((isActive, cIdx) => (
               <div
@@ -131,7 +203,7 @@ function Hero3GrowthMetricCard() {
       {/* BOTTOM EQUALIZER / WAVEFORM BARS */}
       <div className="flex flex-col gap-1.5 pt-1 z-10">
         <div className="flex items-end justify-between sm:justify-center gap-1.5 sm:gap-2">
-          {equalizerBars.map((bar, idx) => (
+          {EQUALIZER_BARS.map((bar, idx) => (
             <div
               key={`bar-${idx}`}
               className={cn(
@@ -179,53 +251,6 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
     };
   }, [mobileMenuOpen]);
 
-  const navLinks = [
-    { label: "Features", href: "#features" },
-    { label: "Products", href: "#products" },
-    { label: "Solutions", href: "#solutions" },
-    { label: "Resources", href: "#resources" },
-  ];
-
-  // Balanced optical sizing: standard base for all logos, with Grok slightly scaled to optically balance its diagonal mark
-  const brandLogos = [
-    {
-      name: "OpenAI",
-      Component: OpenAI,
-      logoClass: "h-5.5 sm:h-6 lg:h-6.5",
-      opacityClass: "opacity-85",
-    },
-    {
-      name: "Anthropic",
-      Component: Anthropic,
-      logoClass: "h-4 sm:h-4.5 lg:h-5",
-      opacityClass: "opacity-85",
-    },
-    {
-      name: "Replicate",
-      Component: Replicate,
-      logoClass: "h-5 sm:h-5.5 lg:h-6",
-      opacityClass: "opacity-85",
-    },
-    {
-      name: "GitHub",
-      Component: GitHub,
-      logoClass: "h-4.5 sm:h-5 lg:h-5.5",
-      opacityClass: "opacity-85",
-    },
-    {
-      name: "Vercel",
-      Component: Vercel,
-      logoClass: "h-4 sm:h-4.5 lg:h-5",
-      opacityClass: "opacity-85",
-    },
-    {
-      name: "Grok",
-      Component: Grok,
-      logoClass: "h-6 sm:h-6.5 lg:h-7",
-      opacityClass: "opacity-85",
-    },
-  ];
-
   // Reversed slots (Left: Metric Card, Right: Dashboard Image)
   const resolvedLeft = leftSlot || leftImageSlot || <Hero3GrowthMetricCard />;
   const resolvedRight = rightSlot || rightImageSlot || (
@@ -252,31 +277,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
       {/* 
         GPU-Accelerated Seamless Infinite Left-to-Right Marquee for Mobile/Tablet
       */}
-      <style jsx global>{`
-        @keyframes marquee-ltr {
-          0% {
-            transform: translate3d(-100%, 0, 0);
-          }
-          100% {
-            transform: translate3d(0%, 0, 0);
-          }
-        }
-        .animate-marquee-ltr {
-          animation: marquee-ltr 22s linear infinite;
-          will-change: transform;
-          transform: translate3d(0, 0, 0);
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-          perspective: 1000px;
-        }
-        .marquee-track:hover .animate-marquee-ltr {
-          animation-play-state: paused;
-        }
-        html.dark .hero3-brand-logo,
-        .dark .hero3-brand-logo {
-          filter: invert(1) brightness(1.2) !important;
-        }
-      `}</style>
+      <style jsx global>{HERO3_STYLES}</style>
 
       {/* =========================================================================
           NAVBAR: Precision typography, alignment & desktop micro-interactions
@@ -300,7 +301,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
 
           {/* Desktop Navigation Links: Clean spacing and precise typography */}
           <nav className="hidden md:flex items-center gap-8 lg:gap-10">
-            {navLinks.map((item) => (
+            {NAV_LINKS.map((item) => (
               <Link
                 key={item.label}
                 href={item.href}
@@ -386,7 +387,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
               }}
               className="flex flex-col gap-6 pt-2"
             >
-              {navLinks.map((item) => (
+              {NAV_LINKS.map((item) => (
                 <motion.div
                   key={item.label}
                   variants={{
@@ -508,7 +509,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
               <div className="flex w-max items-center">
                 {/* Track 1 */}
                 <div className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13 transform-gpu will-change-transform">
-                  {brandLogos.map((logo) => {
+                  {BRAND_LOGOS.map((logo) => {
                     const LogoComp = logo.Component;
                     return (
                       <div
@@ -526,7 +527,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
                   className="animate-marquee-ltr flex shrink-0 items-center gap-10 sm:gap-13 pr-10 sm:pr-13 transform-gpu will-change-transform"
                   aria-hidden="true"
                 >
-                  {brandLogos.map((logo) => {
+                  {BRAND_LOGOS.map((logo) => {
                     const LogoComp = logo.Component;
                     return (
                       <div
@@ -543,7 +544,7 @@ export function Hero3({ leftSlot, rightSlot, leftImageSlot, rightImageSlot }: He
 
             {/* Desktop Static Logos Grid: strictly uniform gap spacing across all logos */}
             <div className="hidden lg:flex items-center justify-center gap-11 xl:gap-14 max-w-5xl mx-auto py-2">
-              {brandLogos.map((logo, index) => {
+              {BRAND_LOGOS.map((logo, index) => {
                 const LogoComp = logo.Component;
                 return (
                   <motion.div
