@@ -12,29 +12,26 @@ const PROMPTS = [
   "Optimize global campaign budget",
 ];
 
+const TYPEWRITER_STYLES = `
+  @keyframes typewriter-caret-blink {
+    0%, 49.9% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+  }
+  .animate-typewriter-caret {
+    animation: typewriter-caret-blink 1.06s infinite;
+  }
+`;
+
 export function TypewriterPrompt() {
   const shouldReduceMotion = useReducedMotion();
   const inputRef = React.useRef<HTMLInputElement>(null);
 
   const [promptIndex, setPromptIndex] = React.useState(0);
   const [displayText, setDisplayText] = React.useState(PROMPTS[0]);
-  const [caretVisible, setCaretVisible] = React.useState(true);
   const [isUserTyping, setIsUserTyping] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
   const [isSubmitted, setIsSubmitted] = React.useState(false);
   const [isBusy, setIsBusy] = React.useState(false);
-
-  // Caret blinking effect
-  React.useEffect(() => {
-    if (isUserTyping || shouldReduceMotion) {
-      setCaretVisible(true);
-      return;
-    }
-    const interval = setInterval(() => {
-      setCaretVisible((prev) => !prev);
-    }, 530);
-    return () => clearInterval(interval);
-  }, [isUserTyping, shouldReduceMotion]);
 
   // Typewriter animation loop
   React.useEffect(() => {
@@ -125,6 +122,7 @@ export function TypewriterPrompt() {
 
   return (
     <div className="animate-enter-4 relative z-10 w-full max-w-[540px] 4k:max-w-[760px] mx-auto px-3 sm:px-4 mb-5 sm:mb-6 4k:mb-8">
+      <style>{TYPEWRITER_STYLES}</style>
       <Card
         className="w-full bg-white dark:bg-[#121215] rounded-[18px] sm:rounded-[20px] 4k:rounded-[24px] p-3.5 sm:p-5 4k:p-6 pb-3 sm:pb-3.5 4k:pb-4 min-h-[105px] sm:min-h-[125px] 4k:min-h-[155px] flex flex-col justify-between border border-black/[0.08] dark:border-white/[0.12] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.12)] dark:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.6)] cursor-text ring-0 gap-0"
         onClick={() => inputRef.current?.focus()}
@@ -144,8 +142,7 @@ export function TypewriterPrompt() {
               </span>
               <span
                 id="typewriterCaret"
-                className="inline-block w-[1.5px] 4k:w-[2px] h-[1rem] sm:h-[1.15rem] 4k:h-[1.4rem] bg-zinc-950 dark:bg-zinc-100 ml-[2px] transition-opacity duration-150"
-                style={{ opacity: caretVisible ? 1 : 0 }}
+                className="inline-block w-[1.5px] 4k:w-[2px] h-[1rem] sm:h-[1.15rem] 4k:h-[1.4rem] bg-zinc-950 dark:bg-zinc-100 ml-[2px] animate-typewriter-caret"
               />
             </div>
           )}
