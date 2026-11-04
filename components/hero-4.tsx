@@ -8,13 +8,58 @@ import { BorderBeam } from "border-beam";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ZurisWhiteV1 } from "@/components/ui/zuris-white-v1";
-import {
-  Mocha,
-  Manus,
-  Firecrawl,
-  Grida,
-  Grok,
-} from "@/components/logos/all-logos";
+import { Mocha } from "@/components/logos/mocha";
+import { Manus } from "@/components/logos/manus";
+import { Firecrawl } from "@/components/logos/firecrawl";
+import { Grida } from "@/components/logos/grida";
+import { Grok } from "@/components/logos/grok";
+
+const HERO4_LOGOS = [
+  {
+    name: "Mocha",
+    Component: Mocha,
+    logoClass: "h-3.5 xs:h-4 sm:h-[18px] lg:h-5 w-auto",
+  },
+  {
+    name: "Manus",
+    Component: Manus,
+    logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
+  },
+  {
+    name: "Firecrawl",
+    Component: Firecrawl,
+    logoClass: "h-4.5 xs:h-5 sm:h-[22px] lg:h-6 w-auto",
+  },
+  {
+    name: "Grida",
+    Component: Grida,
+    logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
+  },
+  {
+    name: "Grok",
+    Component: Grok,
+    logoClass: "h-5.5 xs:h-6 sm:h-[26px] lg:h-7 w-auto",
+  },
+];
+
+const HERO4_STYLES = `
+  @keyframes marquee-ltr {
+    0% {
+      transform: translate3d(-50%, 0, 0);
+    }
+    100% {
+      transform: translate3d(0%, 0, 0);
+    }
+  }
+  .animate-marquee-ltr {
+    animation: marquee-ltr 24s linear infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+    -webkit-transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+`;
 
 /**
  * High-performance, zero-flicker gradient background converted directly from gradient.html.
@@ -90,34 +135,6 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
     }
   };
 
-  const logos = [
-    {
-      name: "Mocha",
-      Component: Mocha,
-      logoClass: "h-3.5 xs:h-4 sm:h-[18px] lg:h-5 w-auto",
-    },
-    {
-      name: "Manus",
-      Component: Manus,
-      logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
-    },
-    {
-      name: "Firecrawl",
-      Component: Firecrawl,
-      logoClass: "h-4.5 xs:h-5 sm:h-[22px] lg:h-6 w-auto",
-    },
-    {
-      name: "Grida",
-      Component: Grida,
-      logoClass: "h-5 xs:h-5.5 sm:h-[24px] lg:h-[26px] w-auto",
-    },
-    {
-      name: "Grok",
-      Component: Grok,
-      logoClass: "h-5.5 xs:h-6 sm:h-[26px] lg:h-7 w-auto",
-    },
-  ];
-
   return (
     <section
       className={cn(
@@ -126,24 +143,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
       )}
     >
       {/* Seamless Left-to-Right Marquee Keyframes for Mobile & Tablet with 100% mathematically uniform spacing */}
-      <style jsx>{`
-        @keyframes marquee-ltr {
-          0% {
-            transform: translate3d(-50%, 0, 0);
-          }
-          100% {
-            transform: translate3d(0%, 0, 0);
-          }
-        }
-        .animate-marquee-ltr {
-          animation: marquee-ltr 24s linear infinite;
-          will-change: transform;
-          transform: translate3d(0, 0, 0);
-          -webkit-transform: translate3d(0, 0, 0);
-          backface-visibility: hidden;
-          -webkit-backface-visibility: hidden;
-        }
-      `}</style>
+      <style jsx>{HERO4_STYLES}</style>
 
       {/* Background Gradient converted from gradient.html */}
       <HeroGradientBackground />
@@ -437,7 +437,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
 
           {/* Logos Row (powered by motion/react) */}
           <div className="flex items-center justify-between gap-8 lg:gap-10 flex-1 text-zinc-800">
-            {logos.map(({ name, Component, logoClass }, index) => (
+            {HERO4_LOGOS.map(({ name, Component, logoClass }, index) => (
               <motion.div
                 key={name}
                 initial={{ opacity: 0, y: 14 }}
@@ -486,7 +486,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
               style={{ contain: "layout style paint" }}
             >
               <div className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14">
-                {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
+                {[...HERO4_LOGOS, ...HERO4_LOGOS].map(({ name, Component, logoClass }, idx) => (
                   <div
                     key={`track1-${name}-${idx}`}
                     className="flex items-center justify-center shrink-0"
@@ -500,7 +500,7 @@ export function Hero4({ className, onAutomateSubmit }: Hero4Props) {
                 className="flex shrink-0 items-center gap-10 sm:gap-14 pr-10 sm:pr-14"
                 aria-hidden="true"
               >
-                {[...logos, ...logos].map(({ name, Component, logoClass }, idx) => (
+                {[...HERO4_LOGOS, ...HERO4_LOGOS].map(({ name, Component, logoClass }, idx) => (
                   <div
                     key={`track2-${name}-${idx}`}
                     className="flex items-center justify-center shrink-0"
