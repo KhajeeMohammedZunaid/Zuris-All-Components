@@ -72,7 +72,7 @@ function useResponsiveArcMetrics() {
     }
 
     computeMetrics();
-    window.addEventListener("resize", computeMetrics);
+    window.addEventListener("resize", computeMetrics, { passive: true });
     return () => window.removeEventListener("resize", computeMetrics);
   }, []);
 
