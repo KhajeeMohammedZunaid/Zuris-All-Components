@@ -264,7 +264,7 @@ export default function LogoIntro() {
   useEffect(() => {
     const f = () => setFit(Math.min(innerWidth / 1280, innerHeight / 720));
     f();
-    addEventListener("resize", f);
+    addEventListener("resize", f, { passive: true });
     return () => removeEventListener("resize", f);
   }, []);
 
