@@ -2,7 +2,9 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { ClaudeAI, Shopify, Stripe } from "@/components/logo-only/all-logos";
+import { ClaudeAI } from "@/components/logo-only/claude";
+import { Shopify } from "@/components/logo-only/shopify";
+import { Stripe } from "@/components/logo-only/stripe";
 
 export interface Testimonials1Props {
   className?: string;
