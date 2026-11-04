@@ -188,6 +188,38 @@ export interface StuxButtonProps
  *   2. "edge-fill" (Seamless Text-Only with Creative SVG Paths): No icon, zero gap,
  *      and creative SVG path fills (cross, wave, cyber, arc, zigzag) sweeping smoothly from left to right.
  */
+const STUX_BUTTON_STYLES = `
+  .stux-btn .stux-arrow-main,
+  .stux-btn .stux-arrow-clone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .stux-btn .stux-arrow-main {
+    transform: translate(0, 0);
+  }
+  .stux-btn .stux-arrow-clone {
+    transform: translate(calc(-1 * var(--arrow-dist)), var(--arrow-dist));
+  }
+  .stux-btn:hover .stux-arrow-main,
+  .stux-btn[data-tapped="true"] .stux-arrow-main,
+  .stux-btn:focus-visible .stux-arrow-main,
+  .stux-btn[aria-expanded="true"] .stux-arrow-main {
+    transform: translate(var(--arrow-dist), calc(-1 * var(--arrow-dist)));
+  }
+  .stux-btn:hover .stux-arrow-clone,
+  .stux-btn[data-tapped="true"] .stux-arrow-clone,
+  .stux-btn:focus-visible .stux-arrow-clone,
+  .stux-btn[aria-expanded="true"] .stux-arrow-clone {
+    transform: translate(0, 0);
+  }
+`;
+
 export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
   (
     {
@@ -230,7 +262,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
         }
       };
 
-      document.addEventListener("pointerdown", handlePointerDownOutside);
+      document.addEventListener("pointerdown", handlePointerDownOutside, { passive: true });
       return () => {
         document.removeEventListener("pointerdown", handlePointerDownOutside);
       };
@@ -250,39 +282,8 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
 
     return (
       <>
-        {/* Scoped CSS for precise micro-animations */}
-        <style>{`
-          /* --- Variant 1: Dual Arrow Fly-Through Physics --- */
-          .stux-btn-${id} .stux-arrow-main,
-          .stux-btn-${id} .stux-arrow-clone {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-            will-change: transform;
-          }
-          .stux-btn-${id} .stux-arrow-main {
-            transform: translate(0, 0);
-          }
-          .stux-btn-${id} .stux-arrow-clone {
-            transform: translate(calc(-1 * var(--arrow-dist)), var(--arrow-dist));
-          }
-          .stux-btn-${id}:hover .stux-arrow-main,
-          .stux-btn-${id}[data-tapped="true"] .stux-arrow-main,
-          .stux-btn-${id}:focus-visible .stux-arrow-main,
-          .stux-btn-${id}[aria-expanded="true"] .stux-arrow-main {
-            transform: translate(var(--arrow-dist), calc(-1 * var(--arrow-dist)));
-          }
-          .stux-btn-${id}:hover .stux-arrow-clone,
-          .stux-btn-${id}[data-tapped="true"] .stux-arrow-clone,
-          .stux-btn-${id}:focus-visible .stux-arrow-clone,
-          .stux-btn-${id}[aria-expanded="true"] .stux-arrow-clone {
-            transform: translate(0, 0);
-          }
-        `}</style>
+        {/* Scoped CSS for precise micro-animations hoisted outside render */}
+        <style>{STUX_BUTTON_STYLES}</style>
 
         <motion.button
           ref={innerRef}
@@ -305,6 +306,7 @@ export const StuxButton = React.forwardRef<HTMLButtonElement, StuxButtonProps>(
             } as React.CSSProperties
           }
           className={cn(
+            "stux-btn",
             `stux-btn-${id}`,
             "relative flex items-stretch select-none overflow-hidden focus:outline-none shadow-none group pointer-events-auto border-[3px] border-[#040404] dark:border-white/30 transition-all duration-300 cursor-pointer will-change-transform active:scale-[0.98] active:translate-y-[1px]",
             scheme.darkHoverBorder,
